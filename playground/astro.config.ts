@@ -7,7 +7,13 @@ export default defineConfig({
     adapter: node({
         mode: "standalone"
     }),
-    integrations: [pagemeta({ defaults: { title: "Default Title" } })],
+    integrations: [
+        pagemeta({
+            defaults: () => {
+                return { title: "Default Title" };
+            }
+        })
+    ],
     output: "server",
     redirects: { "/old-page": "/" }
 });

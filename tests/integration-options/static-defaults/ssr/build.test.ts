@@ -1,5 +1,4 @@
 import type { TestApp } from "@inox-tools/astro-tests/astroFixture";
-import type { AstroInlineConfig } from "astro";
 
 import { loadFixture } from "@inox-tools/astro-tests/astroFixture";
 import testAdapter from "@inox-tools/astro-tests/testAdapter";
@@ -23,7 +22,7 @@ const config = {
             }
         })
     ]
-} satisfies AstroInlineConfig;
+};
 
 describe("static-defaults / SSR / build", () => {
     let app: TestApp;

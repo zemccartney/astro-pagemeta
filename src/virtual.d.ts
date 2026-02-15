@@ -5,3 +5,11 @@ declare module "@grepco/astro-pagemeta/runtime" {
     export const resolvePagemeta: import("./types.ts").ResolvePagemeta;
     export const isPageRoute: import("./types.ts").IsPageRoute;
 }
+
+declare module "virtual:pagemeta/config" {
+    import type { APIContext } from "astro";
+    import type { Options } from "rehype-meta";
+
+    export const routePatterns: RegExp[];
+    export const defaults: ((ctx: APIContext) => Options) | Options | undefined;
+}

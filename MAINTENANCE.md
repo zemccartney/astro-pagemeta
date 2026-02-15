@@ -146,6 +146,7 @@ pnpm test tests/basic/static/dev.test.ts
 ### The Underlying Issue
 
 `@inox-tools/inline-mod` maintains a global module registry. When a module ID is registered twice:
+
 - **Build mode**: Throws "Module already defined" error
 - **Dev mode**: Silently overwrites the registry entry
 
@@ -173,16 +174,20 @@ Dev tests (`fixture.startDevServer()`) can test multiple configurations in one f
 ```typescript
 // ✅ OK - sequential with proper cleanup
 test("config A", async () => {
-    const dev = await fixture.startDevServer({ integrations: [pagemeta(configA)] });
+    const dev = await fixture.startDevServer({
+        integrations: [pagemeta(configA)]
+    });
     try {
         // assertions
     } finally {
-        await dev.stop();  // Must complete before next test
+        await dev.stop(); // Must complete before next test
     }
 });
 
 test("config B", async () => {
-    const dev = await fixture.startDevServer({ integrations: [pagemeta(configB)] });
+    const dev = await fixture.startDevServer({
+        integrations: [pagemeta(configB)]
+    });
     // ...
 });
 ```
@@ -191,12 +196,12 @@ test("config B", async () => {
 
 ### When to Use Each Pattern
 
-| Scenario | Pattern |
-|----------|---------|
-| Testing output modes (static/SSR) | Separate files per mode |
-| Testing integration options | Separate files per option set |
-| Testing error handling / edge cases | Single dev-test file with multiple configs |
-| Verifying build behavior | Must use build tests (dev won't catch issues) |
+| Scenario                            | Pattern                                       |
+| ----------------------------------- | --------------------------------------------- |
+| Testing output modes (static/SSR)   | Separate files per mode                       |
+| Testing integration options         | Separate files per option set                 |
+| Testing error handling / edge cases | Single dev-test file with multiple configs    |
+| Verifying build behavior            | Must use build tests (dev won't catch issues) |
 
 ## Virtual Module / Runtime Stub Sync
 

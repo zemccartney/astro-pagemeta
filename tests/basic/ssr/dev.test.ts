@@ -1,5 +1,3 @@
-import type { AstroInlineConfig } from "astro";
-
 import { loadFixture } from "@inox-tools/astro-tests/astroFixture";
 import testAdapter from "@inox-tools/astro-tests/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
@@ -14,7 +12,7 @@ const fixture = await loadFixture({
 
 const config = {
     integrations: [pagemeta()]
-} satisfies AstroInlineConfig;
+};
 
 describe("SSR / dev server", () => {
     let devServer: Awaited<ReturnType<typeof fixture.startDevServer>>;

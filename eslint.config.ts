@@ -18,6 +18,7 @@ export default defineConfig([
     includeIgnoreFile(gitignorePath),
     {
         ignores: [
+            ".claude",
             ".plan", // replicate global ignore settings
             "runtime-stub.js"
         ]
@@ -79,7 +80,7 @@ export default defineConfig([
             tseslint.configs.strictTypeChecked,
             tseslint.configs.stylisticTypeChecked
         ],
-        files: ["**/*.{js,ts,tsx,jsx,mjs,mts}"],
+        files: ["**/*.{ts,tsx,mts}"],
         languageOptions: {
             parserOptions: {
                 projectService: true

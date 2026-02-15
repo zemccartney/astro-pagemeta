@@ -1,5 +1,4 @@
 import type { TestApp } from "@inox-tools/astro-tests/astroFixture";
-import type { AstroInlineConfig } from "astro";
 
 import { loadFixture } from "@inox-tools/astro-tests/astroFixture";
 import testAdapter from "@inox-tools/astro-tests/testAdapter";
@@ -16,7 +15,7 @@ const fixture = await loadFixture({
 const config = {
     integrations: [pagemeta({ defaults: { title: "Default Title" } })],
     redirects: { "/old-page": "/" }
-} satisfies AstroInlineConfig;
+};
 
 describe("route-filtering / SSR / build", () => {
     let app: TestApp;

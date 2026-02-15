@@ -1,12 +1,12 @@
-import { loadFixture } from "@inox-tools/astro-tests/astroFixture";
-import { beforeAll, describe, expect, test } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import pagemeta from "../../../../src/index.ts";
 import { extractMeta } from "../../../utils/extract-meta.ts";
+import { isolatedFixture } from "../../../utils/isolated-fixture.ts";
 
-const fixture = await loadFixture({
-    root: "./fixture"
-});
+const { cleanup, fixture } = await isolatedFixture(
+    new URL("../../../fixtures/static-defaults/", import.meta.url)
+);
 
 const config = {
     integrations: [
@@ -24,6 +24,8 @@ describe("static-defaults / static / build", () => {
     beforeAll(async () => {
         await fixture.build(config);
     });
+
+    afterAll(() => cleanup());
 
     test("applies defaults to page without setPagemeta()", async () => {
         const html = await fixture.readFile("/index.html");

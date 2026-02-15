@@ -21,16 +21,16 @@
  * | closes over external variable   | 500 error      | Serialized fn loses closure scope|
  */
 
-import { loadFixture } from "@inox-tools/astro-tests/astroFixture";
-import { afterEach, describe, expect, test } from "vitest";
+import { afterAll, afterEach, describe, expect, test } from "vitest";
 
 import pagemeta from "../../src/index.ts";
 import { createErrorCapture } from "../utils/error-capture/index.ts";
 import { extractMeta } from "../utils/extract-meta.ts";
+import { isolatedFixture } from "../utils/isolated-fixture.ts";
 
-const fixture = await loadFixture({
-    root: "./fixture"
-});
+const { cleanup, fixture } = await isolatedFixture(
+    new URL("../fixtures/error-handling/", import.meta.url)
+);
 
 describe("defaults function edge cases", () => {
     let devServer: Awaited<ReturnType<typeof fixture.startDevServer>>;
@@ -41,6 +41,8 @@ describe("defaults function edge cases", () => {
         errorCapture?.dispose();
         await devServer.stop();
     });
+
+    afterAll(() => cleanup());
 
     describe("non-object returns → 500 error", () => {
         test("returning null", async () => {

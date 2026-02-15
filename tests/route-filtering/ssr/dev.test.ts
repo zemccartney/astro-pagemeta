@@ -1,14 +1,14 @@
-import { loadFixture } from "@inox-tools/astro-tests/astroFixture";
 import testAdapter from "@inox-tools/astro-tests/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import pagemeta from "../../../src/index.ts";
 import { extractMeta } from "../../utils/extract-meta.ts";
+import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 
-const fixture = await loadFixture({
-    adapter: testAdapter(),
-    root: "./fixture"
-});
+const { cleanup, fixture } = await isolatedFixture(
+    new URL("../../fixtures/route-filtering/", import.meta.url),
+    { adapter: testAdapter(), output: "server" }
+);
 
 const config = {
     integrations: [pagemeta({ defaults: { title: "Default Title" } })],
@@ -24,6 +24,7 @@ describe("route-filtering / SSR / dev server", () => {
 
     afterAll(async () => {
         await devServer.stop();
+        await cleanup();
     });
 
     test("page with server:defer gets meta tags", async () => {

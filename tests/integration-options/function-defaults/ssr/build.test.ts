@@ -1,16 +1,16 @@
 import type { TestApp } from "@inox-tools/astro-tests/astroFixture";
 
-import { loadFixture } from "@inox-tools/astro-tests/astroFixture";
 import testAdapter from "@inox-tools/astro-tests/testAdapter";
-import { beforeAll, describe, expect, test } from "vitest";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import pagemeta from "../../../../src/index.ts";
 import { extractMeta } from "../../../utils/extract-meta.ts";
+import { isolatedFixture } from "../../../utils/isolated-fixture.ts";
 
-const fixture = await loadFixture({
-    adapter: testAdapter(),
-    root: "./fixture"
-});
+const { cleanup, fixture } = await isolatedFixture(
+    new URL("../../../fixtures/function-defaults/", import.meta.url),
+    { adapter: testAdapter(), output: "server" }
+);
 
 const config = {
     integrations: [
@@ -32,6 +32,8 @@ describe("function-defaults / SSR / build", () => {
         await fixture.build(config);
         app = await fixture.loadTestAdapterApp();
     });
+
+    afterAll(() => cleanup());
 
     test("applies defaults to page without setPagemeta()", async () => {
         const response = await app.render(new Request("https://example.com/"));

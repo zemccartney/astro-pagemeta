@@ -28,9 +28,7 @@ import { createErrorCapture } from "../utils/error-capture/index.ts";
 import { extractMeta } from "../utils/extract-meta.ts";
 import { isolatedFixture } from "../utils/isolated-fixture.ts";
 
-const { cleanup, fixture } = await isolatedFixture(
-    new URL("../fixtures/error-handling/", import.meta.url)
-);
+const { cleanup, fixture } = await isolatedFixture("error-handling");
 
 describe("defaults function edge cases", () => {
     let devServer: Awaited<ReturnType<typeof fixture.startDevServer>>;

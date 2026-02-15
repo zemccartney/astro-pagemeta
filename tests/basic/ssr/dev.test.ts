@@ -5,10 +5,10 @@ import pagemeta from "../../../src/index.ts";
 import { extractMeta } from "../../utils/extract-meta.ts";
 import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 
-const { cleanup, fixture } = await isolatedFixture(
-    new URL("../../fixtures/basic/", import.meta.url),
-    { adapter: testAdapter(), output: "server" }
-);
+const { cleanup, fixture } = await isolatedFixture("basic", {
+    adapter: testAdapter(),
+    output: "server"
+});
 
 const config = {
     integrations: [pagemeta()]

@@ -1,7 +1,7 @@
 import type { AstroInlineConfig } from "astro";
 
 import { loadFixture } from "@inox-tools/astro-tests/astroFixture";
-import { cp, mkdir, mkdtemp, rm } from "node:fs/promises";
+import { cp, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 type FixtureConfig = Omit<AstroInlineConfig, "root">;
@@ -13,12 +13,13 @@ const projectRoot = path.resolve(
     "../.."
 );
 const tmpBase = path.join(projectRoot, ".test-tmp");
+const fixturesBase = path.join(projectRoot, "tests/fixtures");
 
 export async function isolatedFixture(
-    fixtureUrl: URL,
+    fixtureName: string,
     inlineConfig: FixtureConfig = {}
 ) {
-    const sourcePath = new URL(".", fixtureUrl).pathname;
+    const sourcePath = path.join(fixturesBase, fixtureName);
 
     await mkdir(tmpBase, { recursive: true });
     const tmp = await mkdtemp(path.join(tmpBase, "fixture-"));
@@ -37,6 +38,13 @@ export async function isolatedFixture(
 
     return {
         cleanup: () => rm(tmp, { force: true, recursive: true }),
-        fixture
+        fixture,
+        inject: async (dest: string, source: string | URL) => {
+            const destPath = path.join(tmp, "src", dest);
+            await mkdir(path.dirname(destPath), { recursive: true });
+            await (source instanceof URL ?
+                cp(source.pathname, destPath)
+            :   writeFile(destPath, source));
+        }
     };
 }

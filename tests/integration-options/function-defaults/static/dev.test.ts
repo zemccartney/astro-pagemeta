@@ -4,9 +4,9 @@ import pagemeta from "../../../../src/index.ts";
 import { extractMeta } from "../../../utils/extract-meta.ts";
 import { isolatedFixture } from "../../../utils/isolated-fixture.ts";
 
-const { cleanup, fixture } = await isolatedFixture(
-    new URL("../../../fixtures/function-defaults/", import.meta.url)
-);
+const { cleanup, fixture, inject } = await isolatedFixture("defaults");
+
+await inject("pages/[slug].astro", new URL("[slug].astro", import.meta.url));
 
 const config = {
     integrations: [

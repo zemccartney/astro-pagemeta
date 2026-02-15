@@ -7,10 +7,10 @@ import pagemeta from "../../../../src/index.ts";
 import { extractMeta } from "../../../utils/extract-meta.ts";
 import { isolatedFixture } from "../../../utils/isolated-fixture.ts";
 
-const { cleanup, fixture } = await isolatedFixture(
-    new URL("../../../fixtures/static-defaults/", import.meta.url),
-    { adapter: testAdapter(), output: "server" }
-);
+const { cleanup, fixture } = await isolatedFixture("defaults", {
+    adapter: testAdapter(),
+    output: "server"
+});
 
 const config = {
     integrations: [
@@ -135,8 +135,8 @@ describe("static-defaults / SSR / build", () => {
 
         // All 3 sources contribute:
         // - Template: charset, generator, og:site_name (preserved)
-        // - Defaults: title (overrides template), author (added)
-        // - setPagemeta: description (overrides defaults)
+        // - Defaults: description, author (added)
+        // - setPagemeta: title (overrides defaults and template)
         //
         // Template metadata survives because:
         // - generator: rehype-meta doesn't manage this tag
@@ -154,10 +154,10 @@ describe("static-defaults / SSR / build", () => {
                 },
                 tag: "meta"
             },
-            { properties: { text: "Default Title" }, tag: "title" },
+            { properties: { text: "Title from setPagemeta" }, tag: "title" },
             {
                 properties: {
-                    content: "Description from setPagemeta",
+                    content: "Default site description",
                     name: "description"
                 },
                 tag: "meta"

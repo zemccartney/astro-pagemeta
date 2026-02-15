@@ -1,16 +1,16 @@
 ---
 import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
 
-// Sets only description - demonstrates all 3 sources contributing:
+// Sets only title - demonstrates all 3 sources contributing:
 // - Template: charset, generator, og:site_name (preserved)
-// - Defaults: title (overrides template), author (added)
-// - setPagemeta: description (overrides defaults)
+// - Defaults: author, description (from defaults)
+// - setPagemeta: title (overrides default)
 //
 // Template metadata survives because:
 // - generator: rehype-meta doesn't manage this tag
 // - og:site_name: rehype-meta manages it, but we didn't set it via defaults/setPagemeta
 setPagemeta(Astro, {
-    description: "Description from setPagemeta"
+    title: "Title from setPagemeta"
 });
 ---
 

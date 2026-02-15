@@ -1,12 +1,14 @@
+import type { AstroInlineConfig } from "astro";
+
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import pagemeta from "../../../../src/index.ts";
 import { extractMeta } from "../../../utils/extract-meta.ts";
 import { isolatedFixture } from "../../../utils/isolated-fixture.ts";
 
-const { cleanup, fixture } = await isolatedFixture(
-    new URL("../../../fixtures/function-defaults/", import.meta.url)
-);
+const { cleanup, fixture, inject } = await isolatedFixture("defaults");
+
+await inject("pages/[slug].astro", new URL("[slug].astro", import.meta.url));
 
 const config = {
     build: { format: "directory" },
@@ -20,7 +22,7 @@ const config = {
         })
     ],
     site: "https://example.com"
-};
+} satisfies AstroInlineConfig;
 
 describe("function-defaults / static / build", () => {
     beforeAll(async () => {

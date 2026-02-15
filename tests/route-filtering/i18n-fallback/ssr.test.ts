@@ -1,9 +1,11 @@
+import type { TestApp } from "@inox-tools/astro-tests/astroFixture";
+
 import testAdapter from "@inox-tools/astro-tests/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../../../src/index.ts";
-import { extractMeta } from "../../../utils/extract-meta.ts";
-import { isolatedFixture } from "../../../utils/isolated-fixture.ts";
+import pagemeta from "../../../src/index.ts";
+import { extractMeta } from "../../utils/extract-meta.ts";
+import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 
 const { cleanup, fixture } = await isolatedFixture("i18n-fallback", {
     adapter: testAdapter(),
@@ -23,6 +25,8 @@ const config = {
     integrations: [pagemeta()]
 };
 
+afterAll(() => cleanup());
+
 describe("i18n-fallback / SSR / dev server", () => {
     let devServer: Awaited<ReturnType<typeof fixture.startDevServer>>;
 
@@ -32,7 +36,6 @@ describe("i18n-fallback / SSR / dev server", () => {
 
     afterAll(async () => {
         await devServer.stop();
-        await cleanup();
     });
 
     test("default locale page gets meta tags", async () => {
@@ -55,6 +58,53 @@ describe("i18n-fallback / SSR / dev server", () => {
 
     test("fallback locale route gets meta tags", async () => {
         const response = await fixture.fetch("/fr/");
+        const html = await response.text();
+        const headMeta = extractMeta(html);
+
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            { properties: { text: "English Page" }, tag: "title" },
+            {
+                properties: {
+                    content: "English page description",
+                    name: "description"
+                },
+                tag: "meta"
+            }
+        ]);
+    });
+});
+
+describe("i18n-fallback / SSR / build", () => {
+    let app: TestApp;
+
+    beforeAll(async () => {
+        await fixture.build(config);
+        app = await fixture.loadTestAdapterApp();
+    });
+
+    test("default locale page gets meta tags", async () => {
+        const response = await app.render(new Request("https://example.com/"));
+        const html = await response.text();
+        const headMeta = extractMeta(html);
+
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            { properties: { text: "English Page" }, tag: "title" },
+            {
+                properties: {
+                    content: "English page description",
+                    name: "description"
+                },
+                tag: "meta"
+            }
+        ]);
+    });
+
+    test("fallback locale route gets meta tags", async () => {
+        const response = await app.render(
+            new Request("https://example.com/fr/")
+        );
         const html = await response.text();
         const headMeta = extractMeta(html);
 

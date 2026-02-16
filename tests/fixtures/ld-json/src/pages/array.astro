@@ -1,0 +1,27 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    ldJson: [
+        {
+            "@type": "Organization",
+            name: "Test Org"
+        },
+        {
+            "@type": "WebSite",
+            name: "Test Site"
+        }
+    ],
+    title: "Multiple Entities"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+    </head>
+    <body>
+        <p>Page with multiple LD-JSON entities</p>
+    </body>
+</html>

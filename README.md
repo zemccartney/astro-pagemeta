@@ -451,3 +451,16 @@ This means if a template has `<title>Foo</title>`:
 - There is no way to say "remove the template's title tag"
 
 This contrasts with how integration defaults and `setPagemeta` interact with each other, where the merge hierarchy (`setPagemeta > defaults > template`) allows full override. The gap is at the bottom of the stack: you can override template tags with new values, but you can't null them out.
+
+### LD-JSON is limited — consider a builder approach
+
+The current `ldJson` option accepts raw Schema.org objects. Users own the schema entirely — the integration only handles `@context` wrapping and injection. This is intentional for v1 but limited: users have to know the Schema.org vocabulary, there's no type guidance for specific schema types, and building nested structures (offers, ratings, addresses) is tedious and error-prone.
+
+A builder approach like `@tanstack/meta`'s `jsonLd` namespace ([TanStack/router#6277](https://github.com/TanStack/router/pull/6277)) would be a better DX. Their design:
+
+- A `create()` low-level builder that handles `@context`/`@graph` wrapping (what we do now internally)
+- Type-safe builders per schema type: `jsonLd.product({ name, price, currency })`, `jsonLd.article({ headline, author, datePublished })`, `jsonLd.breadcrumbs([...])`, etc.
+- Each builder accepts a focused config object with only the relevant fields, maps it to the full Schema.org structure internally, and calls `create()` under the hood
+- A `Thing` base interface that all schema types extend, providing `@type`, `name`, `url`, `image`, etc.
+
+If we go this direction, the current `ldJson` field on `PagemetaOptions` could stay as the raw escape hatch, and builders could be a separate export (e.g. `@grepco/astro-pagemeta/json-ld`) that produces the same shape. The builders compose with `setPagemeta` — they just return objects that get passed as `ldJson`.

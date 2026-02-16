@@ -1,5 +1,4 @@
 import type { APIContext } from "astro";
-import type { Options } from "rehype-meta";
 
 import {
     addVitePlugin,
@@ -8,14 +7,16 @@ import {
 } from "astro-integration-kit";
 import { z } from "astro/zod";
 
+import type { PagemetaOptions } from "./types.ts";
+
 const optionsSchema = z
     .object({
         defaults: z
             .union([
-                z.custom<(ctx: APIContext) => Options>(
+                z.custom<(ctx: APIContext) => PagemetaOptions>(
                     (val) => typeof val === "function"
                 ),
-                z.custom<Options>(
+                z.custom<PagemetaOptions>(
                     (val) =>
                         typeof val === "object" &&
                         val !== null &&
@@ -32,7 +33,10 @@ const VIRTUAL_CONFIG_ID = "virtual:pagemeta/config";
 const RESOLVED_CONFIG_ID = "\0" + VIRTUAL_CONFIG_ID;
 
 function createConfigPlugin(
-    defaults: ((ctx: APIContext) => Options) | Options | undefined
+    defaults:
+        | ((ctx: APIContext) => PagemetaOptions)
+        | PagemetaOptions
+        | undefined
 ) {
     let routePatterns: RegExp[] = [];
 

@@ -1,0 +1,28 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    ldJson: {
+        "@type": "Article",
+        headline: "Injected Article"
+    },
+    title: "Template LD-JSON Page"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement": []
+            }
+        </script>
+    </head>
+    <body>
+        <p>Page with template LD-JSON and injected LD-JSON</p>
+    </body>
+</html>

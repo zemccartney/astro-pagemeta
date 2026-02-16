@@ -1,7 +1,10 @@
 declare module "virtual:pagemeta/config" {
     import type { APIContext } from "astro";
-    import type { Options } from "rehype-meta";
+    type PagemetaOptions = import("./types.ts").PagemetaOptions;
 
     export const routePatterns: RegExp[];
-    export const defaults: ((ctx: APIContext) => Options) | Options | undefined;
+    export const defaults:
+        | ((ctx: APIContext) => PagemetaOptions)
+        | PagemetaOptions
+        | undefined;
 }

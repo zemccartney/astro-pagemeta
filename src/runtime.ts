@@ -1,8 +1,11 @@
 import type { APIContext } from "astro";
-import type { Options } from "rehype-meta";
+import type { Root } from "hast";
 
 import { defineMiddleware } from "astro/middleware";
+import { select } from "hast-util-select";
 import { defaults, routePatterns } from "virtual:pagemeta/config";
+
+import type { LdJson, PagemetaOptions } from "./types.ts";
 
 const LOCALS_KEY = Symbol("pagemeta");
 
@@ -12,18 +15,18 @@ export const isPageRoute = (pathname: string): boolean => {
 
 export const resolvePagemeta = (
     ctx: Readonly<APIContext>
-): Options | undefined => {
+): PagemetaOptions | undefined => {
     // @ts-expect-error -- index type error, not worrying about it given we're coordinating with our own symbol
     const pageMeta = ctx.locals[LOCALS_KEY] as
         | false // hard opt-out i.e. skip any defaults, don't set any meta tags
-        | Options
+        | PagemetaOptions
         | undefined;
 
     if (pageMeta === false) {
         return;
     }
 
-    let computedDefaults: Options;
+    let computedDefaults: PagemetaOptions;
     if (typeof defaults === "function") {
         const result = defaults(ctx);
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- handling type-indifferent runtime possibility
@@ -47,7 +50,7 @@ export const resolvePagemeta = (
 
 export const setPagemeta = (
     ctx: Readonly<APIContext>,
-    data: false | Readonly<Options>
+    data: false | Readonly<PagemetaOptions>
 ): void => {
     if (data === false) {
         // @ts-expect-error -- index type error, not worrying about it given we're coordinating with our own symbol
@@ -67,7 +70,7 @@ export const setPagemeta = (
     }
 
     // @ts-expect-error -- index type error, not worrying about it given we're coordinating with our own symbol
-    const pageMeta = ctx.locals[LOCALS_KEY] as Options | undefined;
+    const pageMeta = ctx.locals[LOCALS_KEY] as PagemetaOptions | undefined;
 
     // @ts-expect-error -- index type error, not worrying about it given we're coordinating with our own symbol
     ctx.locals[LOCALS_KEY] = {
@@ -75,6 +78,25 @@ export const setPagemeta = (
         ...data
     };
 };
+
+function rehypeLdJson(ldJson: LdJson | LdJson[]) {
+    const document =
+        Array.isArray(ldJson) ?
+            { "@context": "https://schema.org", "@graph": ldJson }
+        :   { "@context": "https://schema.org", ...ldJson };
+
+    return (tree: Root) => {
+        const head = select("head", tree);
+        if (!head) return;
+
+        head.children.push({
+            children: [{ type: "text", value: JSON.stringify(document) }],
+            properties: { type: "application/ld+json" },
+            tagName: "script",
+            type: "element"
+        });
+    };
+}
 
 const isHtmlDocument = (html: string) => /^<!doctype\s/i.test(html.trimStart());
 
@@ -120,7 +142,12 @@ export const processPagemeta = async (
     const { rehype } = await import("rehype");
     const { default: rehypeMeta } = await import("rehype-meta");
 
-    const processed = await rehype().use(rehypeMeta, metadata).process(html);
+    const { ldJson, ...rehypeMetaOptions } = metadata;
+    let processor = rehype().use(rehypeMeta, rehypeMetaOptions);
+    if (ldJson) {
+        processor = processor.use(rehypeLdJson, ldJson);
+    }
+    const processed = await processor.process(html);
 
     return new Response(String(processed), {
         headers: response.headers,

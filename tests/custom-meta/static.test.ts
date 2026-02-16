@@ -251,4 +251,60 @@ describe("custom-meta with defaults / static", async () => {
             ]);
         });
     });
+
+    describe("build", () => {
+        beforeAll(async () => {
+            await fixture.build(config);
+        });
+
+        test("defaults custom applies when no setPagemeta()", async () => {
+            const html = await fixture.readFile("/defaults-only/index.html");
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
+            const headMeta = extractMeta(html!);
+
+            expect(headMeta).toEqual([
+                { properties: { charSet: "utf-8" }, tag: "meta" },
+                {
+                    properties: {
+                        content: "Default Generator",
+                        name: "generator"
+                    },
+                    tag: "meta"
+                },
+                {
+                    properties: { content: "index", name: "robots" },
+                    tag: "meta"
+                }
+            ]);
+        });
+
+        test("page custom deep-merges with defaults custom", async () => {
+            const html = await fixture.readFile("/defaults-merge/index.html");
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
+            const headMeta = extractMeta(html!);
+
+            // Page overrides generator, adds viewport; defaults' robots preserved
+            expect(headMeta).toEqual([
+                { properties: { charSet: "utf-8" }, tag: "meta" },
+                {
+                    properties: {
+                        content: "Custom Generator",
+                        name: "generator"
+                    },
+                    tag: "meta"
+                },
+                {
+                    properties: { content: "index", name: "robots" },
+                    tag: "meta"
+                },
+                {
+                    properties: {
+                        content: "width=device-width",
+                        name: "viewport"
+                    },
+                    tag: "meta"
+                }
+            ]);
+        });
+    });
 });

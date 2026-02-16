@@ -270,4 +270,67 @@ describe("custom-meta with defaults / SSR", async () => {
             ]);
         });
     });
+
+    describe("build", () => {
+        let app: TestApp;
+
+        beforeAll(async () => {
+            await fixture.build(config);
+            app = await fixture.loadTestAdapterApp();
+        });
+
+        test("defaults custom applies when no setPagemeta()", async () => {
+            const response = await app.render(
+                new Request("https://example.com/defaults-only")
+            );
+            const html = await response.text();
+            const headMeta = extractMeta(html);
+
+            expect(headMeta).toEqual([
+                { properties: { charSet: "utf-8" }, tag: "meta" },
+                {
+                    properties: {
+                        content: "Default Generator",
+                        name: "generator"
+                    },
+                    tag: "meta"
+                },
+                {
+                    properties: { content: "index", name: "robots" },
+                    tag: "meta"
+                }
+            ]);
+        });
+
+        test("page custom deep-merges with defaults custom", async () => {
+            const response = await app.render(
+                new Request("https://example.com/defaults-merge")
+            );
+            const html = await response.text();
+            const headMeta = extractMeta(html);
+
+            // Page overrides generator, adds viewport; defaults' robots preserved
+            expect(headMeta).toEqual([
+                { properties: { charSet: "utf-8" }, tag: "meta" },
+                {
+                    properties: {
+                        content: "Custom Generator",
+                        name: "generator"
+                    },
+                    tag: "meta"
+                },
+                {
+                    properties: { content: "index", name: "robots" },
+                    tag: "meta"
+                },
+                {
+                    properties: {
+                        content: "width=device-width",
+                        name: "viewport"
+                    },
+                    tag: "meta"
+                }
+            ]);
+        });
+    });
 });

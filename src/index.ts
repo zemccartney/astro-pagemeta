@@ -24,6 +24,7 @@ const optionsSchema = z
                 )
             ])
             .optional(),
+        includeExternal: z.boolean().optional().default(false),
         manual: z.boolean().optional().default(false)
     })
     .optional()
@@ -103,7 +104,10 @@ export default defineIntegration({
                         routes
                             .filter(
                                 (r) =>
-                                    r.origin === "project" && r.type === "page"
+                                    r.type === "page" &&
+                                    (r.origin === "project" ||
+                                        (options.includeExternal &&
+                                            r.origin === "external"))
                             )
                             .map((r) => r.patternRegex)
                     );

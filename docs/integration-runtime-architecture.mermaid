@@ -1,0 +1,37 @@
+---
+title: Integration Runtime Architecture
+---
+flowchart TD
+    subgraph BuildTime["Build Time (astro:config:setup + astro:routes:resolved)"]
+        INT[src/index.ts<br/>defineIntegration]
+        INT -->|registers| VP[Vite Plugin<br/>pagemeta:config]
+        INT -->|registers| MW_REG[addMiddleware<br/>order: post]
+        INT -->|collects routes| RP[Route Patterns<br/>project page RegExps]
+        RP -->|injected into| VP
+        OPTS[User Options<br/>defaults: object or fn] -->|serialized into| VP
+        VP -->|serves| VMOD["virtual:pagemeta/config<br/>routePatterns + defaults"]
+    end
+
+    subgraph RequestTime["Request Time"]
+        PAGE["Page Frontmatter<br/>setPagemeta(Astro, {...})"]
+        PAGE -->|stores via Symbol| LOCALS["Astro.locals[Symbol]<br/>metadata object"]
+
+        USER_MW["User Middleware (optional)<br/>setPagemeta(ctx, defaults)<br/>before next()"]
+        USER_MW -->|can also store| LOCALS
+
+        MW["src/middleware.ts<br/>post-order middleware"]
+        MW -->|"1. isPageRoute(pathname)"| ROUTE_CHECK{Page route?}
+        ROUTE_CHECK -->|No: API, endpoint,<br/>server island| PASS[Pass through unchanged]
+        ROUTE_CHECK -->|Yes| RESOLVE["2. resolvePagemeta(ctx)"]
+
+        RESOLVE -->|reads| LOCALS
+        RESOLVE -->|reads| VMOD
+        RESOLVE -->|merges| MERGED["{ ...defaults, ...pageMeta }"]
+
+        MERGED --> DOC_CHECK{Has doctype?}
+        DOC_CHECK -->|No: fragment,<br/>partial| PASS
+        DOC_CHECK -->|Yes| REHYPE["3. rehype + rehype-meta<br/>inject tags into head"]
+        REHYPE --> RESPONSE["Modified HTML Response"]
+    end
+
+    BuildTime -.->|virtual module available at| RequestTime

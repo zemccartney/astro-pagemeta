@@ -1,0 +1,76 @@
+---
+title: Codebase File Architecture
+---
+flowchart TD
+    subgraph Source["Source (src/)"]
+        INDEX["index.ts<br/>Integration entry<br/>Vite plugin + hooks"]
+        RUNTIME["runtime.ts<br/>setPagemeta()<br/>resolvePagemeta()<br/>isPageRoute()"]
+        MIDDLEWARE["middleware.ts<br/>Post-render HTML processing"]
+        TYPES["types.ts<br/>SetPagemeta, ResolvePagemeta,<br/>IsPageRoute"]
+        VIRTUAL_D["virtual.d.ts<br/>Module declarations"]
+
+        TYPES -->|types used by| RUNTIME
+        RUNTIME -->|imported by| MIDDLEWARE
+        VIRTUAL_D -->|types for| RUNTIME
+        INDEX -->|registers| MIDDLEWARE
+    end
+
+    subgraph Config["Config Files"]
+        PKG["package.json<br/>exports: . → dist/index<br/>exports: ./runtime → src/runtime.ts"]
+        TSCONFIG["tsconfig.json<br/>nodenext, es2022, strict"]
+        VITEST["vitest.config.ts<br/>include: tests/**/*.test.ts"]
+    end
+
+    subgraph TestUtils["Test Utilities (tests/utils/)"]
+        HTML_PARSE["html-parse.ts<br/>extractMeta()<br/>isFragment()<br/>extractServerIslandUrl()"]
+        ISO_FIX["isolated-fixture.ts<br/>isolatedFixture()<br/>temp dir + cleanup + inject"]
+
+        subgraph ErrorCapture["error-capture/"]
+            EC_INDEX["index.ts<br/>createErrorCapture()"]
+            EC_MW["middleware.ts<br/>Catches + stores errors"]
+            EC_VIRT["virtual.d.ts<br/>Config types"]
+            EC_INDEX -->|registers| EC_MW
+        end
+    end
+
+    subgraph Fixtures["Test Fixtures (tests/fixtures/)"]
+        FIX_BASIC["basic/<br/>index, complex, no-meta,<br/>no-head, override,<br/>template-setpagemeta"]
+        FIX_DEFAULTS["defaults/<br/>index, override, opt-out,<br/>template-defaults, full-cascade"]
+        FIX_MW["middleware-defaults/<br/>src/middleware.ts +<br/>without-meta, with-override,<br/>partial-override"]
+        FIX_ROUTE["route-filtering/<br/>server island, API routes,<br/>partials, rewrites"]
+        FIX_ERR["error-handling/<br/>index (minimal page)"]
+    end
+
+    subgraph Tests["Test Files (tests/)"]
+        T_BASIC_SSR["basic/ssr.test.ts"]
+        T_BASIC_STATIC["basic/static.test.ts"]
+        T_SD_SSR["integration-options/<br/>static-defaults/ssr.test.ts"]
+        T_SD_STATIC["integration-options/<br/>static-defaults/static.test.ts"]
+        T_FD_SSR["integration-options/<br/>function-defaults/ssr.test.ts"]
+        T_FD_STATIC["integration-options/<br/>function-defaults/static.test.ts"]
+        T_ERR["error-handling/<br/>defaults-function.test.ts"]
+        T_ROUTE["route-filtering/ssr.test.ts"]
+        T_MW_ORDER["middleware-ordering/ssr.test.ts"]
+    end
+
+    %% Test → Fixture relationships
+    T_BASIC_SSR & T_BASIC_STATIC -->|load| FIX_BASIC
+    T_SD_SSR & T_SD_STATIC & T_FD_SSR & T_FD_STATIC -->|load| FIX_DEFAULTS
+    T_ERR -->|load| FIX_ERR
+    T_ROUTE -->|load| FIX_ROUTE
+    T_MW_ORDER -->|load| FIX_MW
+
+    %% Test → Utility relationships
+    Tests -->|use| HTML_PARSE
+    Tests -->|use| ISO_FIX
+    T_ERR -->|uses| EC_INDEX
+
+    %% Test → Source relationships
+    Tests -->|import integration from| INDEX
+
+    subgraph Docs["Documentation"]
+        CLAUDE["CLAUDE.md<br/>AI agent context"]
+        MAINT["MAINTENANCE.md<br/>Test organization guide"]
+        TODO_MD["TODO.md<br/>Roadmap"]
+        README["README.md<br/>User documentation"]
+    end

@@ -96,7 +96,7 @@ export default defineIntegration({
                         routes
                             .filter(
                                 (r) =>
-                                    r.type === "page" || r.type === "fallback"
+                                    r.origin === "project" && r.type === "page"
                             )
                             .map((r) => r.patternRegex)
                     );

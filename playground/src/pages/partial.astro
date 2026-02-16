@@ -1,0 +1,21 @@
+---
+export const partial = true;
+
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    description: "This is a partial page",
+    title: "Partial Page"
+});
+
+console.log("--- Astro object keys ---");
+console.log(Object.keys(Astro));
+console.log("--- Astro.props ---", Astro.props);
+console.log("--- Astro.url ---", Astro.url.toString());
+console.log("--- Astro.request.headers ---", Astro.request.headers);
+---
+
+<div>
+    <h2>I'm a partial!</h2>
+    <p>This is a partial page fragment, not a full document.</p>
+</div>

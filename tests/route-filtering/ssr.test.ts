@@ -4,7 +4,11 @@ import testAdapter from "@inox-tools/astro-tests/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import pagemeta from "../../src/index.ts";
-import { extractMeta } from "../utils/extract-meta.ts";
+import {
+    extractMeta,
+    extractServerIslandUrl,
+    isFragment
+} from "../utils/html-parse.ts";
 import { isolatedFixture } from "../utils/isolated-fixture.ts";
 
 const { cleanup, fixture } = await isolatedFixture("route-filtering", {
@@ -30,36 +34,17 @@ describe("route-filtering / SSR / dev server", () => {
         await devServer.stop();
     });
 
-    test("page with server:defer gets meta tags", async () => {
-        const response = await fixture.fetch("/");
-        const html = await response.text();
-        const headMeta = extractMeta(html);
-
-        // Astro injects a <link rel="preload"> for the server island fetch,
-        // so use arrayContaining to assert on the metadata we control
-        expect(headMeta).toEqual(
-            expect.arrayContaining([
-                { properties: { charSet: "utf-8" }, tag: "meta" },
-                {
-                    properties: { text: "Server Island Page" },
-                    tag: "title"
-                },
-                {
-                    properties: {
-                        content: "Page with server island",
-                        name: "description"
-                    },
-                    tag: "meta"
-                }
-            ])
-        );
-    });
-
-    test("page with server:defer has island placeholder", async () => {
+    test("server island fragment not processed by middleware", async () => {
         const response = await fixture.fetch("/");
         const html = await response.text();
 
-        expect(html).toContain("server-island");
+        const islandUrl = extractServerIslandUrl(html);
+
+        const islandResponse = await fixture.fetch(islandUrl);
+        const islandHtml = await islandResponse.text();
+
+        expect(isFragment(islandHtml)).toBe(true);
+        expect(islandHtml).toContain("Hello from server island");
     });
 
     test("JSON endpoint passes through", async () => {
@@ -110,6 +95,14 @@ describe("route-filtering / SSR / dev server", () => {
             }
         ]);
     });
+
+    test("partial page not processed by middleware", async () => {
+        const response = await fixture.fetch("/partial");
+        const html = await response.text();
+
+        expect(isFragment(html)).toBe(true);
+        expect(html).toContain("I'm a partial fragment");
+    });
 });
 
 describe("route-filtering / SSR / build", () => {
@@ -120,36 +113,19 @@ describe("route-filtering / SSR / build", () => {
         app = await fixture.loadTestAdapterApp();
     });
 
-    test("page with server:defer gets meta tags", async () => {
+    test("server island fragment not processed by middleware", async () => {
         const response = await app.render(new Request("https://example.com/"));
         const html = await response.text();
-        const headMeta = extractMeta(html);
 
-        // Astro injects a <link rel="preload"> for the server island fetch,
-        // so use arrayContaining to assert on the metadata we control
-        expect(headMeta).toEqual(
-            expect.arrayContaining([
-                { properties: { charSet: "utf-8" }, tag: "meta" },
-                {
-                    properties: { text: "Server Island Page" },
-                    tag: "title"
-                },
-                {
-                    properties: {
-                        content: "Page with server island",
-                        name: "description"
-                    },
-                    tag: "meta"
-                }
-            ])
+        const islandUrl = extractServerIslandUrl(html);
+
+        const islandResponse = await app.render(
+            new Request(`https://example.com${islandUrl}`)
         );
-    });
+        const islandHtml = await islandResponse.text();
 
-    test("page with server:defer has island placeholder", async () => {
-        const response = await app.render(new Request("https://example.com/"));
-        const html = await response.text();
-
-        expect(html).toContain("server-island");
+        expect(isFragment(islandHtml)).toBe(true);
+        expect(islandHtml).toContain("Hello from server island");
     });
 
     test("JSON endpoint passes through", async () => {
@@ -182,9 +158,11 @@ describe("route-filtering / SSR / build", () => {
         const response = await app.render(
             new Request("https://example.com/old-page")
         );
+        const contentType = response.headers.get("content-type");
 
-        expect(response.status).toBeGreaterThanOrEqual(300);
-        expect(response.status).toBeLessThan(400);
+        // eslint-disable-next-line unicorn/no-null -- output of Response API
+        expect(contentType).toEqual(null);
+        expect(response.status).toEqual(301);
     });
 
     test("rewrite has target's meta tags", async () => {
@@ -205,5 +183,15 @@ describe("route-filtering / SSR / build", () => {
                 tag: "meta"
             }
         ]);
+    });
+
+    test("partial page not processed by middleware", async () => {
+        const response = await app.render(
+            new Request("https://example.com/partial")
+        );
+        const html = await response.text();
+
+        expect(isFragment(html)).toBe(true);
+        expect(html).toContain("I'm a partial fragment");
     });
 });

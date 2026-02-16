@@ -5,7 +5,12 @@
         "module": "nodenext",
         "skipLibCheck": true,
         "target": "es2022",
-        "types": ["node"],
+        "types": [
+            // pull in to support using astro: protocol modules within our test fixtures, for which we never generate
+            // types outside our temp directories (see the isolatedFixture utility)
+            "astro/client",
+            "node"
+        ],
 
         // module system behavior
         "allowImportingTsExtensions": true,

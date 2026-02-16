@@ -7,13 +7,15 @@ export default defineConfig({
     adapter: node({
         mode: "standalone"
     }),
-    integrations: [
-        pagemeta({
-            defaults: () => {
-                return { title: "Default Title" };
-            }
-        })
-    ],
-    output: "server",
-    redirects: { "/old-page": "/" }
+    i18n: {
+        defaultLocale: "en",
+        fallback: { fr: "es" },
+        locales: ["en", "fr", "es"],
+        routing: {
+            fallbackType: "rewrite",
+            prefixDefaultLocale: false
+        }
+    },
+    integrations: [pagemeta()],
+    output: "server"
 });

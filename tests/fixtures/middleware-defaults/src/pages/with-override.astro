@@ -2,8 +2,8 @@
 import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
 
 setPagemeta(Astro, {
-    description: "English page description",
-    title: "English Page"
+    description: "Page override description",
+    title: "Page Override Title"
 });
 ---
 
@@ -13,6 +13,6 @@ setPagemeta(Astro, {
         <meta charset="utf-8" />
     </head>
     <body>
-        <p>English content</p>
+        <p>Page with full override</p>
     </body>
 </html>

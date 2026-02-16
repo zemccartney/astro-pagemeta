@@ -4,7 +4,7 @@ import testAdapter from "@inox-tools/astro-tests/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import pagemeta from "../../../src/index.ts";
-import { extractMeta } from "../../utils/extract-meta.ts";
+import { extractMeta } from "../../utils/html-parse.ts";
 import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 
 const { cleanup, fixture, inject } = await isolatedFixture("defaults", {

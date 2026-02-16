@@ -432,3 +432,22 @@ In practice, this means your template's existing meta tags integrate naturally w
 - Tags you set via defaults or `setPagemeta()`: override any existing template values
 
 See [rehype-meta's options](https://github.com/rehypejs/rehype-meta?tab=readme-ov-file#options) for the full list of managed tags.
+
+---
+
+## Notes / Ideas (WIP)
+
+Scratch space for things to factor into the docs once implementation settles.
+
+### Template metadata can be replaced but not removed
+
+rehype-meta's `ensure()` function finds-or-creates elements by CSS selector. It replaces content when a value is provided and leaves existing tags alone when no value is provided. There is no mechanism to remove a tag.
+
+This means if a template has `<title>Foo</title>`:
+
+- `setPagemeta(Astro, { title: "Bar" })` replaces it with "Bar"
+- `setPagemeta(Astro, { description: "..." })` (no title) leaves "Foo" in place
+- `setPagemeta(Astro, false)` opts out of all processing — "Foo" stays as-is
+- There is no way to say "remove the template's title tag"
+
+This contrasts with how integration defaults and `setPagemeta` interact with each other, where the merge hierarchy (`setPagemeta > defaults > template`) allows full override. The gap is at the bottom of the stack: you can override template tags with new values, but you can't null them out.

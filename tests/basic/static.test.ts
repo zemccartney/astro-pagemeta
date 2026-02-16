@@ -184,6 +184,24 @@ describe("static / dev server", () => {
             }
         ]);
     });
+
+    test("setting title: false does not remove template title", async () => {
+        const response = await fixture.fetch("/template-title-only");
+        const html = await response.text();
+        const headMeta = extractMeta(html);
+
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            { properties: { text: "Template Title" }, tag: "title" },
+            {
+                properties: {
+                    content: "Description from setPagemeta",
+                    name: "description"
+                },
+                tag: "meta"
+            }
+        ]);
+    });
 });
 
 describe("static / build", () => {
@@ -346,6 +364,24 @@ describe("static / build", () => {
             {
                 properties: {
                     content: "Description for headless page",
+                    name: "description"
+                },
+                tag: "meta"
+            }
+        ]);
+    });
+
+    test("setting title: false does not remove template title", async () => {
+        const html = await fixture.readFile("/template-title-only/index.html");
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
+        const headMeta = extractMeta(html!);
+
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            { properties: { text: "Template Title" }, tag: "title" },
+            {
+                properties: {
+                    content: "Description from setPagemeta",
                     name: "description"
                 },
                 tag: "meta"

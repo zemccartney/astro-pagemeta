@@ -224,6 +224,11 @@ Static builds with `build.format: "directory"` normalize URLs with trailing slas
 
 The `function-defaults` static build test uses explicit `build.format: "directory"` to make this behavior predictable.
 
-### Dev Server Race Conditions
+### Dev Server Socket Errors
 
-Running many dev server tests in parallel can cause socket errors (`ECONNREFUSED`, `other side closed`). Use `--no-file-parallelism` if you see flaky failures.
+Intermittent `SocketError: other side closed` failures appear occasionally, most often in `error-handling/defaults-function.test.ts`. The `@inox-tools/astro-tests` fixture's `fetch()` uses Undici over real HTTP to the dev server. When a test intentionally triggers a middleware error (e.g. defaults function returning `undefined`), Astro's dev server sometimes closes the socket before the full 500 response is flushed.
+
+**Unverified theory from Claude:** this is a timing issue inside Astro's dev server error handling, not a test isolation problem — each fixture gets its own server on a unique port. Root cause has not been confirmed and there are no reliable reproduction steps. It's infrequent enough to live with for now. If it gets worse:
+
+- `pnpm test -- --no-file-parallelism` reduces (but doesn't eliminate) it
+- The build-side tests for the same cases are not affected because `app.render()` is in-process with no HTTP

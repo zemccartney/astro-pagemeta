@@ -190,6 +190,30 @@ describe("SSR / dev server", () => {
             }
         ]);
     });
+
+    // Template metadata that rehype-meta manages (like <title>) cannot be
+    // removed via setPagemeta — only replaced with a truthy value. Even
+    // explicitly setting title to false doesn't remove the template's
+    // <title>. There's no way to negate a template tag short of opting out
+    // entirely with setPagemeta(Astro, false), which skips everything.
+    test("setting title: false does not remove template title", async () => {
+        const response = await fixture.fetch("/template-title-only");
+        const html = await response.text();
+        const headMeta = extractMeta(html);
+
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            // Template title survives despite setPagemeta({ title: false })
+            { properties: { text: "Template Title" }, tag: "title" },
+            {
+                properties: {
+                    content: "Description from setPagemeta",
+                    name: "description"
+                },
+                tag: "meta"
+            }
+        ]);
+    });
 });
 
 describe("SSR / build", () => {
@@ -365,6 +389,26 @@ describe("SSR / build", () => {
             {
                 properties: {
                     content: "Description for headless page",
+                    name: "description"
+                },
+                tag: "meta"
+            }
+        ]);
+    });
+
+    test("setting title: false does not remove template title", async () => {
+        const response = await app.render(
+            new Request("https://example.com/template-title-only")
+        );
+        const html = await response.text();
+        const headMeta = extractMeta(html);
+
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            { properties: { text: "Template Title" }, tag: "title" },
+            {
+                properties: {
+                    content: "Description from setPagemeta",
                     name: "description"
                 },
                 tag: "meta"

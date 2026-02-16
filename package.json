@@ -33,6 +33,7 @@
         "src/virtual.d.ts"
     ],
     "scripts": {
+        "check": "pnpm lint:fix && pnpm fmt:fix && pnpm typecheck",
         "deps": "ncu -p pnpm -i --format group --cooldown 3",
         "fmt": "prettier . --check",
         "fmt:fix": "prettier . --write",

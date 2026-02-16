@@ -1,0 +1,22 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    custom: { robots: "noindex, nofollow" },
+    title: "Template Override Test"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            content="index, follow"
+            name="robots"
+        />
+    </head>
+    <body>
+        <p>Template has robots meta, setPagemeta replaces it</p>
+    </body>
+</html>

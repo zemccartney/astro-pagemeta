@@ -1,0 +1,18 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    custom: { generator: "Astro", robots: "index, follow" },
+    title: "Custom Meta Test"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+    </head>
+    <body>
+        <p>Basic custom meta injection</p>
+    </body>
+</html>

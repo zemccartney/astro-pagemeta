@@ -1,5 +1,5 @@
 import type { APIContext } from "astro";
-import type { Root } from "hast";
+import type { Element, Root } from "hast";
 
 import { defineMiddleware } from "astro/middleware";
 import { select } from "hast-util-select";
@@ -45,7 +45,11 @@ export const resolvePagemeta = (
         return;
     }
 
-    return { ...computedDefaults, ...pageMeta };
+    const merged = { ...computedDefaults, ...pageMeta };
+    if (computedDefaults.custom || pageMeta?.custom) {
+        merged.custom = { ...computedDefaults.custom, ...pageMeta?.custom };
+    }
+    return merged;
 };
 
 export const setPagemeta = (
@@ -75,9 +79,39 @@ export const setPagemeta = (
     // @ts-expect-error -- index type error, not worrying about it given we're coordinating with our own symbol
     ctx.locals[LOCALS_KEY] = {
         ...pageMeta,
-        ...data
+        ...data,
+        ...(pageMeta?.custom || data.custom ?
+            { custom: { ...pageMeta?.custom, ...data.custom } }
+        :   {})
     };
 };
+
+function rehypeCustomMeta(meta: Record<string, string>) {
+    return (tree: Root) => {
+        const head = select("head", tree);
+        if (!head) return;
+
+        for (const [name, content] of Object.entries(meta)) {
+            const existing = head.children.find(
+                (node): node is Element =>
+                    node.type === "element" &&
+                    node.tagName === "meta" &&
+                    node.properties["name"] === name
+            );
+
+            if (existing) {
+                existing.properties["content"] = content;
+            } else {
+                head.children.push({
+                    children: [],
+                    properties: { content, name },
+                    tagName: "meta",
+                    type: "element"
+                });
+            }
+        }
+    };
+}
 
 function rehypeLdJson(ldJson: LdJson | LdJson[]) {
     const document =
@@ -142,10 +176,13 @@ export const processPagemeta = async (
     const { rehype } = await import("rehype");
     const { default: rehypeMeta } = await import("rehype-meta");
 
-    const { ldJson, ...rehypeMetaOptions } = metadata;
+    const { custom, ldJson, ...rehypeMetaOptions } = metadata;
     let processor = rehype().use(rehypeMeta, rehypeMetaOptions);
     if (ldJson) {
         processor = processor.use(rehypeLdJson, ldJson);
+    }
+    if (custom && Object.keys(custom).length > 0) {
+        processor = processor.use(rehypeCustomMeta, custom);
     }
     const processed = await processor.process(html);
 

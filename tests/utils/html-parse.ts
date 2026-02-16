@@ -9,6 +9,9 @@ import { unified } from "unified";
  * Parses in document mode — the parser always adds html/head/body, but
  * only creates a doctype node if the input actually had one. So the
  * presence of a doctype node proves the input was a full document.
+ *
+ * This aligns with Astro's behavior: Astro appears to add doctypes
+ * for non-partial renders only
  */
 export const isFragment = (html: string): boolean => {
     const tree = unified().use(rehypeParse).parse(html);

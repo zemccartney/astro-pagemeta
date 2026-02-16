@@ -1,0 +1,18 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    description: "Index page description",
+    title: "Index Page Title"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+    </head>
+    <body>
+        <p>Index page — manual mode, no user middleware processing</p>
+    </body>
+</html>

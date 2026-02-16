@@ -3,13 +3,13 @@ import type { TestApp } from "@inox-tools/astro-tests/astroFixture";
 import testAdapter from "@inox-tools/astro-tests/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../src/index.ts";
+import pagemeta from "../src/index.ts";
 import {
     extractMeta,
     extractServerIslandUrl,
     isFragment
-} from "../utils/html-parse.ts";
-import { isolatedFixture } from "../utils/isolated-fixture.ts";
+} from "./utils/html-parse.ts";
+import { isolatedFixture } from "./utils/isolated-fixture.ts";
 
 const { cleanup, fixture } = await isolatedFixture("route-filtering", {
     adapter: testAdapter(),
@@ -23,7 +23,7 @@ const config = {
 
 afterAll(() => cleanup());
 
-describe("route-filtering / SSR / dev server", () => {
+describe("route-filtering / dev server", () => {
     let devServer: Awaited<ReturnType<typeof fixture.startDevServer>>;
 
     beforeAll(async () => {
@@ -45,6 +45,28 @@ describe("route-filtering / SSR / dev server", () => {
 
         expect(isFragment(islandHtml)).toBe(true);
         expect(islandHtml).toContain("Hello from server island");
+    });
+
+    // Server island that renders a complete page (html/head/body with its
+    // own title). Astro strips the doctype so the response is a fragment,
+    // and /_server-islands/ doesn't match any page route — neither the
+    // island's own title nor integration defaults appear in processed output.
+    test("server island rendering full page is still not processed", async () => {
+        const response = await fixture.fetch("/full-doc-island-page");
+        const html = await response.text();
+
+        const islandUrl = extractServerIslandUrl(html);
+
+        const islandResponse = await fixture.fetch(islandUrl);
+        const islandHtml = await islandResponse.text();
+
+        expect(isFragment(islandHtml)).toBe(true);
+        // The component's own title and charset survive as static template
+        // content, but no "Default Title" from integration defaults
+        expect(extractMeta(islandHtml)).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            { properties: { text: "Island-Rendered Page" }, tag: "title" }
+        ]);
     });
 
     test("JSON endpoint passes through", async () => {
@@ -103,9 +125,28 @@ describe("route-filtering / SSR / dev server", () => {
         expect(isFragment(html)).toBe(true);
         expect(html).toContain("I'm a partial fragment");
     });
+
+    // The template includes <!doctype html> and the frontmatter calls
+    // setPagemeta(), but astro appears to strip the doctype from all
+    // non-page renders. Since this page exports `partial = true`, the response has no doctype and the
+    // middleware's isHtmlDocument() check classifies it as a fragment,
+    // skipping all metadata injection. setPagemeta() and integration
+    // defaults are both silently ignored.
+    test("partial with full document template not processed", async () => {
+        const response = await fixture.fetch("/partial-full-doc");
+        const html = await response.text();
+
+        // Astro strips doctype — response is classified as fragment
+        expect(isFragment(html)).toBe(true);
+        // Only template-level metadata survives; setPagemeta() and defaults ignored
+        expect(extractMeta(html)).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" }
+        ]);
+        expect(html).toContain("I'm a partial with full document structure");
+    });
 });
 
-describe("route-filtering / SSR / build", () => {
+describe("route-filtering / build", () => {
     let app: TestApp;
 
     beforeAll(async () => {
@@ -126,6 +167,26 @@ describe("route-filtering / SSR / build", () => {
 
         expect(isFragment(islandHtml)).toBe(true);
         expect(islandHtml).toContain("Hello from server island");
+    });
+
+    test("server island rendering full page not processed", async () => {
+        const response = await app.render(
+            new Request("https://example.com/full-doc-island-page")
+        );
+        const html = await response.text();
+
+        const islandUrl = extractServerIslandUrl(html);
+
+        const islandResponse = await app.render(
+            new Request(`https://example.com${islandUrl}`)
+        );
+        const islandHtml = await islandResponse.text();
+
+        expect(isFragment(islandHtml)).toBe(true);
+        expect(extractMeta(islandHtml)).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            { properties: { text: "Island-Rendered Page" }, tag: "title" }
+        ]);
     });
 
     test("JSON endpoint passes through", async () => {
@@ -193,5 +254,18 @@ describe("route-filtering / SSR / build", () => {
 
         expect(isFragment(html)).toBe(true);
         expect(html).toContain("I'm a partial fragment");
+    });
+
+    test("partial with full document template not processed", async () => {
+        const response = await app.render(
+            new Request("https://example.com/partial-full-doc")
+        );
+        const html = await response.text();
+
+        expect(isFragment(html)).toBe(true);
+        expect(extractMeta(html)).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" }
+        ]);
+        expect(html).toContain("I'm a partial with full document structure");
     });
 });

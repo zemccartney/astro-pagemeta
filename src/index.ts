@@ -22,7 +22,8 @@ const optionsSchema = z
                         typeof val !== "function"
                 )
             ])
-            .optional()
+            .optional(),
+        manual: z.boolean().optional().default(false)
     })
     .optional()
     .default({});
@@ -86,10 +87,12 @@ export default defineIntegration({
                         plugin: configPlugin.plugin
                     });
 
-                    params.addMiddleware({
-                        entrypoint: resolve("./middleware.ts"),
-                        order: "post"
-                    });
+                    if (!options.manual) {
+                        params.addMiddleware({
+                            entrypoint: resolve("./middleware.ts"),
+                            order: "post"
+                        });
+                    }
                 },
                 "astro:routes:resolved": ({ routes }) => {
                     configPlugin.setRoutePatterns(

@@ -97,6 +97,7 @@ tests/
 ### Fixture Isolation: `isolatedFixture()`
 
 All tests use `isolatedFixture(name, inlineConfig?)` which:
+
 1. Copies fixture to a temp dir in `.test-tmp/` (filters out `.astro`, `dist`, `node_modules`)
 2. Returns `{ fixture, cleanup(), inject(dest, source) }`
 3. `inject()` adds files dynamically (used for SSR vs static dynamic route pages)

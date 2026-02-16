@@ -27,7 +27,7 @@ import { isolatedFixture } from "../utils/isolated-fixture.ts";
  * pages can selectively override via setPagemeta().
  */
 
-const { cleanup, fixture } = await isolatedFixture("middleware-defaults", {
+const { cleanup, fixture } = await isolatedFixture("middleware/ordering", {
     adapter: testAdapter(),
     output: "server"
 });

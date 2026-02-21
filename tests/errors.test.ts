@@ -23,10 +23,10 @@
 
 import { afterAll, afterEach, describe, expect, test } from "vitest";
 
-import pagemeta from "../../src/index.ts";
-import { createErrorCapture } from "../utils/error-capture/index.ts";
-import { extractMeta } from "../utils/html-parse.ts";
-import { isolatedFixture } from "../utils/isolated-fixture.ts";
+import pagemeta from "../src/index.ts";
+import { createErrorCapture } from "./utils/error-capture/index.ts";
+import { extractMeta } from "./utils/html-parse.ts";
+import { isolatedFixture } from "./utils/isolated-fixture.ts";
 
 const { cleanup, fixture } = await isolatedFixture("error-handling");
 

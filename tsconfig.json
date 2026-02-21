@@ -35,7 +35,7 @@
 
         // typechecking
         "strict": true,
-        "allowJs": true,
+        "allowJs": false,
         "erasableSyntaxOnly": true,
         "exactOptionalPropertyTypes": true,
         "noFallthroughCasesInSwitch": true,
@@ -45,5 +45,9 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true
     },
-    "exclude": [".plan", "./runtime-stub.js", "**/dist"]
+    "exclude": [
+        ".plan", // replicate global git ignore settings
+        "**/dist",
+        "playground" // sample app for local experimentation
+    ]
 }

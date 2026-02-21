@@ -19,8 +19,7 @@ export default defineConfig([
     {
         ignores: [
             ".claude",
-            ".plan", // replicate global ignore settings
-            "runtime-stub.js"
+            ".plan" // replicate global ignore settings
         ]
     },
     {
@@ -61,7 +60,7 @@ export default defineConfig([
             perfectionist.configs["recommended-natural"]
         ],
         // astro files still get non-typed lint rules from typescript eslint ...
-        files: ["**/*.{js,ts,tsx,jsx,astro,mjs,mts}"],
+        files: ["**/*.{ts,astro}"],
         rules: {
             "block-scoped-var": ["error"],
             "unicorn/no-keyword-prefix": ["off"],
@@ -80,7 +79,7 @@ export default defineConfig([
             tseslint.configs.strictTypeChecked,
             tseslint.configs.stylisticTypeChecked
         ],
-        files: ["**/*.{ts,tsx,mts}"],
+        files: ["**/*.{ts}"],
         languageOptions: {
             parserOptions: {
                 projectService: true
@@ -88,7 +87,7 @@ export default defineConfig([
         }
     },
     {
-        files: ["*.{js,ts,mjs}"],
+        files: ["*.{ts}"],
         languageOptions: {
             globals: {
                 ...globals.node

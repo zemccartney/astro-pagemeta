@@ -79,7 +79,7 @@ export default defineConfig([
             tseslint.configs.strictTypeChecked,
             tseslint.configs.stylisticTypeChecked
         ],
-        files: ["**/*.{ts}"],
+        files: ["**/*.ts"],
         languageOptions: {
             parserOptions: {
                 projectService: true
@@ -87,7 +87,7 @@ export default defineConfig([
         }
     },
     {
-        files: ["*.{ts}"],
+        files: ["*.ts"],
         languageOptions: {
             globals: {
                 ...globals.node

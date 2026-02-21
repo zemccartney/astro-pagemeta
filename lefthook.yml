@@ -2,12 +2,12 @@ pre-commit:
     parallel: true
     commands:
         lint:
-            glob: "*.{ts,astro,json}"
+            glob: "**/*.{ts,astro,json}"
             run: pnpm lint:fix
             stage_fixed: true
         fmt:
             run: pnpm fmt:fix
             stage_fixed: true
         typecheck:
-            glob: "*.{ts,astro}"
+            glob: "**/*.{ts,astro}"
             run: pnpm typecheck

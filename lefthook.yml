@@ -1,5 +1,3 @@
-glob_matcher: doublestar
-
 pre-commit:
     parallel: true
     commands:
@@ -11,5 +9,5 @@ pre-commit:
             run: pnpm fmt:fix
             stage_fixed: true
         typecheck:
-            glob: "**/*.{ts,astro}"
+            glob: "*.{ts,astro}"
             run: pnpm typecheck

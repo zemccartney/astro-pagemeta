@@ -9,6 +9,8 @@ import { z } from "astro/zod";
 
 import type { PagemetaOptions } from "./types.ts";
 
+console.log("ZZZ");
+
 const optionsSchema = z
     .object({
         defaults: z

@@ -12,8 +12,6 @@ import globals from "globals";
 import Path from "node:path";
 import tseslint from "typescript-eslint";
 
-console.log("TEST ROOT");
-
 const gitignorePath = Path.resolve(import.meta.dirname, ".gitignore");
 
 export default defineConfig([

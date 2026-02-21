@@ -33,6 +33,8 @@ const optionsSchema = z
 const VIRTUAL_CONFIG_ID = "virtual:pagemeta/config";
 const RESOLVED_CONFIG_ID = "\0" + VIRTUAL_CONFIG_ID;
 
+console.log("CONES");
+
 function createConfigPlugin(
     defaults:
         | ((ctx: APIContext) => PagemetaOptions)

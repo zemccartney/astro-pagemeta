@@ -1,4 +1,15 @@
+### security (see https://pnpm.io/supply-chain-security)
+
+blockExoticSubdeps: true
+minimumReleaseAge: 4320 # 3 days
 onlyBuiltDependencies:
     - esbuild
     - lefthook
     - sharp
+
+trustPolicy: no-downgrade
+trustPolicyExclude:
+    # Currently triggering "High-risk trust downgrade for "vite@6.4.1" (possible package takeover)
+    # This error happened while installing the dependencies of astro@5.17.3"
+    # unclear why, revisit later and turn this on as viable
+    - "vite@6.4.1"

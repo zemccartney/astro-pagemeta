@@ -9,7 +9,7 @@ import { z } from "astro/zod";
 
 import type { PagemetaOptions } from "./types.ts";
 
-const optionsSchema = z
+const _optionsSchema = z
     .object({
         defaults: z
             .union([
@@ -25,10 +25,36 @@ const optionsSchema = z
             ])
             .optional(),
         includeExternal: z.boolean().optional().default(false),
-        manual: z.boolean().optional().default(false)
+        manual: z.boolean().optional().default(false),
+        mode: z.enum(["auto", "streaming"]).optional().default("auto")
+    })
+    .refine((opts) => !(opts.mode === "streaming" && opts.manual), {
+        message: "`manual` is only valid when mode is 'auto'",
+        path: ["manual"]
     })
     .optional()
     .default({});
+
+type OptionsInput =
+    | {
+          defaults?: ((ctx: APIContext) => PagemetaOptions) | PagemetaOptions;
+          includeExternal?: boolean;
+          manual?: boolean;
+          mode?: "auto";
+      }
+    | {
+          defaults?: ((ctx: APIContext) => PagemetaOptions) | PagemetaOptions;
+          includeExternal?: boolean;
+          mode: "streaming";
+      };
+
+// TODO Explain; accounting for how refine doesn't allow for showing red squiggle from ts
+// if you pass manual w/ mode: "streaming"
+const optionsSchema = _optionsSchema as z.ZodType<
+    z.output<typeof _optionsSchema>,
+    z.ZodTypeDef,
+    OptionsInput | undefined
+>;
 
 const VIRTUAL_CONFIG_ID = "virtual:pagemeta/config";
 const RESOLVED_CONFIG_ID = "\0" + VIRTUAL_CONFIG_ID;
@@ -92,7 +118,7 @@ export default defineIntegration({
                         plugin: configPlugin.plugin
                     });
 
-                    if (!options.manual) {
+                    if (options.mode !== "streaming" && !options.manual) {
                         params.addMiddleware({
                             entrypoint: resolve("./middleware.ts"),
                             order: "post"

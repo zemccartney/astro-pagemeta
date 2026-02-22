@@ -100,6 +100,7 @@ export default defineConfig([
         extends: [astro.configs.recommended, astro.configs["jsx-a11y-strict"]],
         files: ["**/*.astro"],
         rules: {
+            "unicorn/filename-case": ["off"],
             // https://github.com/sindresorhus/eslint-plugin-unicorn/blob/v56.0.1/docs/rules/prefer-module.md
             // accounts for Astro frontmatter not looking like an ES Module
             "unicorn/prefer-module": ["off"]

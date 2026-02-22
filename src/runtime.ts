@@ -3,6 +3,8 @@ import type { Element, Root } from "hast";
 
 import { defineMiddleware } from "astro/middleware";
 import { select } from "hast-util-select";
+import { rehype } from "rehype";
+import rehypeMeta from "rehype-meta";
 import { defaults, routePatterns } from "virtual:pagemeta/config";
 
 import type { LdJson, PagemetaOptions } from "./types.ts";
@@ -86,6 +88,19 @@ export const setPagemeta = (
     };
 };
 
+// TODO explain
+export function rehypeHeadContentsOnly() {
+    // eslint-disable-next-line unicorn/consistent-function-scoping -- prefer consistency with other plugins
+    return (tree: Root) => {
+        const head = select("head", tree);
+        if (!head) return;
+        return {
+            children: head.children,
+            type: "root"
+        };
+    };
+}
+
 function rehypeCustomMeta(meta: Record<string, string>) {
     return (tree: Root) => {
         const head = select("head", tree);
@@ -134,48 +149,11 @@ function rehypeLdJson(ldJson: LdJson | LdJson[]) {
 
 const isHtmlDocument = (html: string) => /^<!doctype\s/i.test(html.trimStart());
 
-export const processPagemeta = async (
-    ctx: Readonly<APIContext>,
-    response: Response
-): Promise<Response> => {
-    if (!isPageRoute(ctx.url.pathname)) {
-        return response;
-    }
-
-    const metadata = resolvePagemeta(ctx);
-
-    if (!metadata) {
-        return response;
-    }
-
-    const html = await response.text();
-
-    /**
-     * Skip partial pages — they render as HTML fragments without a doctype.
-     * rehype parses in document mode by default and would wrap the fragment
-     * in a full document structure (html/head/body), corrupting the output.
-     *
-     * This relies on an internal Astro behavior: Per Claude, "the compiler strips
-     * <!doctype> from all .astro templates during compilation, and the
-     * renderer only re-injects it for non-partial renders (gated on an
-     * internal `partial` flag set by server islands and pages that export
-     * `partial = true`). Because this is not a documented public API, we
-     * should expect it could change without notice in a future Astro
-     * release."
-     *
-     * unsure this explanation is 100% accurate, but at least
-     * lines up with observable behavior
-     * */
-    if (!isHtmlDocument(html)) {
-        return new Response(html, {
-            headers: response.headers,
-            status: response.status
-        });
-    }
-
-    const { rehype } = await import("rehype");
-    const { default: rehypeMeta } = await import("rehype-meta");
-
+export const _getHtmlProcessor = ({
+    metadata
+}: {
+    metadata: PagemetaOptions;
+}) => {
     const { custom, ldJson, ...rehypeMetaOptions } = metadata;
     let processor = rehype().use(rehypeMeta, rehypeMetaOptions);
     if (ldJson) {
@@ -184,17 +162,56 @@ export const processPagemeta = async (
     if (custom && Object.keys(custom).length > 0) {
         processor = processor.use(rehypeCustomMeta, custom);
     }
-    const processed = await processor.process(html);
-
-    return new Response(String(processed), {
-        headers: response.headers,
-        status: response.status
-    });
+    return processor;
 };
 
 export const middleware = () => {
-    return defineMiddleware(async (context, next) => {
+    return defineMiddleware(async (ctx, next) => {
         const response = await next();
-        return processPagemeta(context, response);
+
+        if (!isPageRoute(ctx.url.pathname)) {
+            return response;
+        }
+
+        const metadata = resolvePagemeta(ctx);
+
+        if (!metadata) {
+            return response;
+        }
+
+        const html = await response.text();
+
+        /**
+         * Skip partial pages — they render as HTML fragments without a doctype.
+         * rehype parses in document mode by default and would wrap the fragment
+         * in a full document structure (html/head/body), corrupting the output.
+         *
+         * This relies on an internal Astro behavior: Per Claude, "the compiler strips
+         * <!doctype> from all .astro templates during compilation, and the
+         * renderer only re-injects it for non-partial renders (gated on an
+         * internal `partial` flag set by server islands and pages that export
+         * `partial = true`). Because this is not a documented public API, we
+         * should expect it could change without notice in a future Astro
+         * release."
+         *
+         * unsure this explanation is 100% accurate, but at least
+         * lines up with observable behavior
+         * */
+        if (!isHtmlDocument(html)) {
+            return new Response(html, {
+                headers: response.headers,
+                status: response.status
+            });
+        }
+
+        const processor = _getHtmlProcessor({ metadata });
+        const processed = await processor.process(html);
+
+        console.log({ html, processed });
+
+        return new Response(String(processed), {
+            headers: response.headers,
+            status: response.status
+        });
     });
 };

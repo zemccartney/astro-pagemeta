@@ -70,6 +70,8 @@ if (metadata) {
     // think about the API you want... sensible to limit to rehype-meta-supported-tags
     head = await processor.use(rehypeHeadContentsOnly).process(templateMeta);
 }
+
+// TODO interesting property: this component works with auto mode, too
 ---
 
 <Fragment set:html={head ? String(head) : templateMeta} />

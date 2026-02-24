@@ -34,9 +34,9 @@
     ],
     "scripts": {
         "check": "pnpm lint:fix && pnpm fmt:fix && pnpm typecheck",
-        "deps": "ncu -p pnpm -i --format group --cooldown 3",
-        "fmt": "prettier . --check",
-        "fmt:fix": "prettier . --write",
+        "deps": "ncu -p pnpm -i --format group --cooldown 3d",
+        "fmt": "prettier --check .",
+        "fmt:fix": "prettier --write .",
         "lint": "eslint --flag unstable_native_nodejs_ts_config",
         "lint:debug": "eslint --flag unstable_native_nodejs_ts_config --inspect-config",
         "lint:fix": "eslint --flag unstable_native_nodejs_ts_config --fix",

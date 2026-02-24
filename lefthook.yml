@@ -1,13 +1,16 @@
+glob_matcher: doublestar
+
 pre-commit:
     parallel: true
     commands:
         lint:
-            glob: "*.{ts,astro,json}"
-            run: pnpm lint:fix
+            glob: "**/*.{ts,astro,json}"
+            run: pnpm lint:fix {staged_files}
             stage_fixed: true
         fmt:
-            run: pnpm fmt:fix
+            glob: "**/*.{ts,astro,json,md,yml,yaml}"
+            run: pnpm exec prettier --write {staged_files}
             stage_fixed: true
         typecheck:
-            glob: "*.{ts,astro}"
+            glob: "**/*.{ts,astro}"
             run: pnpm typecheck

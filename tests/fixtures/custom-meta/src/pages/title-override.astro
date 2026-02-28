@@ -1,0 +1,21 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+// rehype-meta computes title from title + separator + name
+// custom.title overrides the computed result directly
+setPagemeta(Astro, {
+    custom: { title: "Exact Title Override" },
+    name: "My Site",
+    title: "Page Title"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+    </head>
+    <body>
+        <p>Custom title overrides rehype-meta computed title</p>
+    </body>
+</html>

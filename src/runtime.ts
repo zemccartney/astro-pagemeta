@@ -105,25 +105,89 @@ export function rehypeHeadContentsOnly() {
     };
 }
 
+// OGP-defined prefixes (https://ogp.me/) that use the `property` attribute
+// on meta tags instead of `name`. Includes `fb:` which is widely used in
+// practice though not in the OGP spec itself.
+const OG_PREFIXES = [
+    "og:",
+    "article:",
+    "book:",
+    "music:",
+    "profile:",
+    "video:",
+    "fb:",
+    "payment:"
+];
+
+const isOgProperty = (key: string) =>
+    OG_PREFIXES.some((prefix) => key.startsWith(prefix));
+
+const CANONICAL_KEY = "link:rel:canonical";
+
 function rehypeCustomMeta(meta: Record<string, string>) {
     return (tree: Root) => {
         const head = select("head", tree);
         if (!head) return;
 
-        for (const [name, content] of Object.entries(meta)) {
+        for (const [key, value] of Object.entries(meta)) {
+            if (key === "title") {
+                const existing = head.children.find(
+                    (node): node is Element =>
+                        node.type === "element" && node.tagName === "title"
+                );
+                if (existing) {
+                    existing.children = [{ type: "text", value }];
+                } else {
+                    head.children.push({
+                        children: [{ type: "text", value }],
+                        properties: {},
+                        tagName: "title",
+                        type: "element"
+                    });
+                }
+                continue;
+            }
+
+            if (key === CANONICAL_KEY) {
+                // rehype-parse normalizes `rel` to a space-separated token
+                // array, so we check for array containment
+                const existing = head.children.find((node): node is Element => {
+                    if (node.type !== "element" || node.tagName !== "link")
+                        return false;
+                    const rel = node.properties["rel"];
+                    return (
+                        (Array.isArray(rel) && rel.includes("canonical")) ||
+                        rel === "canonical"
+                    );
+                });
+                if (existing) {
+                    existing.properties["href"] = value;
+                } else {
+                    head.children.push({
+                        children: [],
+                        properties: { href: value, rel: ["canonical"] },
+                        tagName: "link",
+                        type: "element"
+                    });
+                }
+                continue;
+            }
+
+            const attrKey = isOgProperty(key) ? "property" : "name";
+
             const existing = head.children.find(
                 (node): node is Element =>
                     node.type === "element" &&
                     node.tagName === "meta" &&
-                    node.properties["name"] === name
+                    node.properties[attrKey] === key
             );
 
             if (existing) {
-                existing.properties["content"] = content;
+                existing.properties["content"] = value;
             } else {
                 head.children.push({
                     children: [],
-                    properties: { content, name },
+                    properties: { [attrKey]: key, content: value },
                     tagName: "meta",
                     type: "element"
                 });

@@ -1,0 +1,19 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+// Set title via custom without using rehype-meta's title option
+setPagemeta(Astro, {
+    custom: { title: "Title From Custom Only" },
+    description: "Has a description but title only via custom"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+    </head>
+    <body>
+        <p>Title created by custom, not rehype-meta</p>
+    </body>
+</html>

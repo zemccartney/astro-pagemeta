@@ -1,0 +1,19 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+// Set canonical without needing origin + pathname
+setPagemeta(Astro, {
+    custom: { "link:rel:canonical": "https://example.com/my-page" },
+    title: "Page With Canonical"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+    </head>
+    <body>
+        <p>Canonical link created without origin/pathname</p>
+    </body>
+</html>

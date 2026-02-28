@@ -1,0 +1,29 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    custom: {
+        description: "custom description",
+        "og:image:alt": "custom alt",
+        "og:image:height": "99999"
+    },
+    description: "rehype-meta description",
+    image: {
+        alt: "alt text",
+        height: "630",
+        url: "/path/to/my/image.png",
+        width: "1200"
+    },
+    og: true
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+    </head>
+    <body>
+        <p>Basic custom meta injection</p>
+    </body>
+</html>

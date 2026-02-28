@@ -4,10 +4,10 @@ import testAdapter from "@inox-tools/astro-tests/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import pagemeta from "../../src/index.ts";
-import { extractLdJson } from "../utils/html-parse.ts";
+import { extractJsonLd } from "../utils/html-parse.ts";
 import { isolatedFixture } from "../utils/isolated-fixture.ts";
 
-const { cleanup, fixture } = await isolatedFixture("ld-json", {
+const { cleanup, fixture } = await isolatedFixture("json-ld", {
     adapter: testAdapter(),
     output: "server"
 });
@@ -18,7 +18,7 @@ const config = {
 
 afterAll(() => cleanup());
 
-describe("ld-json / SSR / dev server", () => {
+describe("json-ld / SSR / dev server", () => {
     let devServer: Awaited<ReturnType<typeof fixture.startDevServer>>;
 
     beforeAll(async () => {
@@ -32,9 +32,9 @@ describe("ld-json / SSR / dev server", () => {
     test("injects single LD-JSON script tag with auto @context", async () => {
         const response = await fixture.fetch("/");
         const html = await response.text();
-        const ldJson = extractLdJson(html);
+        const jsonLd = extractJsonLd(html);
 
-        expect(ldJson).toEqual([
+        expect(jsonLd).toEqual([
             {
                 "@context": "https://schema.org",
                 "@type": "WebPage",
@@ -46,9 +46,9 @@ describe("ld-json / SSR / dev server", () => {
     test("wraps array in @graph with single script tag", async () => {
         const response = await fixture.fetch("/array");
         const html = await response.text();
-        const ldJson = extractLdJson(html);
+        const jsonLd = extractJsonLd(html);
 
-        expect(ldJson).toEqual([
+        expect(jsonLd).toEqual([
             {
                 "@context": "https://schema.org",
                 "@graph": [
@@ -60,11 +60,11 @@ describe("ld-json / SSR / dev server", () => {
     });
 
     test("template LD-JSON and injected LD-JSON both preserved", async () => {
-        const response = await fixture.fetch("/template-ld-json");
+        const response = await fixture.fetch("/template-json-ld");
         const html = await response.text();
-        const ldJson = extractLdJson(html);
+        const jsonLd = extractJsonLd(html);
 
-        expect(ldJson).toEqual([
+        expect(jsonLd).toEqual([
             {
                 "@context": "https://schema.org",
                 "@type": "BreadcrumbList",
@@ -79,7 +79,7 @@ describe("ld-json / SSR / dev server", () => {
     });
 });
 
-describe("ld-json / SSR / build", () => {
+describe("json-ld / SSR / build", () => {
     let app: TestApp;
 
     beforeAll(async () => {
@@ -90,9 +90,9 @@ describe("ld-json / SSR / build", () => {
     test("injects single LD-JSON script tag with auto @context", async () => {
         const response = await app.render(new Request("https://example.com/"));
         const html = await response.text();
-        const ldJson = extractLdJson(html);
+        const jsonLd = extractJsonLd(html);
 
-        expect(ldJson).toEqual([
+        expect(jsonLd).toEqual([
             {
                 "@context": "https://schema.org",
                 "@type": "WebPage",
@@ -106,9 +106,9 @@ describe("ld-json / SSR / build", () => {
             new Request("https://example.com/array")
         );
         const html = await response.text();
-        const ldJson = extractLdJson(html);
+        const jsonLd = extractJsonLd(html);
 
-        expect(ldJson).toEqual([
+        expect(jsonLd).toEqual([
             {
                 "@context": "https://schema.org",
                 "@graph": [
@@ -121,12 +121,12 @@ describe("ld-json / SSR / build", () => {
 
     test("template LD-JSON and injected LD-JSON both preserved", async () => {
         const response = await app.render(
-            new Request("https://example.com/template-ld-json")
+            new Request("https://example.com/template-json-ld")
         );
         const html = await response.text();
-        const ldJson = extractLdJson(html);
+        const jsonLd = extractJsonLd(html);
 
-        expect(ldJson).toEqual([
+        expect(jsonLd).toEqual([
             {
                 "@context": "https://schema.org",
                 "@type": "BreadcrumbList",

@@ -1,10 +1,10 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import pagemeta from "../../src/index.ts";
-import { extractLdJson } from "../utils/html-parse.ts";
+import { extractJsonLd } from "../utils/html-parse.ts";
 import { isolatedFixture } from "../utils/isolated-fixture.ts";
 
-const { cleanup, fixture } = await isolatedFixture("ld-json");
+const { cleanup, fixture } = await isolatedFixture("json-ld");
 
 const config = {
     integrations: [pagemeta()]
@@ -12,7 +12,7 @@ const config = {
 
 afterAll(() => cleanup());
 
-describe("ld-json / static / dev server", () => {
+describe("json-ld / static / dev server", () => {
     let devServer: Awaited<ReturnType<typeof fixture.startDevServer>>;
 
     beforeAll(async () => {
@@ -26,9 +26,9 @@ describe("ld-json / static / dev server", () => {
     test("injects single LD-JSON script tag with auto @context", async () => {
         const response = await fixture.fetch("/");
         const html = await response.text();
-        const ldJson = extractLdJson(html);
+        const jsonLd = extractJsonLd(html);
 
-        expect(ldJson).toEqual([
+        expect(jsonLd).toEqual([
             {
                 "@context": "https://schema.org",
                 "@type": "WebPage",
@@ -40,9 +40,9 @@ describe("ld-json / static / dev server", () => {
     test("wraps array in @graph with single script tag", async () => {
         const response = await fixture.fetch("/array");
         const html = await response.text();
-        const ldJson = extractLdJson(html);
+        const jsonLd = extractJsonLd(html);
 
-        expect(ldJson).toEqual([
+        expect(jsonLd).toEqual([
             {
                 "@context": "https://schema.org",
                 "@graph": [
@@ -54,11 +54,11 @@ describe("ld-json / static / dev server", () => {
     });
 
     test("template LD-JSON and injected LD-JSON both preserved", async () => {
-        const response = await fixture.fetch("/template-ld-json");
+        const response = await fixture.fetch("/template-json-ld");
         const html = await response.text();
-        const ldJson = extractLdJson(html);
+        const jsonLd = extractJsonLd(html);
 
-        expect(ldJson).toEqual([
+        expect(jsonLd).toEqual([
             {
                 "@context": "https://schema.org",
                 "@type": "BreadcrumbList",
@@ -73,7 +73,7 @@ describe("ld-json / static / dev server", () => {
     });
 });
 
-describe("ld-json / static / build", () => {
+describe("json-ld / static / build", () => {
     beforeAll(async () => {
         await fixture.build(config);
     });
@@ -81,9 +81,9 @@ describe("ld-json / static / build", () => {
     test("injects single LD-JSON script tag with auto @context", async () => {
         const html = await fixture.readFile("/index.html");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
-        const ldJson = extractLdJson(html!);
+        const jsonLd = extractJsonLd(html!);
 
-        expect(ldJson).toEqual([
+        expect(jsonLd).toEqual([
             {
                 "@context": "https://schema.org",
                 "@type": "WebPage",
@@ -95,9 +95,9 @@ describe("ld-json / static / build", () => {
     test("wraps array in @graph with single script tag", async () => {
         const html = await fixture.readFile("/array/index.html");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
-        const ldJson = extractLdJson(html!);
+        const jsonLd = extractJsonLd(html!);
 
-        expect(ldJson).toEqual([
+        expect(jsonLd).toEqual([
             {
                 "@context": "https://schema.org",
                 "@graph": [
@@ -109,11 +109,11 @@ describe("ld-json / static / build", () => {
     });
 
     test("template LD-JSON and injected LD-JSON both preserved", async () => {
-        const html = await fixture.readFile("/template-ld-json/index.html");
+        const html = await fixture.readFile("/template-json-ld/index.html");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
-        const ldJson = extractLdJson(html!);
+        const jsonLd = extractJsonLd(html!);
 
-        expect(ldJson).toEqual([
+        expect(jsonLd).toEqual([
             {
                 "@context": "https://schema.org",
                 "@type": "BreadcrumbList",

@@ -1,10 +1,9 @@
 import type { Options } from "rehype-meta";
+import type { Thing } from "schema-dts";
 
-export type LdJson = Record<string, unknown> & {
-    "@type"?: string;
-};
+export type JsonLd = Thing;
 
 export interface PagemetaOptions extends Options {
     custom?: Record<string, string>;
-    ldJson?: LdJson | LdJson[];
+    jsonLd?: JsonLd | JsonLd[];
 }

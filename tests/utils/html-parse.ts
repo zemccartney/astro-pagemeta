@@ -43,7 +43,7 @@ export const isFragment = (html: string): boolean => {
     return !tree.children.some((node) => node.type === "doctype");
 };
 
-export const extractLdJson = (html: string): unknown[] => {
+export const extractJsonLd = (html: string): unknown[] => {
     const tree = parseHtml(html);
 
     return selectAll('head > script[type="application/ld+json"]', tree)

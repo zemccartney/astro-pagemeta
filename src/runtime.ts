@@ -7,7 +7,7 @@ import { rehype } from "rehype";
 import rehypeMeta from "rehype-meta";
 import { defaults, routePatterns } from "virtual:pagemeta/config";
 
-import type { LdJson, PagemetaOptions } from "./types.ts";
+import type { JsonLd, PagemetaOptions } from "./types.ts";
 
 const LOCALS_KEY = Symbol("pagemeta");
 
@@ -196,11 +196,11 @@ function rehypeCustomMeta(meta: Record<string, string>) {
     };
 }
 
-function rehypeLdJson(ldJson: LdJson | LdJson[]) {
+function rehypeJsonLd(jsonLd: JsonLd | JsonLd[]) {
     const document =
-        Array.isArray(ldJson) ?
-            { "@context": "https://schema.org", "@graph": ldJson }
-        :   { "@context": "https://schema.org", ...ldJson };
+        Array.isArray(jsonLd) ?
+            { "@context": "https://schema.org", "@graph": jsonLd }
+        :   Object.assign({ "@context": "https://schema.org" }, jsonLd);
 
     return (tree: Root) => {
         const head = select("head", tree);
@@ -222,10 +222,10 @@ export const _getHtmlProcessor = ({
 }: {
     metadata: PagemetaOptions;
 }) => {
-    const { custom, ldJson, ...rehypeMetaOptions } = metadata;
+    const { custom, jsonLd, ...rehypeMetaOptions } = metadata;
     let processor = rehype().use(rehypeMeta, rehypeMetaOptions);
-    if (ldJson) {
-        processor = processor.use(rehypeLdJson, ldJson);
+    if (jsonLd) {
+        processor = processor.use(rehypeJsonLd, jsonLd);
     }
     if (custom && Object.keys(custom).length > 0) {
         processor = processor.use(rehypeCustomMeta, custom);

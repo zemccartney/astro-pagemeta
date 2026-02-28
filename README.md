@@ -452,18 +452,32 @@ This means if a template has `<title>Foo</title>`:
 
 This contrasts with how integration defaults and `setPagemeta` interact with each other, where the merge hierarchy (`setPagemeta > defaults > template`) allows full override. The gap is at the bottom of the stack: you can override template tags with new values, but you can't null them out.
 
-### LD-JSON is limited — consider a builder approach
+### `custom` is a post-processing override layer, not just an "extra tags" field
 
-The current `ldJson` option accepts raw Schema.org objects. Users own the schema entirely — the integration only handles `@context` wrapping and injection. This is intentional for v1 but limited: users have to know the Schema.org vocabulary, there's no type guidance for specific schema types, and building nested structures (offers, ratings, addresses) is tedious and error-prone.
+The `custom` option in `setPagemeta` runs _after_ rehype-meta has done its work. This means it can override anything in the final `<head>` output — not just add tags that rehype-meta doesn't know about, but replace tags that rehype-meta already set.
 
-A builder approach like `@tanstack/meta`'s `jsonLd` namespace ([TanStack/router#6277](https://github.com/TanStack/router/pull/6277)) would be a better DX. Their design:
+This matters because rehype-meta has a dependent-keys design: many output tags are derived from combinations of input properties. `og: true` gates all OG tags. The `<title>` element is computed from `title + separator + name`. The canonical `<link>` is derived from `origin + pathname`. If you want fine-grained control — e.g., override just `og:image:alt` without touching `og:image`, or set an exact `<title>` without it being concatenated with a site name — rehype-meta doesn't offer that.
+
+`custom` solves this by operating on the rendered output:
+
+- **Meta tags with `name`**: `custom: { robots: "noindex" }` → finds/creates `<meta name="robots">`
+- **Meta tags with `property`** (OG): `custom: { "og:image:alt": "..." }` → finds/creates `<meta property="og:image:alt">`. Keys starting with OGP-defined prefixes (`og:`, `article:`, `book:`, `music:`, `profile:`, `video:`, `fb:`, `payment:`) use the `property` attribute per the [Open Graph Protocol](https://ogp.me/).
+- **Title**: `custom: { title: "Exact Title" }` → replaces (or creates) the `<title>` element directly, bypassing rehype-meta's title+separator+name computation.
+- **Canonical link**: `custom: { "link:rel:canonical": "https://..." }` → replaces (or creates) the `<link rel="canonical">` element, without needing `origin` + `pathname`.
+
+The mental model: rehype-meta options describe _inputs_ to a tag-generation process. `custom` describes the _outputs_ you want, overriding whatever that process produced.
+
+### JSON-LD typing and future builder approach
+
+The `jsonLd` option is typed with `schema-dts` (`Thing`), which provides autocomplete and type-checking for all Schema.org types. Users get intellisense for `@type` values and their associated properties out of the box. The integration handles `@context` wrapping and injection — users just supply the schema object(s).
+
+A builder approach like `@tanstack/meta`'s `jsonLd` namespace ([TanStack/router#6277](https://github.com/TanStack/router/pull/6277)) could improve DX further. Their design:
 
 - A `create()` low-level builder that handles `@context`/`@graph` wrapping (what we do now internally)
 - Type-safe builders per schema type: `jsonLd.product({ name, price, currency })`, `jsonLd.article({ headline, author, datePublished })`, `jsonLd.breadcrumbs([...])`, etc.
 - Each builder accepts a focused config object with only the relevant fields, maps it to the full Schema.org structure internally, and calls `create()` under the hood
-- A `Thing` base interface that all schema types extend, providing `@type`, `name`, `url`, `image`, etc.
 
-If we go this direction, the current `ldJson` field on `PagemetaOptions` could stay as the raw escape hatch, and builders could be a separate export (e.g. `@grepco/astro-pagemeta/json-ld`) that produces the same shape. The builders compose with `setPagemeta` — they just return objects that get passed as `ldJson`.
+If we go this direction, the current `jsonLd` field on `PagemetaOptions` stays as the raw option, and builders could be a separate export (e.g. `@grepco/astro-pagemeta/json-ld`) that produces the same shape. The builders compose with `setPagemeta` — they just return objects that get passed as `jsonLd`.
 
 ### Integration-injected pages and `includeExternal`
 

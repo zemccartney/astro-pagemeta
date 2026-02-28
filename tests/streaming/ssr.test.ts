@@ -4,21 +4,30 @@ import testAdapter from "@inox-tools/astro-tests/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import pagemeta from "../../src/index.ts";
-import { extractHeadElements, extractMeta } from "../utils/html-parse.ts";
+import {
+    extractHeadElements,
+    extractMeta,
+    query
+} from "../utils/html-parse.ts";
 import { isolatedFixture } from "../utils/isolated-fixture.ts";
 
-const { cleanup, fixture } = await isolatedFixture("basic", {
+const { cleanup, fixture } = await isolatedFixture("streaming", {
     adapter: testAdapter(),
     output: "server"
 });
 
 const config = {
-    integrations: [pagemeta()]
+    integrations: [
+        pagemeta({
+            defaults: { author: "Default Author" },
+            mode: "streaming"
+        })
+    ]
 };
 
 afterAll(() => cleanup());
 
-describe("SSR / dev server", () => {
+describe("streaming / SSR / dev server", () => {
     let devServer: Awaited<ReturnType<typeof fixture.startDevServer>>;
 
     beforeAll(async () => {
@@ -29,8 +38,51 @@ describe("SSR / dev server", () => {
         await devServer.stop();
     });
 
+    test("page without component receives no injection even with defaults", async () => {
+        const response = await fixture.fetch("/no-component");
+        const html = await response.text();
+        const headMeta = extractMeta(html);
+
+        // Only the hardcoded charset — no title, description, or author
+        // despite setPagemeta() call and configured defaults
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" }
+        ]);
+    });
+
+    test("integration defaults apply via the component", async () => {
+        const response = await fixture.fetch("/defaults-only");
+        const html = await response.text();
+        const headMeta = extractMeta(html);
+
+        // charset from slot children + author from defaults
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            {
+                properties: { content: "Default Author", name: "author" },
+                tag: "meta"
+            }
+        ]);
+    });
+
+    test("empty component renders without breaking, sibling head elements survive", async () => {
+        const response = await fixture.fetch("/no-children");
+        const html = await response.text();
+        const headMeta = extractMeta(html);
+
+        // The hardcoded charset outside the component survives, and
+        // defaults still apply through the empty component
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            {
+                properties: { content: "Default Author", name: "author" },
+                tag: "meta"
+            }
+        ]);
+    });
+
     test("injects title and description meta tags", async () => {
-        const response = await fixture.fetch("/");
+        const response = await fixture.fetch("/basic");
         const html = await response.text();
         const headMeta = extractMeta(html);
 
@@ -43,17 +95,11 @@ describe("SSR / dev server", () => {
                     name: "description"
                 },
                 tag: "meta"
+            },
+            {
+                properties: { content: "Default Author", name: "author" },
+                tag: "meta"
             }
-        ]);
-    });
-
-    test("page without setPagemeta() passes through unmodified", async () => {
-        const response = await fixture.fetch("/no-meta");
-        const html = await response.text();
-        const headMeta = extractMeta(html);
-
-        expect(headMeta).toEqual([
-            { properties: { charSet: "utf-8" }, tag: "meta" }
         ]);
     });
 
@@ -125,105 +171,53 @@ describe("SSR / dev server", () => {
         ]);
     });
 
-    test("multiple setPagemeta calls merge metadata", async () => {
-        const response = await fixture.fetch("/override");
+    test("non-head-valid children are filtered out", async () => {
+        const response = await fixture.fetch("/non-head-tags");
         const html = await response.text();
         const headMeta = extractMeta(html);
 
+        // Only head-valid tags survive — <p> and <div> are filtered by
+        // rehype's document-mode parser (moved to <body>, then stripped
+        // by rehypeHeadContentsOnly)
         expect(headMeta).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
-            {
-                properties: { text: "Overridden Title - Site Name" },
-                tag: "title"
-            },
+            { properties: { text: "Test Page Title" }, tag: "title" },
             {
                 properties: {
-                    content: "Overridden description",
+                    content: "Test page description",
                     name: "description"
                 },
                 tag: "meta"
             },
             {
-                properties: { content: "Initial Author", name: "author" },
+                properties: { content: "Default Author", name: "author" },
                 tag: "meta"
             }
         ]);
     });
 
-    test("setPagemeta overrides template title and preserves other template meta", async () => {
-        const response = await fixture.fetch("/template-setpagemeta");
-        const html = await response.text();
-        const headMeta = extractMeta(html);
-
-        // setPagemeta overrides template title, adds description
-        // Template's generator meta is preserved
-        expect(headMeta).toEqual([
-            { properties: { charSet: "utf-8" }, tag: "meta" },
-            {
-                properties: { content: "Astro", name: "generator" },
-                tag: "meta"
-            },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
-            {
-                properties: {
-                    content: "Description from setPagemeta",
-                    name: "description"
-                },
-                tag: "meta"
-            }
-        ]);
-    });
-
-    test("rehype-meta creates head element if missing", async () => {
-        const response = await fixture.fetch("/no-head");
-        const html = await response.text();
-        const headMeta = extractMeta(html);
-
-        expect(headMeta).toEqual([
-            { properties: { text: "Title for Headless Page" }, tag: "title" },
-            {
-                properties: {
-                    content: "Description for headless page",
-                    name: "description"
-                },
-                tag: "meta"
-            }
-        ]);
-    });
-
-    // Template metadata that rehype-meta manages (like <title>) cannot be
-    // removed via setPagemeta — only replaced with a truthy value. Even
-    // explicitly setting title to false doesn't remove the template's
-    // <title>. There's no way to negate a template tag short of opting out
-    // entirely with setPagemeta(Astro, false), which skips everything.
-    test("setting title: false does not remove template title", async () => {
-        const response = await fixture.fetch("/template-title-only");
-        const html = await response.text();
-        const headMeta = extractMeta(html);
-
-        expect(headMeta).toEqual([
-            { properties: { charSet: "utf-8" }, tag: "meta" },
-            // Template title survives despite setPagemeta({ title: false })
-            { properties: { text: "Template Title" }, tag: "title" },
-            {
-                properties: {
-                    content: "Description from setPagemeta",
-                    name: "description"
-                },
-                tag: "meta"
-            }
-        ]);
-    });
-
-    test("Astro-injected styles survive rehype processing", async () => {
+    test("Astro-injected styles coexist with component output", async () => {
         const response = await fixture.fetch("/with-styled-component");
         const html = await response.text();
 
-        // Full head contents: Astro-injected style + Vite dev scripts
-        // coexist with middleware-injected meta tags
+        // Full head contents: component-rendered meta tags appear first
+        // (at the component's position in the template), followed by
+        // Astro-injected style + Vite dev scripts
         const headElements = extractHeadElements(html);
         expect(headElements).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
+            { properties: {}, tag: "title", textContent: "Styled Page" },
+            {
+                properties: {
+                    content: "Page with styled component",
+                    name: "description"
+                },
+                tag: "meta"
+            },
+            {
+                properties: { content: "Default Author", name: "author" },
+                tag: "meta"
+            },
             {
                 properties: {
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- vitest asymmetric matcher
@@ -246,20 +240,38 @@ describe("SSR / dev server", () => {
                     type: "module"
                 },
                 tag: "script"
-            },
-            { properties: {}, tag: "title", textContent: "Styled Page" },
+            }
+        ]);
+    });
+
+    test("component outside <head> renders meta tags in body, not head", async () => {
+        const response = await fixture.fetch("/outside-head");
+        const html = await response.text();
+
+        // No meta tags in <head> — the component's output never reaches it
+        expect(extractMeta(html)).toEqual([]);
+
+        // The tags render in <body> instead — structurally wrong,
+        // invisible to crawlers in a streaming context
+        expect(query(html, "body > title, body > meta")).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            { properties: { text: "Test Page Title" }, tag: "title" },
             {
                 properties: {
-                    content: "Page with styled component",
+                    content: "Test page description",
                     name: "description"
                 },
+                tag: "meta"
+            },
+            {
+                properties: { content: "Default Author", name: "author" },
                 tag: "meta"
             }
         ]);
     });
 });
 
-describe("SSR / build", () => {
+describe("streaming / SSR / build", () => {
     let app: TestApp;
 
     beforeAll(async () => {
@@ -267,8 +279,56 @@ describe("SSR / build", () => {
         app = await fixture.loadTestAdapterApp();
     });
 
+    test("page without component receives no injection even with defaults", async () => {
+        const response = await app.render(
+            new Request("https://example.com/no-component")
+        );
+        const html = await response.text();
+        const headMeta = extractMeta(html);
+
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" }
+        ]);
+    });
+
+    test("integration defaults apply via the component", async () => {
+        const response = await app.render(
+            new Request("https://example.com/defaults-only")
+        );
+        const html = await response.text();
+        const headMeta = extractMeta(html);
+
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            {
+                properties: { content: "Default Author", name: "author" },
+                tag: "meta"
+            }
+        ]);
+    });
+
+    test("empty component renders without breaking, sibling head elements survive", async () => {
+        const response = await app.render(
+            new Request("https://example.com/no-children")
+        );
+        const html = await response.text();
+        const headMeta = extractMeta(html);
+
+        // The hardcoded charset outside the component survives, and
+        // defaults still apply through the empty component
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            {
+                properties: { content: "Default Author", name: "author" },
+                tag: "meta"
+            }
+        ]);
+    });
+
     test("injects title and description meta tags", async () => {
-        const response = await app.render(new Request("https://example.com/"));
+        const response = await app.render(
+            new Request("https://example.com/basic")
+        );
         const html = await response.text();
         const headMeta = extractMeta(html);
 
@@ -281,19 +341,11 @@ describe("SSR / build", () => {
                     name: "description"
                 },
                 tag: "meta"
+            },
+            {
+                properties: { content: "Default Author", name: "author" },
+                tag: "meta"
             }
-        ]);
-    });
-
-    test("page without setPagemeta() passes through unmodified", async () => {
-        const response = await app.render(
-            new Request("https://example.com/no-meta")
-        );
-        const html = await response.text();
-        const headMeta = extractMeta(html);
-
-        expect(headMeta).toEqual([
-            { properties: { charSet: "utf-8" }, tag: "meta" }
         ]);
     });
 
@@ -367,109 +419,53 @@ describe("SSR / build", () => {
         ]);
     });
 
-    test("multiple setPagemeta calls merge metadata", async () => {
+    test("non-head-valid children are filtered out", async () => {
         const response = await app.render(
-            new Request("https://example.com/override")
+            new Request("https://example.com/non-head-tags")
         );
         const html = await response.text();
         const headMeta = extractMeta(html);
 
         expect(headMeta).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
-            {
-                properties: { text: "Overridden Title - Site Name" },
-                tag: "title"
-            },
+            { properties: { text: "Test Page Title" }, tag: "title" },
             {
                 properties: {
-                    content: "Overridden description",
+                    content: "Test page description",
                     name: "description"
                 },
                 tag: "meta"
             },
             {
-                properties: { content: "Initial Author", name: "author" },
+                properties: { content: "Default Author", name: "author" },
                 tag: "meta"
             }
         ]);
     });
 
-    test("setPagemeta overrides template title and preserves other template meta", async () => {
-        const response = await app.render(
-            new Request("https://example.com/template-setpagemeta")
-        );
-        const html = await response.text();
-        const headMeta = extractMeta(html);
-
-        // setPagemeta overrides template title, adds description
-        // Template's generator meta is preserved
-        expect(headMeta).toEqual([
-            { properties: { charSet: "utf-8" }, tag: "meta" },
-            {
-                properties: { content: "Astro", name: "generator" },
-                tag: "meta"
-            },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
-            {
-                properties: {
-                    content: "Description from setPagemeta",
-                    name: "description"
-                },
-                tag: "meta"
-            }
-        ]);
-    });
-
-    test("rehype-meta creates head element if missing", async () => {
-        const response = await app.render(
-            new Request("https://example.com/no-head")
-        );
-        const html = await response.text();
-        const headMeta = extractMeta(html);
-
-        expect(headMeta).toEqual([
-            { properties: { text: "Title for Headless Page" }, tag: "title" },
-            {
-                properties: {
-                    content: "Description for headless page",
-                    name: "description"
-                },
-                tag: "meta"
-            }
-        ]);
-    });
-
-    test("setting title: false does not remove template title", async () => {
-        const response = await app.render(
-            new Request("https://example.com/template-title-only")
-        );
-        const html = await response.text();
-        const headMeta = extractMeta(html);
-
-        expect(headMeta).toEqual([
-            { properties: { charSet: "utf-8" }, tag: "meta" },
-            { properties: { text: "Template Title" }, tag: "title" },
-            {
-                properties: {
-                    content: "Description from setPagemeta",
-                    name: "description"
-                },
-                tag: "meta"
-            }
-        ]);
-    });
-
-    test("Astro-injected styles survive rehype processing", async () => {
+    test("Astro-injected styles coexist with component output", async () => {
         const response = await app.render(
             new Request("https://example.com/with-styled-component")
         );
         const html = await response.text();
 
-        // Full head contents: Astro-injected inline style coexists
-        // with middleware-injected meta tags (no Vite scripts in build)
+        // Full head contents: component-rendered meta tags first,
+        // Astro-injected inline style last (no Vite scripts in build)
         const headElements = extractHeadElements(html);
         expect(headElements).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
+            { properties: {}, tag: "title", textContent: "Styled Page" },
+            {
+                properties: {
+                    content: "Page with styled component",
+                    name: "description"
+                },
+                tag: "meta"
+            },
+            {
+                properties: { content: "Default Author", name: "author" },
+                tag: "meta"
+            },
             {
                 properties: {},
                 tag: "style",
@@ -477,13 +473,32 @@ describe("SSR / build", () => {
                 textContent: expect.stringMatching(
                     /^\.styled\[data-astro-cid-\w+\]\{color:red\}\n?$/
                 )
-            },
-            { properties: {}, tag: "title", textContent: "Styled Page" },
+            }
+        ]);
+    });
+
+    test("component outside <head> renders meta tags in body, not head", async () => {
+        const response = await app.render(
+            new Request("https://example.com/outside-head")
+        );
+        const html = await response.text();
+
+        // No meta tags in <head>
+        expect(extractMeta(html)).toEqual([]);
+
+        // The tags render in <body> instead
+        expect(query(html, "body > title, body > meta")).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            { properties: { text: "Test Page Title" }, tag: "title" },
             {
                 properties: {
-                    content: "Page with styled component",
+                    content: "Test page description",
                     name: "description"
                 },
+                tag: "meta"
+            },
+            {
+                properties: { content: "Default Author", name: "author" },
                 tag: "meta"
             }
         ]);

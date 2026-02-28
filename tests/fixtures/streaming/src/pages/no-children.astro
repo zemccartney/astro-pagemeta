@@ -1,0 +1,17 @@
+---
+import Pagemeta from "@grepco/astro-pagemeta/Pagemeta";
+
+// Self-closing component: no slot content, no setPagemeta.
+// Hardcoded head elements outside the component should survive.
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <Pagemeta />
+    </head>
+    <body>
+        <p>Page with empty Pagemeta component</p>
+    </body>
+</html>

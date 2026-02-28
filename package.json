@@ -29,6 +29,7 @@
     },
     "files": [
         "dist",
+        "src/Pagemeta.astro",
         "src/runtime.ts",
         "src/virtual.d.ts"
     ],
@@ -40,6 +41,7 @@
         "lint": "eslint --flag unstable_native_nodejs_ts_config",
         "lint:debug": "eslint --flag unstable_native_nodejs_ts_config --inspect-config",
         "lint:fix": "eslint --flag unstable_native_nodejs_ts_config --fix",
+        "prepare": "git rev-parse --git-dir > /dev/null 2>&1 && lefthook install || true",
         "test": "vitest --run",
         "typecheck": "tsc --noEmit"
     },

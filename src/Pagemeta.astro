@@ -1,54 +1,38 @@
 ---
 /*
-Notes: hugely helpful https://angelika.me/2025/03/16/implications-of-astro-html-streaming/
-*/
-
-/*
-TESTS
-
-- what if no user input? / no children
-- what if no resolved meta?
-- test in-page and nested layouts
-*/
-
-/*
-WHY?
-
-- rehype-parse in fragment mode appears to open head elements i.e. <head><meta></head> seems
-to turn to <meta><head> in its internal representation?
-- rehype-meta only acts on documents, adds head element
-
-<head> must be static in template to not break astro's asset insertion
-
-
-```ts
-import { rehype } from "rehype";
-import rehypeMeta from "rehype-meta";
-
-const processed = await rehype()
-    .data({ settings: { fragment: true } })
-    .use(rehypeMeta, {
-        title: "zzz"
-    })
-    .process(
-        `<meta charset="UTF-8"><meta content="width=device-width" name="viewport"><title>Streaming demo</title>`
-    );
-
-console.log(processed.toString());
-```
-
-Yields:
-
-```html
-    <meta charset="UTF-8"><meta content="width=device-width" name="viewport"><title>Streaming demo</title><head>
-    <title>zzz</title>
-    </head>
-```
-
-As we can see, rehype-meta appends a new "document" after fragment input, does not override matched tags
-*/
-
-// TODO relative import ok? Still resolves correctly when imported by user?
+ * Streaming-compatible meta tag renderer. Renders inside a static <head>
+ * element, preserving Astro's HTML streaming.
+ *
+ * Reuses the same rehype pipeline as the auto-mode middleware. Slot children
+ * (template meta tags) are processed through rehype-meta, which handles
+ * deduplication within the slot scope — e.g., a template <title> is
+ * replaced if setPagemeta() sets a title.
+ *
+ * Requirements:
+ * - Must be inside a static <head> element (Astro needs it for asset injection)
+ * - Must be declared in every layout that has its own <head>
+ *
+ * Why rehypeHeadContentsOnly instead of rehype's fragment mode:
+ * rehype-meta only operates on documents (it looks for a <head> element).
+ * In fragment mode, rehype-parse opens head elements incorrectly — given
+ * `<meta charset="UTF-8"><title>Demo</title>`, rehype-meta appends a new
+ * <head> after the fragment input rather than modifying matched tags:
+ *
+ *   rehype()
+ *     .data({ settings: { fragment: true } })
+ *     .use(rehypeMeta, { title: "Override" })
+ *     .process('<meta charset="UTF-8"><title>Demo</title>')
+ *
+ *   // Yields:
+ *   // <meta charset="UTF-8"><title>Demo</title><head><title>Override</title></head>
+ *
+ * So we process in document mode (rehype wraps input in <html><head>...</head></html>),
+ * let rehype-meta operate normally on the <head>, then strip the wrapper with
+ * rehypeHeadContentsOnly to get just the head children for inline rendering.
+ *
+ * For a hugely helpful resource on Astro's streaming behavior, especially how slot rendering
+ * can break Astro's styles injection: https://angelika.me/2025/03/16/implications-of-astro-html-streaming/
+ */
 import {
     _getHtmlProcessor,
     rehypeHeadContentsOnly,
@@ -56,22 +40,14 @@ import {
 } from "./runtime";
 
 const metadata = resolvePagemeta(Astro);
-const templateMeta = await Astro.slots.render("default");
+const templateMeta =
+    Astro.slots.has("default") ? await Astro.slots.render("default") : "";
 
 let head;
 if (metadata) {
-    // TODO how does minification fit in here? How does minification work in SSR, if at all? doesn't?
-    const processor = _getHtmlProcessor({
-        metadata
-    });
-
-    // TODO dummy, rehype-meta works only on fragments, opens head elements
-    // useful finding, that can inject HTML directly
-    // think about the API you want... sensible to limit to rehype-meta-supported-tags
+    const processor = _getHtmlProcessor({ metadata });
     head = await processor.use(rehypeHeadContentsOnly).process(templateMeta);
 }
-
-// TODO interesting property: this component works with auto mode, too
 ---
 
 <Fragment set:html={head ? String(head) : templateMeta} />

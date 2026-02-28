@@ -88,7 +88,11 @@ export const setPagemeta = (
     };
 };
 
-// TODO explain
+/**
+ * Rehype plugin that extracts the children of the `<head>` element,
+ * discarding the document wrapper. Used by the `<Pagemeta>` component
+ * to produce inline head content from rehype-meta's document-mode output.
+ */
 export function rehypeHeadContentsOnly() {
     // eslint-disable-next-line unicorn/consistent-function-scoping -- prefer consistency with other plugins
     return (tree: Root) => {
@@ -206,8 +210,6 @@ export const middleware = () => {
 
         const processor = _getHtmlProcessor({ metadata });
         const processed = await processor.process(html);
-
-        console.log({ html, processed });
 
         return new Response(String(processed), {
             headers: response.headers,

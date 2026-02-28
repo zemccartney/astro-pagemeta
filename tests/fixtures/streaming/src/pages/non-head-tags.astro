@@ -1,0 +1,23 @@
+---
+import Pagemeta from "@grepco/astro-pagemeta/Pagemeta";
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    description: "Test page description",
+    title: "Test Page Title"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <Pagemeta>
+            <meta charset="utf-8" />
+            <p>This paragraph is not valid in head</p>
+            <div>Neither is this div</div>
+        </Pagemeta>
+    </head>
+    <body>
+        <p>Page testing non-head-valid children</p>
+    </body>
+</html>

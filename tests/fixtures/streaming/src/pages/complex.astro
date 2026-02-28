@@ -1,0 +1,32 @@
+---
+import Pagemeta from "@grepco/astro-pagemeta/Pagemeta";
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    author: "Jane Developer",
+    authorTwitter: "@janedev",
+    description:
+        "A deep dive into how Astro integrations work and how to build your own.",
+    name: "Astro Blog",
+    og: true,
+    siteTwitter: "@astrodotbuild",
+    title: "Understanding Astro Integrations",
+    twitter: true,
+    type: "article"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <Pagemeta>
+            <meta charset="utf-8" />
+        </Pagemeta>
+    </head>
+    <body>
+        <article>
+            <h1>Understanding Astro Integrations</h1>
+            <p>Learn how to build powerful Astro integrations.</p>
+        </article>
+    </body>
+</html>

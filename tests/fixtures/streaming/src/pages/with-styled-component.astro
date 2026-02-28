@@ -1,0 +1,23 @@
+---
+import Pagemeta from "@grepco/astro-pagemeta/Pagemeta";
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+import Styled from "../components/Styled.astro";
+
+setPagemeta(Astro, {
+    description: "Page with styled component",
+    title: "Styled Page"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <Pagemeta>
+            <meta charset="utf-8" />
+        </Pagemeta>
+    </head>
+    <body>
+        <Styled />
+    </body>
+</html>

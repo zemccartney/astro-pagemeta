@@ -4,6 +4,30 @@ import { select, selectAll } from "hast-util-select";
 import rehypeParse from "rehype-parse";
 import { unified } from "unified";
 
+export const parseHtml = (html: string) =>
+    unified().use(rehypeParse).parse(html);
+
+/**
+ * Select elements matching a CSS selector from parsed HTML and normalize
+ * to a `{ tag, properties }` shape. Titles get `{ text }` as their
+ * properties; everything else gets the raw hast properties object.
+ */
+export const query = (html: string, selector: string) => {
+    const tree = parseHtml(html);
+
+    return selectAll(selector, tree).map((el) => {
+        if (el.tagName === "title") {
+            const textNode = el.children.find((c) => c.type === "text");
+            return {
+                properties: { text: textNode?.value ?? "" },
+                tag: "title"
+            };
+        }
+
+        return { properties: el.properties, tag: el.tagName };
+    });
+};
+
 /**
  * Determine whether an HTML string is a fragment (not a full document).
  *
@@ -15,23 +39,12 @@ import { unified } from "unified";
  * for non-partial renders only
  */
 export const isFragment = (html: string): boolean => {
-    const tree = unified().use(rehypeParse).parse(html);
+    const tree = parseHtml(html);
     return !tree.children.some((node) => node.type === "doctype");
 };
 
-const extractElement = (el: Element) => {
-    if (el.tagName === "title") {
-        const textNode = el.children.find((c) => c.type === "text");
-        return { properties: { text: textNode?.value ?? "" }, tag: "title" };
-    }
-
-    if (el.tagName === "meta" || el.tagName === "link") {
-        return { properties: el.properties, tag: el.tagName };
-    }
-};
-
 export const extractLdJson = (html: string): unknown[] => {
-    const tree = unified().use(rehypeParse).parse(html);
+    const tree = parseHtml(html);
 
     return selectAll('head > script[type="application/ld+json"]', tree)
         .map((el) => {
@@ -43,13 +56,31 @@ export const extractLdJson = (html: string): unknown[] => {
         .filter((el) => el !== undefined);
 };
 
-export const extractMeta = (html: string) => {
-    const tree = unified().use(rehypeParse).parse(html);
+/**
+ * Extract all child elements of `<head>`, including styles, scripts, etc.
+ * Unlike `extractMeta` which only captures meta/title/link, this captures
+ * everything — useful for verifying that Astro-injected assets (styles,
+ * scripts) survive rehype processing.
+ */
+export const extractHeadElements = (html: string) => {
+    const tree = parseHtml(html);
+    const head = select("head", tree);
+    if (!head) return [];
 
-    return selectAll("head > title, head > meta, head > link", tree)
-        .map((el) => extractElement(el))
-        .filter((el) => el !== undefined);
+    return head.children
+        .filter((node): node is Element => node.type === "element")
+        .map((el) => {
+            const textNode = el.children.find((c) => c.type === "text");
+            return {
+                properties: el.properties,
+                tag: el.tagName,
+                ...(textNode ? { textContent: textNode.value } : {})
+            };
+        });
 };
+
+export const extractMeta = (html: string) =>
+    query(html, "head > title, head > meta, head > link");
 
 /**
  * Extract the server island preload URL from rendered page HTML.
@@ -61,7 +92,7 @@ export const extractMeta = (html: string) => {
  * Throws if no server island URL is found in the HTML.
  */
 export const extractServerIslandUrl = (html: string): string => {
-    const tree = unified().use(rehypeParse).parse(html);
+    const tree = parseHtml(html);
     const link = select(
         'link[rel~=preload][as=fetch][href*="_server-islands"]',
         tree

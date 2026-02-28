@@ -11,6 +11,7 @@
             "astro/client",
             "node"
         ],
+        "jsx": "preserve",
 
         // module system behavior
         "allowImportingTsExtensions": true,

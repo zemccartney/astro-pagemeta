@@ -32,6 +32,11 @@ const _optionsSchema = z
         message: "`manual` is only valid when mode is 'auto'",
         path: ["manual"]
     })
+    .refine((opts) => !(opts.mode === "streaming" && opts.includeExternal), {
+        message:
+            "`includeExternal` is only valid when mode is 'auto' (it controls middleware route filtering; streaming mode has no middleware)",
+        path: ["includeExternal"]
+    })
     .optional()
     .default({});
 
@@ -44,12 +49,10 @@ type OptionsInput =
       }
     | {
           defaults?: ((ctx: APIContext) => PagemetaOptions) | PagemetaOptions;
-          includeExternal?: boolean;
           mode: "streaming";
       };
 
-// TODO Explain; accounting for how refine doesn't allow for showing red squiggle from ts
-// if you pass manual w/ mode: "streaming"
+// Accounts for how refine doesn't surface invalid input as typescript errors, only runtime
 const optionsSchema = _optionsSchema as z.ZodType<
     z.output<typeof _optionsSchema>,
     z.ZodTypeDef,

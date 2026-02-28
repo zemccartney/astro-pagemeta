@@ -16,6 +16,14 @@ export default defineConfig({
             prefixDefaultLocale: false
         }
     },
-    integrations: [pagemeta()],
+    integrations: [
+        pagemeta({
+            mode: "auto",
+            defaults: () => ({
+                type: "website",
+                author: "Jane Doe"
+            })
+        })
+    ],
     output: "server"
 });

@@ -1,13 +1,24 @@
 import type { APIContext } from "astro";
-import type { Element, Root } from "hast";
+import type { Element, Root, Text } from "hast";
 
 import { defineMiddleware } from "astro/middleware";
 import { select } from "hast-util-select";
 import { rehype } from "rehype";
 import rehypeMeta from "rehype-meta";
-import { defaults, routePatterns } from "virtual:pagemeta/config";
+import rehypeMinifyWhitespace from "rehype-minify-whitespace";
+import {
+    addRequiredGlobalMeta,
+    compressHTML,
+    defaults,
+    routePatterns
+} from "virtual:pagemeta/config";
 
 import type { JsonLd, PagemetaOptions } from "./types.ts";
+
+// Trailing newline after injected elements, matching rehype-meta's formatting
+// convention of separating head children with line breaks for readability.
+// Stripped by rehype-minify-whitespace when compressHTML is enabled.
+const newline = (): Text => ({ type: "text", value: "\n" });
 
 const LOCALS_KEY = Symbol("pagemeta");
 
@@ -124,6 +135,59 @@ const isOgProperty = (key: string) =>
 
 const CANONICAL_KEY = "link:rel:canonical";
 
+function rehypeAddRequiredGlobalMeta() {
+    // eslint-disable-next-line unicorn/consistent-function-scoping -- prefer consistency with other plugins
+    return (tree: Root) => {
+        const head = select("head", tree);
+        if (!head) return;
+
+        for (const key of ["charset", "viewport"] as const) {
+            const existing = head.children.find(
+                (node): node is Element =>
+                    node.type === "element" &&
+                    node.tagName === "meta" &&
+                    (key === "charset" ?
+                        // note camel-casing from rehype
+                        "charSet" in node.properties
+                    :   node.properties["name"] === key)
+            );
+
+            if (!existing) {
+                switch (key) {
+                    case "charset": {
+                        head.children.push(
+                            {
+                                children: [],
+                                properties: { charSet: "utf-8" },
+                                tagName: "meta",
+                                type: "element"
+                            },
+                            newline()
+                        );
+                        break;
+                    }
+                    case "viewport": {
+                        head.children.push(
+                            {
+                                children: [],
+                                properties: {
+                                    name: key,
+                                    // eslint-disable-next-line perfectionist/sort-objects -- prefer standard meta tag attribute ordering
+                                    content: "width=device-width"
+                                },
+                                tagName: "meta",
+                                type: "element"
+                            },
+                            newline()
+                        );
+                        break;
+                    }
+                }
+            }
+        }
+    };
+}
+
 function rehypeCustomMeta(meta: Record<string, string>) {
     return (tree: Root) => {
         const head = select("head", tree);
@@ -138,12 +202,15 @@ function rehypeCustomMeta(meta: Record<string, string>) {
                 if (existing) {
                     existing.children = [{ type: "text", value }];
                 } else {
-                    head.children.push({
-                        children: [{ type: "text", value }],
-                        properties: {},
-                        tagName: "title",
-                        type: "element"
-                    });
+                    head.children.push(
+                        {
+                            children: [{ type: "text", value }],
+                            properties: {},
+                            tagName: "title",
+                            type: "element"
+                        },
+                        newline()
+                    );
                 }
                 continue;
             }
@@ -163,12 +230,15 @@ function rehypeCustomMeta(meta: Record<string, string>) {
                 if (existing) {
                     existing.properties["href"] = value;
                 } else {
-                    head.children.push({
-                        children: [],
-                        properties: { href: value, rel: ["canonical"] },
-                        tagName: "link",
-                        type: "element"
-                    });
+                    head.children.push(
+                        {
+                            children: [],
+                            properties: { href: value, rel: ["canonical"] },
+                            tagName: "link",
+                            type: "element"
+                        },
+                        newline()
+                    );
                 }
                 continue;
             }
@@ -185,12 +255,15 @@ function rehypeCustomMeta(meta: Record<string, string>) {
             if (existing) {
                 existing.properties["content"] = value;
             } else {
-                head.children.push({
-                    children: [],
-                    properties: { [attrKey]: key, content: value },
-                    tagName: "meta",
-                    type: "element"
-                });
+                head.children.push(
+                    {
+                        children: [],
+                        properties: { [attrKey]: key, content: value },
+                        tagName: "meta",
+                        type: "element"
+                    },
+                    newline()
+                );
             }
         }
     };
@@ -206,29 +279,51 @@ function rehypeJsonLd(jsonLd: JsonLd | JsonLd[]) {
         const head = select("head", tree);
         if (!head) return;
 
-        head.children.push({
-            children: [{ type: "text", value: JSON.stringify(document) }],
-            properties: { type: "application/ld+json" },
-            tagName: "script",
-            type: "element"
-        });
+        head.children.push(
+            {
+                children: [
+                    {
+                        type: "text",
+                        value:
+                            compressHTML ?
+                                JSON.stringify(document)
+                            :   JSON.stringify(document, undefined, 2)
+                    }
+                ],
+                properties: { type: "application/ld+json" },
+                tagName: "script",
+                type: "element"
+            },
+            newline()
+        );
     };
 }
 
 const isHtmlDocument = (html: string) => /^<!doctype\s/i.test(html.trimStart());
 
 export const _getHtmlProcessor = ({
+    fragment = false,
     metadata
 }: {
+    fragment?: boolean;
     metadata: PagemetaOptions;
 }) => {
     const { custom, jsonLd, ...rehypeMetaOptions } = metadata;
-    let processor = rehype().use(rehypeMeta, rehypeMetaOptions);
+    const processor = rehype().use(rehypeMeta, rehypeMetaOptions);
     if (jsonLd) {
-        processor = processor.use(rehypeJsonLd, jsonLd);
+        processor.use(rehypeJsonLd, jsonLd);
+    }
+    if (addRequiredGlobalMeta) {
+        processor.use(rehypeAddRequiredGlobalMeta);
     }
     if (custom && Object.keys(custom).length > 0) {
-        processor = processor.use(rehypeCustomMeta, custom);
+        processor.use(rehypeCustomMeta, custom);
+    }
+    if (fragment) {
+        processor.use(rehypeHeadContentsOnly);
+    }
+    if (compressHTML) {
+        processor.use(rehypeMinifyWhitespace);
     }
     return processor;
 };

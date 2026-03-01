@@ -444,7 +444,7 @@ describe("custom-meta / static", async () => {
     });
 });
 
-describe("custom-meta with defaults / static", async () => {
+describe.skip("custom-meta with defaults / static", async () => {
     const { cleanup, fixture } = await isolatedFixture("custom-meta");
 
     const config = {

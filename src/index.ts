@@ -1,4 +1,5 @@
 import type { APIContext } from "astro";
+import type { ViteDevServer } from "vite";
 
 import {
     addVitePlugin,
@@ -11,6 +12,7 @@ import type { PagemetaOptions } from "./types.ts";
 
 const _optionsSchema = z
     .object({
+        addRequiredGlobalMeta: z.boolean().optional().default(false),
         defaults: z
             .union([
                 z.custom<(ctx: APIContext) => PagemetaOptions>(
@@ -24,7 +26,7 @@ const _optionsSchema = z
                 )
             ])
             .optional(),
-        includeExternal: z.boolean().optional().default(false),
+        includeExternalPages: z.boolean().optional().default(false),
         manual: z.boolean().optional().default(false),
         mode: z.enum(["auto", "streaming"]).optional().default("auto")
     })
@@ -32,22 +34,27 @@ const _optionsSchema = z
         message: "`manual` is only valid when mode is 'auto'",
         path: ["manual"]
     })
-    .refine((opts) => !(opts.mode === "streaming" && opts.includeExternal), {
-        message:
-            "`includeExternal` is only valid when mode is 'auto' (it controls middleware route filtering; streaming mode has no middleware)",
-        path: ["includeExternal"]
-    })
+    .refine(
+        (opts) => !(opts.mode === "streaming" && opts.includeExternalPages),
+        {
+            message:
+                "`includeExternalPages` is only valid when mode is 'auto' (it controls middleware route filtering; streaming mode has no middleware)",
+            path: ["includeExternalPages"]
+        }
+    )
     .optional()
     .default({});
 
 type OptionsInput =
     | {
+          addRequiredGlobalMeta?: boolean;
           defaults?: ((ctx: APIContext) => PagemetaOptions) | PagemetaOptions;
-          includeExternal?: boolean;
+          includeExternalPages?: boolean;
           manual?: boolean;
           mode?: "auto";
       }
     | {
+          addRequiredGlobalMeta?: boolean;
           defaults?: ((ctx: APIContext) => PagemetaOptions) | PagemetaOptions;
           mode: "streaming";
       };
@@ -62,13 +69,12 @@ const optionsSchema = _optionsSchema as z.ZodType<
 const VIRTUAL_CONFIG_ID = "virtual:pagemeta/config";
 const RESOLVED_CONFIG_ID = "\0" + VIRTUAL_CONFIG_ID;
 
-function createConfigPlugin(
-    defaults:
-        | ((ctx: APIContext) => PagemetaOptions)
-        | PagemetaOptions
-        | undefined
-) {
+function createConfigPlugin({
+    addRequiredGlobalMeta,
+    defaults
+}: Pick<z.infer<typeof optionsSchema>, "addRequiredGlobalMeta" | "defaults">) {
     let routePatterns: RegExp[] = [];
+    let compressHTML = false;
 
     return {
         plugin: {
@@ -98,8 +104,16 @@ function createConfigPlugin(
                     defaultsCode = JSON.stringify(defaults);
                 }
 
-                return `export const routePatterns = [${patternsCode}];\nexport const defaults = ${defaultsCode};\n`;
+                return `
+                    export const routePatterns = [${patternsCode}];
+                    export const defaults = ${defaultsCode};
+                    export const compressHTML = ${compressHTML};
+                    export const addRequiredGlobalMeta = ${addRequiredGlobalMeta};
+                `;
             }
+        },
+        setCompressHTML(compress: boolean) {
+            compressHTML = compress;
         },
         setRoutePatterns(patterns: RegExp[]) {
             routePatterns = patterns;
@@ -112,7 +126,16 @@ export default defineIntegration({
     optionsSchema,
     setup: ({ options }) => {
         const { resolve } = createResolver(import.meta.url);
-        const configPlugin = createConfigPlugin(options.defaults);
+        const configPlugin = createConfigPlugin({
+            addRequiredGlobalMeta: options.addRequiredGlobalMeta,
+            defaults: options.defaults
+        });
+
+        // Captured in astro:server:setup so astro:routes:resolved can
+        // invalidate the virtual config module during dev. On the first
+        // astro:routes:resolved call (before the server exists) the module
+        // hasn't been loaded yet, so invalidation is unnecessary.
+        let viteServer: undefined | ViteDevServer;
 
         return {
             hooks: {
@@ -135,11 +158,32 @@ export default defineIntegration({
                                 (r) =>
                                     r.type === "page" &&
                                     (r.origin === "project" ||
-                                        (options.includeExternal &&
+                                        (options.includeExternalPages &&
                                             r.origin === "external"))
                             )
                             .map((r) => r.patternRegex)
                     );
+
+                    // Invalidate the virtual module so consumers see updated
+                    // route patterns. Astro re-fires this hook on page file
+                    // add/remove in dev, so this keeps the config in sync
+                    // without a full server restart.
+                    if (viteServer) {
+                        const mod =
+                            viteServer.moduleGraph.getModuleById(
+                                RESOLVED_CONFIG_ID
+                            );
+                        if (mod) {
+                            viteServer.moduleGraph.invalidateModule(mod);
+                        }
+                    }
+                },
+                // eslint-disable-next-line perfectionist/sort-objects -- align with hooks execution order
+                "astro:config:done": ({ config }) => {
+                    configPlugin.setCompressHTML(config.compressHTML);
+                },
+                "astro:server:setup": ({ server }) => {
+                    viteServer = server;
                 }
             }
         };

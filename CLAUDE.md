@@ -8,9 +8,9 @@ An Astro integration (`@grepco/astro-pagemeta`) that simplifies setting page met
 
 Four source files:
 
-1. **`src/index.ts`** — Integration entry point. Creates a Vite plugin that generates the `virtual:pagemeta/config` module, registers middleware with `order: "post"`, and collects route patterns from `astro:routes:resolved`.
+1. **`src/index.ts`** — Integration entry point. Creates a Vite plugin that generates the `virtual:pagemeta/config` module, registers middleware with `order: "post"`, collects route patterns from `astro:routes:resolved`, and invalidates the virtual module during dev when routes change.
 2. **`src/runtime.ts`** — Exports `setPagemeta()`, `resolvePagemeta()`, and `isPageRoute()`. Imported at runtime as `@grepco/astro-pagemeta/runtime` (via `package.json` exports mapping to this file directly — no stub). Uses a private `Symbol("pagemeta")` key for `Astro.locals` storage.
-3. **`src/middleware.ts`** — Post-render middleware. Filters non-page routes via `isPageRoute()`, skips HTML fragments (no doctype), resolves metadata via `resolvePagemeta()`, and processes HTML with `rehype` + `rehype-meta`.
+3. **`src/middleware.ts`** — Post-render middleware. Filters non-page routes via `isPageRoute()`, skips HTML fragments (no doctype), resolves metadata via `resolvePagemeta()`, and processes HTML with `rehype` + `rehype-meta` + optional `rehype-minify-whitespace`.
 4. **`src/types.ts`** — TypeScript types for the three exported functions.
 
 Type declarations for both the public module and the internal virtual module live in `src/virtual.d.ts`.
@@ -21,6 +21,8 @@ The integration creates a custom Vite plugin (not `addVirtualImports`) that serv
 
 - **`routePatterns`**: Array of `RegExp` objects derived from project page routes (collected in `astro:routes:resolved`)
 - **`defaults`**: The user's defaults — either a serialized function (via `Function.toString()`), a JSON object, or `undefined`
+- **`compressHTML`**: Boolean from Astro's `config.compressHTML`, controls whitespace minification and JSON-LD formatting
+- **`addRequiredGlobalMeta`**: Boolean, when true injects `<meta charset="utf-8">` and `<meta name="viewport" content="width=device-width">` if not already present
 
 Function serialization means **closures don't work** — any function default must be self-contained. Variables from outer scope produce `ReferenceError` at runtime. This is tested and documented as an intentional limitation.
 
@@ -38,6 +40,8 @@ Middleware (post order) intercepts response:
   2. resolvePagemeta(context) → merge defaults + page metadata
   3. isHtmlDocument check → skip fragments (partials, server islands)
   4. rehype + rehype-meta → inject tags into <head>
+  5. If addRequiredGlobalMeta: inject charset/viewport if missing
+  6. If compressHTML: rehype-minify-whitespace strips whitespace
     ↓
 Modified HTML response returned
 ```
@@ -65,11 +69,16 @@ tests/
 │   ├── static-defaults/       # Object defaults
 │   │   ├── ssr.test.ts
 │   │   └── static.test.ts
-│   └── function-defaults/     # Function defaults with APIContext access
-│       ├── ssr.test.ts
-│       ├── static.test.ts
-│       ├── slug.ssr.astro     # Dynamic route pages injected at test time
-│       └── slug.static.astro
+│   ├── function-defaults/     # Function defaults with APIContext access
+│   │   ├── ssr.test.ts
+│   │   ├── static.test.ts
+│   │   ├── slug.ssr.astro     # Dynamic route pages injected at test time
+│   │   └── slug.static.astro
+│   ├── required-global-meta/  # addRequiredGlobalMeta option
+│   │   ├── ssr.test.ts        # Enabled/disabled, dedup, no-head
+│   │   └── static.test.ts
+│   └── compress-html/         # compressHTML behavior
+│       └── ssr.test.ts        # JSON-LD minification/pretty-printing
 ├── error-handling/
 │   └── defaults-function.test.ts  # Edge cases: invalid returns, closures, throws
 ├── route-filtering/
@@ -81,6 +90,7 @@ tests/
 │   ├── defaults/
 │   ├── error-handling/
 │   ├── middleware-defaults/
+│   ├── required-global-meta/  # Pages with various charset/viewport combos
 │   └── route-filtering/
 └── utils/
     ├── html-parse.ts          # extractMeta(), isFragment(), extractServerIslandUrl()
@@ -90,9 +100,9 @@ tests/
 
 ### Critical Testing Rules
 
-**Integration config goes in test files, not fixture configs.** `@inox-tools/aik-mod` has a global module registry that throws "Module already defined" if a module ID is registered twice. Fixture `astro.config.ts` files must NOT include the pagemeta integration — it's passed only via inline config to `startDevServer()` / `build()`.
+**Integration config goes in test files, not fixture configs.** Fixture `astro.config.ts` files must NOT include the pagemeta integration — it's passed only via inline config to `startDevServer()` / `build()`.
 
-**One build config per test file.** Build calls can't re-register the module. Dev server calls silently overwrite, so multiple configs per file work for dev tests only (with sequential execution and proper server cleanup).
+**Test parallelism causes flaky dev server failures.** Vitest runs test files in parallel by default. Each file spins up Astro dev servers and builds, and running too many concurrently causes resource exhaustion (`SocketError: other side closed`, missing content in responses). Tests that fail in the full suite but pass in isolation are almost certainly this issue.
 
 ### Fixture Isolation: `isolatedFixture()`
 
@@ -172,25 +182,25 @@ describe("SSR / build", () => {
 2. **Middleware typing**: Use `defineMiddleware` from `astro/middleware` (not `astro:middleware` — that's for user-land code)
 3. **Symbol-based locals**: `Symbol("pagemeta")` is defined in `runtime.ts`, never exported, shared between `setPagemeta` and `resolvePagemeta`
 4. **HTML document detection**: Middleware checks `/^<!doctype\s/i` to distinguish full documents from fragments (server islands, partials)
-5. **Route filtering**: Only project page routes get processed. API routes, endpoints, server islands, and config redirects are skipped via `isPageRoute()` which matches against patterns from `astro:routes:resolved`.
+5. **Route filtering**: Only project page routes get processed. API routes, endpoints, server islands, and config redirects are skipped via `isPageRoute()` which matches against patterns from `astro:routes:resolved`. `includeExternalPages: true` opts in integration-injected pages.
+6. **Dev route invalidation**: When Astro re-fires `astro:routes:resolved` on page file add/remove during dev, the integration updates route patterns and invalidates the virtual module via `server.moduleGraph.invalidateModule()` — no server restart needed.
+7. **Whitespace handling**: Rehype plugins append `newline()` text nodes after injected elements (matching rehype-meta's formatting). When `compressHTML` is enabled, `rehype-minify-whitespace` strips these.
 
 ## Known Limitations
 
 - **Function defaults can't close over variables** — serialized via `Function.toString()` into a virtual module, so outer scope isn't available
-- **`@inox-tools/aik-mod` global registry** — module IDs can only be registered once per build; see MAINTENANCE.md for testing implications
 
 ## TODOs
 
-- LD-JSON support
 - Image service integration
 - JSDoc comments
 - Publishing pipeline (build tooling, changesets, CI)
 
 ## Dependencies
 
-- **Runtime**: `rehype`, `rehype-meta` (HTML processing), `astro-integration-kit` (integration helpers)
+- **Runtime**: `rehype`, `rehype-meta`, `rehype-minify-whitespace` (HTML processing), `astro-integration-kit` (integration helpers), `schema-dts` (JSON-LD types)
 - **Peer**: `astro` 5.x.x
-- **Dev/Test**: `@inox-tools/astro-tests`, `@astrojs/node` (SSR adapter), `vitest`, `rehype-parse` + `unified` (test HTML parsing)
+- **Dev/Test**: `@inox-tools/astro-tests`, `@astrojs/node` (SSR adapter), `vitest`, `rehype-parse` + `unified` (test HTML parsing), `vite` (types only)
 
 ## Architecture Diagrams
 

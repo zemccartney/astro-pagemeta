@@ -1,0 +1,16 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    description: "Page missing both",
+    title: "Neither Page"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head></head>
+    <body>
+        <p>Page with neither charset nor viewport</p>
+    </body>
+</html>

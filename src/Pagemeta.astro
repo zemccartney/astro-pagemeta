@@ -33,11 +33,7 @@
  * For a hugely helpful resource on Astro's streaming behavior, especially how slot rendering
  * can break Astro's styles injection: https://angelika.me/2025/03/16/implications-of-astro-html-streaming/
  */
-import {
-    _getHtmlProcessor,
-    rehypeHeadContentsOnly,
-    resolvePagemeta
-} from "./runtime";
+import { _getHtmlProcessor, resolvePagemeta } from "./runtime";
 
 const metadata = resolvePagemeta(Astro);
 const templateMeta =
@@ -45,8 +41,8 @@ const templateMeta =
 
 let head;
 if (metadata) {
-    const processor = _getHtmlProcessor({ metadata });
-    head = await processor.use(rehypeHeadContentsOnly).process(templateMeta);
+    const processor = _getHtmlProcessor({ fragment: true, metadata });
+    head = await processor.process(templateMeta);
 }
 ---
 

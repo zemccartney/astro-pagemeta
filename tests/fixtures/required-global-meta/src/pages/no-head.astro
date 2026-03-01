@@ -1,0 +1,15 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    description: "Page with no head element",
+    title: "No Head Page"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <body>
+        <p>Page with no head element at all</p>
+    </body>
+</html>

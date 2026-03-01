@@ -1,0 +1,22 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    description: "Test description",
+    title: "Test Title"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            content="width=device-width"
+            name="viewport"
+        />
+    </head>
+    <body>
+        <p>Page with both charset and viewport already present</p>
+    </body>
+</html>

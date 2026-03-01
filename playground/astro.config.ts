@@ -7,7 +7,7 @@ export default defineConfig({
     adapter: node({
         mode: "standalone"
     }),
-    i18n: {
+    /* i18n: {
         defaultLocale: "en",
         fallback: { fr: "es" },
         locales: ["en", "fr", "es"],
@@ -15,15 +15,20 @@ export default defineConfig({
             fallbackType: "rewrite",
             prefixDefaultLocale: false
         }
-    },
+    },*/
     integrations: [
         pagemeta({
             mode: "auto",
-            defaults: () => ({
-                type: "website",
-                author: "Jane Doe"
+            addRequiredGlobalMeta: true,
+            defaults: (ctx) => ({
+                // type: "website",
+                author: "Jane Doe",
+                origin: ctx.site?.origin,
+                image: "provolone.com"
             })
         })
     ],
-    output: "server"
+    site: "https://www.playground.com",
+    output: "server",
+    compressHTML: true
 });

@@ -103,7 +103,7 @@ This ordering difference is cosmetic — browsers process `<head>` elements rega
 - **`<head>` must be a static element.** Astro needs a literal `<head>` tag in the template for asset injection (styles, scripts). Rendering `<head>` via a component breaks this.
 - **Declare the component in every layout that has its own `<head>`.** There's no automatic injection — each discrete `<head>` needs its own `<Pagemeta>`.
 - **Put template meta tags inside the slot.** Tags placed directly in `<head>` alongside `<Pagemeta>` won't be deduplicated. Passing them as children gives rehype-meta visibility into them.
-- **`includeExternal` is meaningless in streaming mode.** That option controls which routes the middleware processes; streaming mode has no middleware.
+- **`includeExternalPages` is meaningless in streaming mode.** That option controls which routes the middleware processes; streaming mode has no middleware.
     - This option is useful for applying defaults to integration-injected pages where you don't have template access. streaming mode requires template modification, so even with that option enabled in streaming mode, the only effect would be including external pages in your bundle via outputting their route pattern regexes, but to no end, since the isPage function that calls that makes sense only in middleware
 
 ## Options schema

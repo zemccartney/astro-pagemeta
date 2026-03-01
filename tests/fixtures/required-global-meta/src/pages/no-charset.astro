@@ -1,0 +1,21 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    description: "Page missing charset",
+    title: "No Charset Page"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta
+            content="width=device-width"
+            name="viewport"
+        />
+    </head>
+    <body>
+        <p>Page with viewport but no charset</p>
+    </body>
+</html>

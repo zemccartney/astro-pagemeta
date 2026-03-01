@@ -479,10 +479,10 @@ A builder approach like `@tanstack/meta`'s `jsonLd` namespace ([TanStack/router#
 
 If we go this direction, the current `jsonLd` field on `PagemetaOptions` stays as the raw option, and builders could be a separate export (e.g. `@grepco/astro-pagemeta/json-ld`) that produces the same shape. The builders compose with `setPagemeta` — they just return objects that get passed as `jsonLd`.
 
-### Integration-injected pages and `includeExternal`
+### Integration-injected pages and `includeExternalPages`
 
 By default, pagemeta only processes pages originating from the user's project (`origin: "project"` in Astro's route system). Pages injected by other integrations via `injectRoute()` (`origin: "external"`) are excluded. The rationale: `isPageRoute()` exists to ensure we only act on pages the user directly controls and is aware of — integration pages are authored by the integration, not the user, and the integration presumably doesn't depend on `setPagemeta`.
 
-`includeExternal: true` is a coarse opt-in that adds all integration-injected pages to the route patterns. If this is too broad, function defaults (which receive the full `APIContext`) can filter out unwanted routes.
+`includeExternalPages: true` is a coarse opt-in that adds all integration-injected pages to the route patterns. If this is too broad, function defaults (which receive the full `APIContext`) can filter out unwanted routes.
 
 **Future interest: per-integration filtering.** Ideally you could say "apply defaults to pages from Starlight but not from my analytics integration." Astro's `astro:routes:resolved` hook exposes `origin: "external"` for all integration routes but does not expose _which_ integration injected them — the integration name is logged at injection time but not attached to the route object. The `entrypoint` field (e.g. `@astrojs/starlight/routes/docs.astro`) is the only distinguishing data, so matching on package-name prefixes is theoretically possible but fragile. Leaving this as a potential enhancement if the use case comes up, or if Astro adds integration attribution to routes.

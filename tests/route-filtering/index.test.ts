@@ -364,7 +364,7 @@ describe("route-filtering / integration-injected pages", () => {
         });
     });
 
-    describe("includeExternal opts in", async () => {
+    describe("includeExternalPages opts in", async () => {
         const { cleanup, fixture } = await isolatedFixture("route-filtering", {
             adapter: testAdapter(),
             output: "server"
@@ -374,7 +374,7 @@ describe("route-filtering / integration-injected pages", () => {
             integrations: [
                 pagemeta({
                     defaults: { title: "Default Title" },
-                    includeExternal: true
+                    includeExternalPages: true
                 }),
                 injectPageIntegration()
             ]

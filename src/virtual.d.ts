@@ -7,4 +7,6 @@ declare module "virtual:pagemeta/config" {
         | ((ctx: APIContext) => PagemetaOptions)
         | PagemetaOptions
         | undefined;
+    export const compressHTML: boolean;
+    export const addRequiredGlobalMeta: boolean;
 }

@@ -84,6 +84,14 @@ export default defineConfig([
             parserOptions: {
                 projectService: true
             }
+        },
+        rules: {
+            "@typescript-eslint/restrict-template-expressions": [
+                "error",
+                {
+                    allowBoolean: true
+                }
+            ]
         }
     },
     {

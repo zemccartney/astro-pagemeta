@@ -1,9 +1,28 @@
 ---
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { setPagemeta } from "../../../src/runtime";
 
 setPagemeta(Astro, {
     description: "English page description",
-    title: "English Page"
+    title: "English Page",
+    // origin: "bunga.com",
+    origin: null,
+    pathname: "/zzz",
+    separator: " ",
+    og: true,
+    type: null,
+    image: null,
+    name: null,
+    ogNameInTitle: true,
+    jsonLd: {
+        "@type": "ArtGallery",
+        "@id": "111",
+        acceptedPaymentMethod: "card"
+    },
+    custom: {
+        // title: "ZZZZ",
+        "og:image:alt": "My alt text"
+        // "link:rel:canonical": "DUNGA.com"
+    }
 });
 ---
 
@@ -14,8 +33,11 @@ setPagemeta(Astro, {
 </style>
 
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
+    <head
+        ><meta
+            name="keywords"
+            content="foo, bar baz, qux"
+        />
     </head>
     <body>
         <p>English content</p>

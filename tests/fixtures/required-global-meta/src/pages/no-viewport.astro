@@ -1,0 +1,18 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+setPagemeta(Astro, {
+    description: "Page missing viewport",
+    title: "No Viewport Page"
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+    </head>
+    <body>
+        <p>Page with charset but no viewport</p>
+    </body>
+</html>

@@ -13,7 +13,7 @@ import {
     routePatterns
 } from "virtual:pagemeta/config";
 
-import type { JsonLd, PagemetaOptions } from "./types.ts";
+import type { PagemetaOptions } from "./types.ts";
 
 // Trailing newline after injected elements, matching rehype-meta's formatting
 // convention of separating head children with line breaks for readability.
@@ -269,7 +269,18 @@ function rehypeCustomMeta(meta: Record<string, string>) {
     };
 }
 
-function rehypeJsonLd(jsonLd: JsonLd | JsonLd[]) {
+/**
+ * Used to workaround a performance cliff from importing type { Thing } from "schema-dts"
+ * Or rather, tanked VSCode's on save actions, few second lag between hitting save and the
+ * actions running and file actually being saved
+ *
+ * Unclear if those types impact end users at all; prelim tests suggest no, but will need to revisit
+ *
+ * */
+// eslint-disable-next-line perfectionist/sort-modules -- collocate with main user of type
+type FakeSchema = Record<string, unknown> | Record<string, unknown>[];
+
+function rehypeJsonLd(jsonLd: FakeSchema) {
     const document =
         Array.isArray(jsonLd) ?
             { "@context": "https://schema.org", "@graph": jsonLd }
@@ -311,7 +322,7 @@ export const _getHtmlProcessor = ({
     const { custom, jsonLd, ...rehypeMetaOptions } = metadata;
     const processor = rehype().use(rehypeMeta, rehypeMetaOptions);
     if (jsonLd) {
-        processor.use(rehypeJsonLd, jsonLd);
+        processor.use(rehypeJsonLd, jsonLd as unknown as FakeSchema);
     }
     if (addRequiredGlobalMeta) {
         processor.use(rehypeAddRequiredGlobalMeta);

@@ -14,7 +14,7 @@ const LD_JSON_SCRIPT_RE =
 
 // compressHTML: true — rehype-minify-whitespace strips whitespace from
 // injected tags, and JSON-LD is minified (single-line)
-describe.skip("compressHTML enabled", async () => {
+describe("compressHTML enabled", async () => {
     const { cleanup, fixture } = await isolatedFixture("json-ld", {
         adapter: testAdapter(),
         compressHTML: true,
@@ -101,7 +101,7 @@ describe.skip("compressHTML enabled", async () => {
 });
 
 // compressHTML: false — JSON-LD is pretty-printed
-describe.skip("compressHTML disabled", async () => {
+describe("compressHTML disabled", async () => {
     const { cleanup, fixture } = await isolatedFixture("json-ld", {
         adapter: testAdapter(),
         compressHTML: false,

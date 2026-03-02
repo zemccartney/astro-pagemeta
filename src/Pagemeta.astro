@@ -33,15 +33,15 @@
  * For a hugely helpful resource on Astro's streaming behavior, especially how slot rendering
  * can break Astro's styles injection: https://angelika.me/2025/03/16/implications-of-astro-html-streaming/
  */
-import { _getHtmlProcessor, resolvePagemeta } from "./runtime";
+import Processor from "./runtime";
 
-const metadata = resolvePagemeta(Astro);
+const metadata = Processor.resolvePagemeta(Astro);
 const templateMeta =
     Astro.slots.has("default") ? await Astro.slots.render("default") : "";
 
 let head;
 if (metadata) {
-    const processor = _getHtmlProcessor({ fragment: true, metadata });
+    const processor = Processor.getHtmlProcessor({ fragment: true, metadata });
     head = await processor.process(templateMeta);
 }
 ---

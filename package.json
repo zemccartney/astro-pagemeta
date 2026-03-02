@@ -30,6 +30,7 @@
     "files": [
         "dist",
         "src/Pagemeta.astro",
+        "src/core.ts",
         "src/runtime.ts",
         "src/virtual.d.ts"
     ],

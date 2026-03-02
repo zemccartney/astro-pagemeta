@@ -136,6 +136,7 @@ export default defineIntegration({
         // astro:routes:resolved call (before the server exists) the module
         // hasn't been loaded yet, so invalidation is unnecessary.
         let viteServer: undefined | ViteDevServer;
+        let isRestart = false;
 
         return {
             hooks: {
@@ -150,6 +151,8 @@ export default defineIntegration({
                             order: "post"
                         });
                     }
+
+                    isRestart = params.isRestart;
                 },
                 "astro:routes:resolved": ({ routes }) => {
                     configPlugin.setRoutePatterns(
@@ -164,11 +167,19 @@ export default defineIntegration({
                             .map((r) => r.patternRegex)
                     );
 
-                    // Invalidate the virtual module so consumers see updated
-                    // route patterns. Astro re-fires this hook on page file
-                    // add/remove in dev, so this keeps the config in sync
-                    // without a full server restart.
-                    if (viteServer) {
+                    /**
+                     * Invalidate the virtual module so consumers see updated
+                     * route patterns. Astro re-fires this hook on page file
+                     * add/remove in dev, so this keeps the config in sync
+                     * without a full server restart.
+                     *
+                     * Tied to restart b/c otherwise was causing test flakiness,
+                     * with the first test against a certain fixture, across apparently
+                     * random files, failing due to metadata failing to set, I assume
+                     * due to our virtual module losing state / invalidating just as
+                     * our test was triggering its usage. I guess? Unclear
+                     */
+                    if (viteServer && isRestart) {
                         const mod =
                             viteServer.moduleGraph.getModuleById(
                                 RESOLVED_CONFIG_ID

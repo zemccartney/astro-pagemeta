@@ -483,5 +483,542 @@ describe("createPagemetaProcessor", () => {
                 tag: "link"
             });
         });
+
+        describe("template interaction", () => {
+            test("preserves existing template meta tags", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: false,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="generator" content="Astro"></head><body></body></html>`;
+                const result = await processor
+                    .getHtmlProcessor({
+                        metadata: {
+                            description: "My page",
+                            title: "My Title"
+                        }
+                    })
+                    .process(html);
+
+                const meta = extractMeta(String(result));
+                expect(meta).toContainEqual({
+                    properties: { content: "Astro", name: "generator" },
+                    tag: "meta"
+                });
+                expect(meta).toContainEqual({
+                    properties: { text: "My Title" },
+                    tag: "title"
+                });
+            });
+
+            test("overrides existing template title", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: false,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Old</title></head><body></body></html>`;
+                const result = await processor
+                    .getHtmlProcessor({
+                        metadata: { title: "New" }
+                    })
+                    .process(html);
+
+                const meta = extractMeta(String(result));
+                const titles = meta.filter((m) => m.tag === "title");
+                expect(titles).toHaveLength(1);
+                expect(titles[0]).toEqual({
+                    properties: { text: "New" },
+                    tag: "title"
+                });
+            });
+
+            test("template title survives when title is false", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: false,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Old</title></head><body></body></html>`;
+                const result = await processor
+                    .getHtmlProcessor({
+                        metadata: { title: false as unknown as string }
+                    })
+                    .process(html);
+
+                const meta = extractMeta(String(result));
+                const titles = meta.filter((m) => m.tag === "title");
+                expect(titles).toHaveLength(1);
+                expect(titles[0]).toEqual({
+                    properties: { text: "Old" },
+                    tag: "title"
+                });
+            });
+
+            test("creates head when document has none", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: false,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                const html = `<!DOCTYPE html><html><body></body></html>`;
+                const result = await processor
+                    .getHtmlProcessor({
+                        metadata: { title: "Injected" }
+                    })
+                    .process(html);
+
+                const meta = extractMeta(String(result));
+                expect(meta).toContainEqual({
+                    properties: { text: "Injected" },
+                    tag: "title"
+                });
+            });
+        });
+
+        describe("custom meta edge cases", () => {
+            test("replaces existing template meta in-place", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: false,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="robots" content="index"></head><body></body></html>`;
+                const result = await processor
+                    .getHtmlProcessor({
+                        metadata: { custom: { robots: "noindex" } }
+                    })
+                    .process(html);
+
+                const meta = extractMeta(String(result));
+                const robotsTags = meta.filter(
+                    (m) =>
+                        m.tag === "meta" &&
+                        "name" in m.properties &&
+                        m.properties["name"] === "robots"
+                );
+                expect(robotsTags).toHaveLength(1);
+                expect(robotsTags[0]).toEqual({
+                    properties: { content: "noindex", name: "robots" },
+                    tag: "meta"
+                });
+            });
+
+            test("custom title creates title element when no rehype-meta title", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: false,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                const result = await processor
+                    .getHtmlProcessor({
+                        metadata: { custom: { title: "Custom Title" } }
+                    })
+                    .process(MINIMAL_HTML);
+
+                const meta = extractMeta(String(result));
+                expect(meta).toContainEqual({
+                    properties: { text: "Custom Title" },
+                    tag: "title"
+                });
+            });
+
+            test("custom canonical overrides template canonical", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: false,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><link rel="canonical" href="https://example.com/old"></head><body></body></html>`;
+                const result = await processor
+                    .getHtmlProcessor({
+                        metadata: {
+                            custom: {
+                                "link:rel:canonical": "https://example.com/new"
+                            }
+                        }
+                    })
+                    .process(html);
+
+                const meta = extractMeta(String(result));
+                const canonicals = meta.filter(
+                    (m) =>
+                        m.tag === "link" &&
+                        Array.isArray(m.properties["rel"]) &&
+                        (m.properties["rel"] as string[]).includes("canonical")
+                );
+                expect(canonicals).toHaveLength(1);
+                expect(canonicals[0]).toEqual({
+                    properties: {
+                        href: "https://example.com/new",
+                        rel: ["canonical"]
+                    },
+                    tag: "link"
+                });
+            });
+
+            test("custom OG overrides rehype-meta computed OG", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: false,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                // rehype-meta with og: true computes og:title from title
+                const result = await processor
+                    .getHtmlProcessor({
+                        metadata: {
+                            custom: { "og:title": "Override" },
+                            og: true,
+                            title: "Page Title"
+                        }
+                    })
+                    .process(MINIMAL_HTML);
+
+                const meta = extractMeta(String(result));
+                const ogTitles = meta.filter(
+                    (m) =>
+                        m.tag === "meta" &&
+                        "property" in m.properties &&
+                        m.properties["property"] === "og:title"
+                );
+                // custom runs after rehype-meta, so it should replace
+                expect(ogTitles).toHaveLength(1);
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- length asserted above
+                expect(ogTitles[0]!.properties["content"]).toBe("Override");
+            });
+        });
+
+        describe("JSON-LD", () => {
+            test("array wraps in @graph", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: false,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                const result = await processor
+                    .getHtmlProcessor({
+                        metadata: {
+                            jsonLd: [
+                                { "@type": "Organization", name: "Org" },
+                                { "@type": "WebSite", name: "Site" }
+                            ] as never
+                        }
+                    })
+                    .process(MINIMAL_HTML);
+
+                const jsonLd = extractJsonLd(String(result));
+                expect(jsonLd).toHaveLength(1);
+                expect(jsonLd[0]).toEqual({
+                    "@context": "https://schema.org",
+                    "@graph": [
+                        { "@type": "Organization", name: "Org" },
+                        { "@type": "WebSite", name: "Site" }
+                    ]
+                });
+            });
+
+            test("template JSON-LD preserved alongside injected", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: false,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[]}</script></head><body></body></html>`;
+                const result = await processor
+                    .getHtmlProcessor({
+                        metadata: {
+                            jsonLd: {
+                                "@type": "Article",
+                                headline: "Test"
+                            } as never
+                        }
+                    })
+                    .process(html);
+
+                const jsonLd = extractJsonLd(String(result));
+                expect(jsonLd).toHaveLength(2);
+                expect(jsonLd).toContainEqual({
+                    "@context": "https://schema.org",
+                    "@type": "BreadcrumbList",
+                    itemListElement: []
+                });
+                expect(jsonLd).toContainEqual({
+                    "@context": "https://schema.org",
+                    "@type": "Article",
+                    headline: "Test"
+                });
+            });
+        });
+
+        describe("defaults cascade with HTML", () => {
+            test("three-way cascade: defaults + page + template", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: false,
+                    compressHTML: false,
+                    defaults: { title: "Default" },
+                    routePatterns: []
+                });
+
+                const ctx = mockContext();
+                setPagemeta(ctx, { description: "Page desc" });
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- setPagemeta guarantees metadata
+                const metadata = processor.resolvePagemeta(ctx)!;
+
+                const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="generator" content="Astro"></head><body></body></html>`;
+                const result = await processor
+                    .getHtmlProcessor({ metadata })
+                    .process(html);
+
+                const meta = extractMeta(String(result));
+                expect(meta).toContainEqual({
+                    properties: { text: "Default" },
+                    tag: "title"
+                });
+                expect(meta).toContainEqual({
+                    properties: { content: "Page desc", name: "description" },
+                    tag: "meta"
+                });
+                expect(meta).toContainEqual({
+                    properties: { content: "Astro", name: "generator" },
+                    tag: "meta"
+                });
+            });
+
+            test("defaults override template title", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: false,
+                    compressHTML: false,
+                    defaults: { title: "Default" },
+                    routePatterns: []
+                });
+
+                // No page metadata — only defaults apply
+                const ctx = mockContext();
+                setPagemeta(ctx, {});
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- defaults guarantee metadata
+                const metadata = processor.resolvePagemeta(ctx)!;
+
+                const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Template</title></head><body></body></html>`;
+                const result = await processor
+                    .getHtmlProcessor({ metadata })
+                    .process(html);
+
+                const meta = extractMeta(String(result));
+                const titles = meta.filter((m) => m.tag === "title");
+                expect(titles).toHaveLength(1);
+                expect(titles[0]).toEqual({
+                    properties: { text: "Default" },
+                    tag: "title"
+                });
+            });
+        });
+
+        describe("addRequiredGlobalMeta combinations", () => {
+            test("only charset missing — injects charset only", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: true,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                const html = `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"></head><body></body></html>`;
+                const result = await processor
+                    .getHtmlProcessor({ metadata: { title: "Test" } })
+                    .process(html);
+
+                const meta = extractMeta(String(result));
+                expect(meta).toContainEqual({
+                    properties: { charSet: "utf-8" },
+                    tag: "meta"
+                });
+                // Viewport should not be duplicated
+                const viewportTags = meta.filter(
+                    (m) =>
+                        m.tag === "meta" &&
+                        "name" in m.properties &&
+                        m.properties["name"] === "viewport"
+                );
+                expect(viewportTags).toHaveLength(1);
+            });
+
+            test("only viewport missing — injects viewport only", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: true,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                const result = await processor
+                    .getHtmlProcessor({ metadata: { title: "Test" } })
+                    .process(MINIMAL_HTML);
+
+                const meta = extractMeta(String(result));
+                expect(meta).toContainEqual({
+                    properties: {
+                        content: "width=device-width",
+                        name: "viewport"
+                    },
+                    tag: "meta"
+                });
+                // Charset should not be duplicated
+                const charsetTags = meta.filter(
+                    (m) => m.tag === "meta" && "charSet" in m.properties
+                );
+                expect(charsetTags).toHaveLength(1);
+            });
+
+            test("no head element — both injected into rehype-created head", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: true,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                const html = `<!DOCTYPE html><html><body></body></html>`;
+                const result = await processor
+                    .getHtmlProcessor({ metadata: { title: "Test" } })
+                    .process(html);
+
+                const meta = extractMeta(String(result));
+                expect(meta).toContainEqual({
+                    properties: { charSet: "utf-8" },
+                    tag: "meta"
+                });
+                expect(meta).toContainEqual({
+                    properties: {
+                        content: "width=device-width",
+                        name: "viewport"
+                    },
+                    tag: "meta"
+                });
+            });
+
+            test("disabled — does not inject charset/viewport", async () => {
+                const processor = createPagemetaProcessor({
+                    addRequiredGlobalMeta: false,
+                    compressHTML: false,
+                    routePatterns: []
+                });
+
+                const html = `<!DOCTYPE html><html><head></head><body></body></html>`;
+                const result = await processor
+                    .getHtmlProcessor({ metadata: { title: "Test" } })
+                    .process(html);
+
+                const meta = extractMeta(String(result));
+                expect(
+                    meta.some(
+                        (m) => m.tag === "meta" && "charSet" in m.properties
+                    )
+                ).toBe(false);
+                expect(
+                    meta.some(
+                        (m) =>
+                            m.tag === "meta" &&
+                            "name" in m.properties &&
+                            m.properties["name"] === "viewport"
+                    )
+                ).toBe(false);
+            });
+        });
+    });
+
+    describe("resolvePagemeta — additional error cases", () => {
+        test("throws when function defaults returns undefined", () => {
+            const processor = createPagemetaProcessor({
+                addRequiredGlobalMeta: false,
+                compressHTML: false,
+                // @ts-expect-error -- testing invalid return type
+                // eslint-disable-next-line @typescript-eslint/no-empty-function -- testing invalid return type
+                defaults: () => {},
+                routePatterns: []
+            });
+            const ctx = mockContext();
+            setPagemeta(ctx, { title: "Trigger" });
+            expect(() => processor.resolvePagemeta(ctx)).toThrow(
+                "defaults function must return an object, got undefined"
+            );
+        });
+
+        test("throws when function defaults returns number", () => {
+            const processor = createPagemetaProcessor({
+                addRequiredGlobalMeta: false,
+                compressHTML: false,
+                // @ts-expect-error -- testing invalid return type
+                defaults: () => 42,
+                routePatterns: []
+            });
+            const ctx = mockContext();
+            setPagemeta(ctx, { title: "Trigger" });
+            expect(() => processor.resolvePagemeta(ctx)).toThrow(
+                "defaults function must return an object, got number"
+            );
+        });
+
+        test("throws when function defaults returns false", () => {
+            const processor = createPagemetaProcessor({
+                addRequiredGlobalMeta: false,
+                compressHTML: false,
+                // @ts-expect-error -- testing invalid return type
+                defaults: () => false,
+                routePatterns: []
+            });
+            const ctx = mockContext();
+            setPagemeta(ctx, { title: "Trigger" });
+            expect(() => processor.resolvePagemeta(ctx)).toThrow(
+                "defaults function must return an object, got boolean"
+            );
+        });
+    });
+
+    describe("setPagemeta + resolvePagemeta + getHtmlProcessor integration", () => {
+        test("multiple setPagemeta calls merge into final HTML output", async () => {
+            const processor = createPagemetaProcessor({
+                addRequiredGlobalMeta: false,
+                compressHTML: false,
+                routePatterns: []
+            });
+
+            const ctx = mockContext();
+            setPagemeta(ctx, { title: "My Title" });
+            setPagemeta(ctx, {
+                custom: { "og:image": "https://example.com/img.png" },
+                description: "My Desc"
+            });
+
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- setPagemeta guarantees metadata
+            const metadata = processor.resolvePagemeta(ctx)!;
+            const result = await processor
+                .getHtmlProcessor({ metadata })
+                .process(MINIMAL_HTML);
+
+            const meta = extractMeta(String(result));
+            expect(meta).toContainEqual({
+                properties: { text: "My Title" },
+                tag: "title"
+            });
+            expect(meta).toContainEqual({
+                properties: { content: "My Desc", name: "description" },
+                tag: "meta"
+            });
+            expect(meta).toContainEqual({
+                properties: {
+                    content: "https://example.com/img.png",
+                    property: "og:image"
+                },
+                tag: "meta"
+            });
+        });
     });
 });

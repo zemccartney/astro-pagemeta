@@ -39,11 +39,15 @@ const metadata = Processor.resolvePagemeta(Astro);
 const templateMeta =
     Astro.slots.has("default") ? await Astro.slots.render("default") : "";
 
-let head;
+let processedHeadContents;
 if (metadata) {
     const processor = Processor.getHtmlProcessor({ fragment: true, metadata });
-    head = await processor.process(templateMeta);
+    processedHeadContents = await processor.process(templateMeta);
 }
 ---
 
-<Fragment set:html={head ? String(head) : templateMeta} />
+<Fragment
+    set:html={processedHeadContents ?
+        String(processedHeadContents)
+    :   templateMeta}
+/>

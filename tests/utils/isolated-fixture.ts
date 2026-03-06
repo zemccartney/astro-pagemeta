@@ -13,7 +13,7 @@ const projectRoot = path.resolve(
     "../.."
 );
 const tmpBase = path.join(projectRoot, ".test-tmp");
-const fixturesBase = path.join(projectRoot, "tests/fixtures");
+const fixturesBase = path.join(projectRoot, "tests/integration/fixtures");
 
 export async function isolatedFixture(
     fixtureName: string,

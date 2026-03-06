@@ -1,16 +1,12 @@
 ---
 /*
- * Streaming-compatible meta tag renderer. Renders inside a static <head>
- * element, preserving Astro's HTML streaming.
+ * Streaming-compatible <head> renderer. Renders a <head> element with
+ * processed meta tags, preserving Astro's HTML streaming.
  *
- * Reuses the same rehype pipeline as the auto-mode middleware. Slot children
- * (template meta tags) are processed through rehype-meta, which handles
- * deduplication within the slot scope — e.g., a template <title> is
- * replaced if setPagemeta() sets a title.
- *
- * Requirements:
- * - Must be inside a static <head> element (Astro needs it for asset injection)
- * - Must be declared in every layout that has its own <head>
+ * Use in place of a hardcoded <head> in layouts. Reuses the same rehype
+ * pipeline as the auto-mode middleware. Slot children (template meta tags)
+ * are processed through rehype-meta, which handles deduplication — e.g.,
+ * a template <title> is replaced if setPagemeta() sets a title.
  *
  * Why rehypeHeadContentsOnly instead of rehype's fragment mode:
  * rehype-meta only operates on documents (it looks for a <head> element).
@@ -29,9 +25,6 @@
  * So we process in document mode (rehype wraps input in <html><head>...</head></html>),
  * let rehype-meta operate normally on the <head>, then strip the wrapper with
  * rehypeHeadContentsOnly to get just the head children for inline rendering.
- *
- * For a hugely helpful resource on Astro's streaming behavior, especially how slot rendering
- * can break Astro's styles injection: https://angelika.me/2025/03/16/implications-of-astro-html-streaming/
  */
 import Processor from "./runtime";
 
@@ -46,7 +39,7 @@ if (metadata) {
 }
 ---
 
-<Fragment
+<head
     set:html={processedHeadContents ?
         String(processedHeadContents)
     :   templateMeta}

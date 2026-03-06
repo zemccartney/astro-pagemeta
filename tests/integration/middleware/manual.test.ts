@@ -10,9 +10,9 @@ import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 /**
  * Manual middleware mode tests.
  *
- * When `manual: true` is set, the integration does NOT register its
+ * When `mode: "manual"` is set, the integration does NOT register its
  * middleware. Pages calling setPagemeta() have no effect unless the
- * user handles processing in their own middleware.
+ * user handles processing in their own middleware or uses the component.
  */
 
 const { cleanup, fixture } = await isolatedFixture("middleware/manual", {
@@ -21,7 +21,7 @@ const { cleanup, fixture } = await isolatedFixture("middleware/manual", {
 });
 
 const config = {
-    integrations: [pagemeta({ manual: true })]
+    integrations: [pagemeta({ mode: "manual" })]
 };
 
 afterAll(() => cleanup());

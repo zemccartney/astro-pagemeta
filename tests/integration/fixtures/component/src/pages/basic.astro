@@ -1,5 +1,5 @@
 ---
-import Pagemeta from "@grepco/astro-pagemeta/Pagemeta";
+import Head from "@grepco/astro-pagemeta/Head";
 import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
 
 setPagemeta(Astro, {
@@ -10,11 +10,9 @@ setPagemeta(Astro, {
 
 <!doctype html>
 <html lang="en">
-    <head>
-        <Pagemeta>
-            <meta charset="utf-8" />
-        </Pagemeta>
-    </head>
+    <Head>
+        <meta charset="utf-8" />
+    </Head>
     <body>
         <p>Hello world</p>
     </body>

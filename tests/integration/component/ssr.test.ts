@@ -11,7 +11,7 @@ import {
 } from "../../utils/html-parse.ts";
 import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 
-const { cleanup, fixture } = await isolatedFixture("streaming", {
+const { cleanup, fixture } = await isolatedFixture("component", {
     adapter: testAdapter(),
     output: "server"
 });
@@ -20,14 +20,14 @@ const config = {
     integrations: [
         pagemeta({
             defaults: { author: "Default Author" },
-            mode: "streaming"
+            mode: "manual"
         })
     ]
 };
 
 afterAll(() => cleanup());
 
-describe("streaming / SSR / dev server", () => {
+describe("component / SSR / dev server", () => {
     let devServer: Awaited<ReturnType<typeof fixture.startDevServer>>;
 
     beforeAll(async () => {
@@ -271,7 +271,7 @@ describe("streaming / SSR / dev server", () => {
     });
 });
 
-describe("streaming / SSR / build", () => {
+describe("component / SSR / build", () => {
     let app: TestApp;
 
     beforeAll(async () => {

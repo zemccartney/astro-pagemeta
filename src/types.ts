@@ -3,7 +3,5 @@ import type { Thing } from "schema-dts";
 
 export interface PagemetaOptions extends Options {
     custom?: Record<string, string>;
-    jsonLd?: JsonLd | JsonLd[];
+    jsonLd?: Thing | Thing[];
 }
-
-type JsonLd = Thing;

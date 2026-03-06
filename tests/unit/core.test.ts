@@ -387,9 +387,9 @@ describe("createPagemetaProcessor", () => {
             expect(html).toContain('"@context": "https://schema.org"');
         });
 
-        test("adds required global meta when enabled", async () => {
+        test("adds required global meta via custom keys", async () => {
             const processor = createPagemetaProcessor({
-                addRequiredGlobalMeta: true,
+                addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
             });
@@ -397,7 +397,13 @@ describe("createPagemetaProcessor", () => {
             const bareHtml = `<!DOCTYPE html><html><head></head><body></body></html>`;
             const result = await processor
                 .getHtmlProcessor({
-                    metadata: { title: "Test" }
+                    metadata: {
+                        custom: {
+                            "meta:charSet": "utf-8",
+                            viewport: "width=device-width"
+                        },
+                        title: "Test"
+                    }
                 })
                 .process(bareHtml);
 
@@ -414,14 +420,20 @@ describe("createPagemetaProcessor", () => {
 
         test("skips required global meta when already present", async () => {
             const processor = createPagemetaProcessor({
-                addRequiredGlobalMeta: true,
+                addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
             });
 
             const result = await processor
                 .getHtmlProcessor({
-                    metadata: { title: "Test" }
+                    metadata: {
+                        custom: {
+                            "meta:charSet": "utf-8",
+                            viewport: "width=device-width"
+                        },
+                        title: "Test"
+                    }
                 })
                 .process(MINIMAL_HTML);
 
@@ -825,16 +837,23 @@ describe("createPagemetaProcessor", () => {
         });
 
         describe("addRequiredGlobalMeta combinations", () => {
+            const REQUIRED_CUSTOM = {
+                "meta:charSet": "utf-8",
+                viewport: "width=device-width"
+            };
+
             test("only charset missing — injects charset only", async () => {
                 const processor = createPagemetaProcessor({
-                    addRequiredGlobalMeta: true,
+                    addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
                 });
 
                 const html = `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width"></head><body></body></html>`;
                 const result = await processor
-                    .getHtmlProcessor({ metadata: { title: "Test" } })
+                    .getHtmlProcessor({
+                        metadata: { custom: REQUIRED_CUSTOM, title: "Test" }
+                    })
                     .process(html);
 
                 const meta = extractMeta(String(result));
@@ -854,13 +873,15 @@ describe("createPagemetaProcessor", () => {
 
             test("only viewport missing — injects viewport only", async () => {
                 const processor = createPagemetaProcessor({
-                    addRequiredGlobalMeta: true,
+                    addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
                 });
 
                 const result = await processor
-                    .getHtmlProcessor({ metadata: { title: "Test" } })
+                    .getHtmlProcessor({
+                        metadata: { custom: REQUIRED_CUSTOM, title: "Test" }
+                    })
                     .process(MINIMAL_HTML);
 
                 const meta = extractMeta(String(result));
@@ -880,14 +901,16 @@ describe("createPagemetaProcessor", () => {
 
             test("no head element — both injected into rehype-created head", async () => {
                 const processor = createPagemetaProcessor({
-                    addRequiredGlobalMeta: true,
+                    addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
                 });
 
                 const html = `<!DOCTYPE html><html><body></body></html>`;
                 const result = await processor
-                    .getHtmlProcessor({ metadata: { title: "Test" } })
+                    .getHtmlProcessor({
+                        metadata: { custom: REQUIRED_CUSTOM, title: "Test" }
+                    })
                     .process(html);
 
                 const meta = extractMeta(String(result));
@@ -904,7 +927,7 @@ describe("createPagemetaProcessor", () => {
                 });
             });
 
-            test("disabled — does not inject charset/viewport", async () => {
+            test("without required globals custom — does not inject charset/viewport", async () => {
                 const processor = createPagemetaProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,

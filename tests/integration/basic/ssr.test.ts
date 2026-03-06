@@ -215,6 +215,28 @@ describe("SSR / dev server", () => {
         ]);
     });
 
+    // Documented limitation: hardcoded template tags are not inputs to
+    // rehype-meta's dependent-key logic. A template <meta name="author">
+    // doesn't feed into copyright generation because rehype-meta never sees it.
+    test("hardcoded template author does not feed into rehype-meta copyright", async () => {
+        const response = await fixture.fetch("/copyright-wrinkle");
+        const html = await response.text();
+        const headMeta = extractMeta(html);
+
+        // Template author is preserved
+        expect(headMeta).toContainEqual({
+            properties: { content: "Arundhati Roy", name: "author" },
+            tag: "meta"
+        });
+
+        // But no copyright meta is generated — rehype-meta doesn't see
+        // the template's author value, so copyright: true is a no-op
+        const copyrightMeta = headMeta.filter(
+            (m) => m.tag === "meta" && m.properties["name"] === "copyright"
+        );
+        expect(copyrightMeta).toHaveLength(0);
+    });
+
     test("Astro-injected styles survive rehype processing", async () => {
         const response = await fixture.fetch("/with-styled-component");
         const html = await response.text();
@@ -457,6 +479,24 @@ describe("SSR / build", () => {
                 tag: "meta"
             }
         ]);
+    });
+
+    test("hardcoded template author does not feed into rehype-meta copyright", async () => {
+        const response = await app.render(
+            new Request("https://example.com/copyright-wrinkle")
+        );
+        const html = await response.text();
+        const headMeta = extractMeta(html);
+
+        expect(headMeta).toContainEqual({
+            properties: { content: "Arundhati Roy", name: "author" },
+            tag: "meta"
+        });
+
+        const copyrightMeta = headMeta.filter(
+            (m) => m.tag === "meta" && m.properties["name"] === "copyright"
+        );
+        expect(copyrightMeta).toHaveLength(0);
     });
 
     test("Astro-injected styles survive rehype processing", async () => {

@@ -38,7 +38,7 @@ await inject(
 );
 
 const config = {
-    integrations: [pagemeta({ manual: true })]
+    integrations: [pagemeta({ mode: "manual" })]
 };
 
 afterAll(() => cleanup());

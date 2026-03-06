@@ -10,7 +10,7 @@ import { z } from "astro/zod";
 
 import type { PagemetaOptions } from "./types.ts";
 
-const _optionsSchema = z
+const optionsSchema = z
     .object({
         addRequiredGlobalMeta: z.boolean().optional().default(false),
         defaults: z
@@ -27,44 +27,10 @@ const _optionsSchema = z
             ])
             .optional(),
         includeExternalPages: z.boolean().optional().default(false),
-        manual: z.boolean().optional().default(false),
-        mode: z.enum(["auto", "streaming"]).optional().default("auto")
+        mode: z.enum(["auto", "manual"]).optional().default("auto")
     })
-    .refine((opts) => !(opts.mode === "streaming" && opts.manual), {
-        message: "`manual` is only valid when mode is 'auto'",
-        path: ["manual"]
-    })
-    .refine(
-        (opts) => !(opts.mode === "streaming" && opts.includeExternalPages),
-        {
-            message:
-                "`includeExternalPages` is only valid when mode is 'auto' (it controls middleware route filtering; streaming mode has no middleware)",
-            path: ["includeExternalPages"]
-        }
-    )
     .optional()
     .default({});
-
-type OptionsInput =
-    | {
-          addRequiredGlobalMeta?: boolean;
-          defaults?: ((ctx: APIContext) => PagemetaOptions) | PagemetaOptions;
-          includeExternalPages?: boolean;
-          manual?: boolean;
-          mode?: "auto";
-      }
-    | {
-          addRequiredGlobalMeta?: boolean;
-          defaults?: ((ctx: APIContext) => PagemetaOptions) | PagemetaOptions;
-          mode: "streaming";
-      };
-
-// Accounts for how refine doesn't surface invalid input as typescript errors, only runtime
-const optionsSchema = _optionsSchema as z.ZodType<
-    z.output<typeof _optionsSchema>,
-    z.ZodTypeDef,
-    OptionsInput | undefined
->;
 
 const VIRTUAL_CONFIG_ID = "virtual:pagemeta/config";
 const RESOLVED_CONFIG_ID = "\0" + VIRTUAL_CONFIG_ID;
@@ -145,7 +111,7 @@ export default defineIntegration({
                         plugin: configPlugin.plugin
                     });
 
-                    if (options.mode !== "streaming" && !options.manual) {
+                    if (options.mode !== "manual") {
                         params.addMiddleware({
                             entrypoint: resolve("./middleware.ts"),
                             order: "post"

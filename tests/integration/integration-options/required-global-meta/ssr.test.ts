@@ -215,6 +215,80 @@ describe("addRequiredGlobalMeta enabled", async () => {
     });
 });
 
+// addRequiredGlobalMeta: true, no defaults — verifies injection
+// even when no setPagemeta() call and no defaults are configured
+describe("addRequiredGlobalMeta enabled, no defaults", async () => {
+    const { cleanup, fixture } = await isolatedFixture("required-global-meta", {
+        adapter: testAdapter(),
+        output: "server"
+    });
+
+    const config = {
+        integrations: [pagemeta({ addRequiredGlobalMeta: true })]
+    };
+
+    afterAll(() => cleanup());
+
+    describe("dev server", () => {
+        let devServer: Awaited<ReturnType<typeof fixture.startDevServer>>;
+
+        beforeAll(async () => {
+            devServer = await fixture.startDevServer(config);
+        });
+
+        afterAll(async () => {
+            await devServer.stop();
+        });
+
+        test("injects charset and viewport on page with no setPagemeta call", async () => {
+            const response = await fixture.fetch("/no-meta");
+            const html = await response.text();
+            const headMeta = extractMeta(html);
+
+            expect(headMeta).toContainEqual({
+                properties: { charSet: "utf-8" },
+                tag: "meta"
+            });
+            expect(headMeta).toContainEqual({
+                properties: {
+                    content: "width=device-width",
+                    name: "viewport"
+                },
+                tag: "meta"
+            });
+        });
+    });
+
+    describe("build", () => {
+        let app: TestApp;
+
+        beforeAll(async () => {
+            await fixture.build(config);
+            app = await fixture.loadTestAdapterApp();
+        });
+
+        test("injects charset and viewport on page with no setPagemeta call", async () => {
+            const response = await app.render(
+                new Request("https://example.com/no-meta")
+            );
+            const html = await response.text();
+            const headMeta = extractMeta(html);
+
+            expect(headMeta).toContainEqual({
+                properties: { charSet: "utf-8" },
+                tag: "meta"
+            });
+            expect(headMeta).toContainEqual({
+                properties: {
+                    content: "width=device-width",
+                    name: "viewport"
+                },
+                tag: "meta"
+            });
+        });
+    });
+});
+
 // addRequiredGlobalMeta: false (default) — no injection
 describe("addRequiredGlobalMeta disabled (default)", async () => {
     const { cleanup, fixture } = await isolatedFixture("required-global-meta", {

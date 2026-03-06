@@ -1,0 +1,27 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+// copyright: true should generate a copyright meta tag from the author,
+// but since the author is only in the template (not passed to setPagemeta),
+// rehype-meta doesn't see it and copyright is not generated.
+setPagemeta(Astro, {
+    copyright: true
+});
+---
+
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            content="Arundhati Roy"
+            name="author"
+        />
+    </head>
+    <body>
+        <p>
+            Tests that hardcoded template tags are not inputs to rehype-meta's
+            dependent-key logic.
+        </p>
+    </body>
+</html>

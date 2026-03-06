@@ -24,12 +24,12 @@
             "types": "./dist/index.d.ts",
             "default": "./dist/index.js"
         },
-        "./Pagemeta": "./src/Pagemeta.astro",
+        "./Head": "./src/Head.astro",
         "./runtime": "./src/runtime.ts"
     },
     "files": [
         "dist",
-        "src/Pagemeta.astro",
+        "src/Head.astro",
         "src/core.ts",
         "src/runtime.ts",
         "src/virtual.d.ts"

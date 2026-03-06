@@ -63,6 +63,7 @@ export const extractJsonLd = (html: string): unknown[] => {
  * scripts) survive rehype processing.
  */
 export const extractHeadElements = (html: string) => {
+    assertValidDocumentStructure(html);
     const tree = parseHtml(html);
     const head = select("head", tree);
     if (!head) return [];
@@ -79,8 +80,32 @@ export const extractHeadElements = (html: string) => {
         });
 };
 
-export const extractMeta = (html: string) =>
-    query(html, "head > title, head > meta, head > link");
+/**
+ * Validates that raw HTML has well-formed document structure before
+ * rehype parsing normalizes it away. Catches issues like nested
+ * `<head>` elements that rehype silently flattens.
+ */
+export function assertValidDocumentStructure(html: string): void {
+    const headMatches = html.match(/<head[\s>]/gi);
+    if (headMatches && headMatches.length > 1) {
+        throw new Error(
+            `Malformed HTML: found ${headMatches.length} <head> elements (expected at most 1).\n` +
+                `This likely means a component is rendering a <head> inside an existing <head>.`
+        );
+    }
+
+    const bodyMatches = html.match(/<body[\s>]/gi);
+    if (bodyMatches && bodyMatches.length > 1) {
+        throw new Error(
+            `Malformed HTML: found ${bodyMatches.length} <body> elements (expected at most 1).`
+        );
+    }
+}
+
+export const extractMeta = (html: string) => {
+    assertValidDocumentStructure(html);
+    return query(html, "head > title, head > meta, head > link");
+};
 
 /**
  * Extract the server island preload URL from rendered page HTML.

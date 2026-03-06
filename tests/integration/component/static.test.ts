@@ -1,32 +1,26 @@
-import type { TestApp } from "@inox-tools/astro-tests/astroFixture";
-
-import testAdapter from "@inox-tools/astro-tests/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import pagemeta from "../../../src/index.ts";
 import { extractMeta } from "../../utils/html-parse.ts";
 import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 
-// Uses the streaming fixture but with auto mode config (middleware active).
-// Documents that the component works alongside the middleware — rehype-meta's
-// ensure() deduplicates on the middleware's second pass, producing no duplicates.
-const { cleanup, fixture } = await isolatedFixture("streaming", {
-    adapter: testAdapter(),
-    output: "server"
-});
+// Demonstrates that the <Pagemeta> component works with static rendering —
+// it isn't dependent on SSR. Static builds still have middleware and locals
+// during build-time rendering, so resolvePagemeta() works the same way.
+const { cleanup, fixture } = await isolatedFixture("component");
 
 const config = {
     integrations: [
         pagemeta({
             defaults: { author: "Default Author" },
-            mode: "auto"
+            mode: "manual"
         })
     ]
 };
 
 afterAll(() => cleanup());
 
-describe("component + auto mode / SSR / dev server", () => {
+describe("component / static / dev server", () => {
     let devServer: Awaited<ReturnType<typeof fixture.startDevServer>>;
 
     beforeAll(async () => {
@@ -37,14 +31,11 @@ describe("component + auto mode / SSR / dev server", () => {
         await devServer.stop();
     });
 
-    test("component output + middleware re-processing produces no duplicates", async () => {
-        const response = await fixture.fetch("/auto-mode");
+    test("injects title and description meta tags", async () => {
+        const response = await fixture.fetch("/basic");
         const html = await response.text();
         const headMeta = extractMeta(html);
 
-        // The component renders meta tags inline, then the middleware
-        // re-processes the full document. rehype-meta's ensure() finds
-        // the existing tags and updates them rather than duplicating.
         expect(headMeta).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
             { properties: { text: "Test Page Title" }, tag: "title" },
@@ -61,22 +52,31 @@ describe("component + auto mode / SSR / dev server", () => {
             }
         ]);
     });
-});
 
-describe("component + auto mode / SSR / build", () => {
-    let app: TestApp;
-
-    beforeAll(async () => {
-        await fixture.build(config);
-        app = await fixture.loadTestAdapterApp();
-    });
-
-    test("component output + middleware re-processing produces no duplicates", async () => {
-        const response = await app.render(
-            new Request("https://example.com/auto-mode")
-        );
+    test("integration defaults apply via the component", async () => {
+        const response = await fixture.fetch("/defaults-only");
         const html = await response.text();
         const headMeta = extractMeta(html);
+
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
+            {
+                properties: { content: "Default Author", name: "author" },
+                tag: "meta"
+            }
+        ]);
+    });
+});
+
+describe("component / static / build", () => {
+    beforeAll(async () => {
+        await fixture.build(config);
+    });
+
+    test("injects title and description meta tags", async () => {
+        const html = await fixture.readFile("/basic/index.html");
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
+        const headMeta = extractMeta(html!);
 
         expect(headMeta).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
@@ -88,6 +88,20 @@ describe("component + auto mode / SSR / build", () => {
                 },
                 tag: "meta"
             },
+            {
+                properties: { content: "Default Author", name: "author" },
+                tag: "meta"
+            }
+        ]);
+    });
+
+    test("integration defaults apply via the component", async () => {
+        const html = await fixture.readFile("/defaults-only/index.html");
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
+        const headMeta = extractMeta(html!);
+
+        expect(headMeta).toEqual([
+            { properties: { charSet: "utf-8" }, tag: "meta" },
             {
                 properties: { content: "Default Author", name: "author" },
                 tag: "meta"

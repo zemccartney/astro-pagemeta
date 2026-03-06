@@ -11,18 +11,18 @@ import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 // the absence of any metadata (no defaults, no setPagemeta call).
 // Common scenario: integration in layout template, but a given page
 // doesn't need custom meta tags.
-const { cleanup, fixture } = await isolatedFixture("streaming", {
+const { cleanup, fixture } = await isolatedFixture("component", {
     adapter: testAdapter(),
     output: "server"
 });
 
 const config = {
-    integrations: [pagemeta({ mode: "streaming" })]
+    integrations: [pagemeta({ mode: "manual" })]
 };
 
 afterAll(() => cleanup());
 
-describe("streaming / no defaults / dev server", () => {
+describe("component / no defaults / dev server", () => {
     let devServer: Awaited<ReturnType<typeof fixture.startDevServer>>;
 
     beforeAll(async () => {
@@ -57,7 +57,7 @@ describe("streaming / no defaults / dev server", () => {
     });
 });
 
-describe("streaming / no defaults / build", () => {
+describe("component / no defaults / build", () => {
     let app: TestApp;
 
     beforeAll(async () => {

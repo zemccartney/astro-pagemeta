@@ -2,7 +2,7 @@
 import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
 
 // setPagemeta is called, but no <Pagemeta> component is used.
-// In streaming mode, nothing should be injected without the component.
+// In manual mode, nothing should be injected without the component or middleware.
 setPagemeta(Astro, {
     description: "This should not appear",
     title: "Should Not Appear"

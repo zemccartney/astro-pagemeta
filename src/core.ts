@@ -34,58 +34,7 @@ export const isOgProperty = (key: string) =>
 
 const CANONICAL_KEY = "link:rel:canonical";
 
-export function rehypeAddRequiredGlobalMeta() {
-    // eslint-disable-next-line unicorn/consistent-function-scoping -- prefer consistency with other plugins
-    return (tree: Root) => {
-        const head = select("head", tree);
-        if (!head) return;
-
-        for (const key of ["charset", "viewport"] as const) {
-            const existing = head.children.find(
-                (node): node is Element =>
-                    node.type === "element" &&
-                    node.tagName === "meta" &&
-                    (key === "charset" ?
-                        // note camel-casing from rehype
-                        "charSet" in node.properties
-                    :   node.properties["name"] === key)
-            );
-
-            if (!existing) {
-                switch (key) {
-                    case "charset": {
-                        head.children.push(
-                            {
-                                children: [],
-                                properties: { charSet: "utf-8" },
-                                tagName: "meta",
-                                type: "element"
-                            },
-                            newline()
-                        );
-                        break;
-                    }
-                    case "viewport": {
-                        head.children.push(
-                            {
-                                children: [],
-                                properties: {
-                                    name: key,
-                                    // eslint-disable-next-line perfectionist/sort-objects -- prefer standard meta tag attribute ordering
-                                    content: "width=device-width"
-                                },
-                                tagName: "meta",
-                                type: "element"
-                            },
-                            newline()
-                        );
-                        break;
-                    }
-                }
-            }
-        }
-    };
-}
+const CHARSET_KEY = "meta:charSet";
 
 export function rehypeCustomMeta(meta: Record<string, string>) {
     return (tree: Root) => {
@@ -106,6 +55,30 @@ export function rehypeCustomMeta(meta: Record<string, string>) {
                             children: [{ type: "text", value }],
                             properties: {},
                             tagName: "title",
+                            type: "element"
+                        },
+                        newline()
+                    );
+                }
+                continue;
+            }
+
+            if (key === CHARSET_KEY) {
+                // rehype-parse normalizes `charset` to camelCase `charSet`
+                const existing = head.children.find(
+                    (node): node is Element =>
+                        node.type === "element" &&
+                        node.tagName === "meta" &&
+                        "charSet" in node.properties
+                );
+                if (existing) {
+                    existing.properties["charSet"] = value;
+                } else {
+                    head.children.push(
+                        {
+                            children: [],
+                            properties: { charSet: value },
+                            tagName: "meta",
                             type: "element"
                         },
                         newline()
@@ -296,9 +269,6 @@ export function createPagemetaProcessor(config: PagemetaProcessorConfig) {
                     jsonLd: jsonLd as unknown as FakeSchema
                 });
             }
-            if (config.addRequiredGlobalMeta) {
-                processor.use(rehypeAddRequiredGlobalMeta);
-            }
             if (custom && Object.keys(custom).length > 0) {
                 processor.use(rehypeCustomMeta, custom);
             }
@@ -343,13 +313,30 @@ export function createPagemetaProcessor(config: PagemetaProcessorConfig) {
                 computedDefaults = config.defaults ?? {};
             }
 
-            if (!pageMeta && Object.keys(computedDefaults).length === 0) {
+            const requiredGlobalMeta =
+                config.addRequiredGlobalMeta ?
+                    {
+                        [CHARSET_KEY]: "utf-8",
+                        viewport: "width=device-width"
+                    }
+                :   undefined;
+
+            if (
+                !pageMeta &&
+                Object.keys(computedDefaults).length === 0 &&
+                !requiredGlobalMeta
+            ) {
                 return;
             }
 
             const merged = { ...computedDefaults, ...pageMeta };
-            if (computedDefaults.custom || pageMeta?.custom) {
+            if (
+                requiredGlobalMeta ||
+                computedDefaults.custom ||
+                pageMeta?.custom
+            ) {
                 merged.custom = {
+                    ...requiredGlobalMeta,
                     ...computedDefaults.custom,
                     ...pageMeta?.custom
                 };

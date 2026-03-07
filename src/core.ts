@@ -145,6 +145,7 @@ export function rehypeCustomMeta(meta: Record<string, string>) {
  * Rehype plugin that extracts the children of the `<head>` element,
  * discarding the document wrapper. Used by the `<Pagemeta>` component
  * to produce inline head content from rehype-meta's document-mode output.
+ * @returns A rehype transform that replaces the tree with `<head>` children.
  */
 export function rehypeHeadContentsOnly() {
     // eslint-disable-next-line unicorn/consistent-function-scoping -- prefer consistency with other plugins
@@ -164,8 +165,7 @@ export function rehypeHeadContentsOnly() {
  * actions running and file actually being saved
  *
  * Unclear if those types impact end users at all; prelim tests suggest no, but will need to revisit
- *
- * */
+ */
 // eslint-disable-next-line perfectionist/sort-modules -- collocate with main user of type
 type FakeSchema = Record<string, unknown> | Record<string, unknown>[];
 
@@ -208,6 +208,25 @@ export function rehypeJsonLd({
 export const isHtmlDocument = (html: string) =>
     /^<!doctype\s/i.test(html.trimStart());
 
+/**
+ * Set page metadata for the current request. Call this in your page's
+ * frontmatter or in user middleware (before `next()`). Multiple calls
+ * are merged, with later calls taking precedence. `custom` entries are
+ * shallow-merged rather than replaced.
+ *
+ * Pass `false` to opt out of all metadata processing for this request
+ * (no defaults applied, no tags injected).
+ * @param ctx - Astro's request context (`Astro` in page frontmatter,
+ *   or the middleware context object)
+ * @param data - Metadata options to set, or `false` to skip processing
+ * @example
+ * ```astro
+ * ---
+ * import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+ * setPagemeta(Astro, { title: "My Page", description: "A description" });
+ * ---
+ * ```
+ */
 export const setPagemeta = (
     ctx: Readonly<APIContext>,
     data: false | Readonly<PagemetaOptions>

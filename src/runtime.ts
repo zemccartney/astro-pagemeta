@@ -19,6 +19,20 @@ const processor = createPagemetaProcessor({
 
 export default processor;
 
+/**
+ * Create the pagemeta middleware. Only needed when using `mode: "manual"` —
+ * in the default `"auto"` mode, the integration registers middleware itself.
+ * @returns An Astro middleware that intercepts page responses and injects
+ *   metadata tags into the HTML `<head>`.
+ * @example
+ * ```ts
+ * // src/middleware.ts
+ * import { middleware as pagemeta } from "@grepco/astro-pagemeta/runtime";
+ * import { sequence } from "astro:middleware";
+ *
+ * export const onRequest = sequence(myMiddleware, pagemeta());
+ * ```
+ */
 export const middleware = () => {
     return defineMiddleware(async (ctx, next) => {
         const response = await next();
@@ -50,7 +64,7 @@ export const middleware = () => {
          *
          * unsure this explanation is 100% accurate, but at least
          * lines up with observable behavior
-         * */
+         */
         if (!isHtmlDocument(html)) {
             return new Response(html, {
                 headers: response.headers,

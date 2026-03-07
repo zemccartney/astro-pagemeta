@@ -87,6 +87,33 @@ function createConfigPlugin({
     };
 }
 
+/**
+ * Astro integration that automatically injects page metadata (`<title>`,
+ * `<meta>`, Open Graph tags, JSON-LD) into rendered HTML. Pages set their
+ * metadata via `setPagemeta()` in frontmatter; the integration handles
+ * the rest via post-render middleware.
+ * @param options - Integration configuration
+ * @param options.defaults - Default metadata applied to all pages. Can be
+ *   an object or a function receiving `APIContext` for per-request defaults.
+ *   Functions are serialized via `toString()` — closures are not supported.
+ * @param options.addRequiredGlobalMeta - When `true`, injects
+ *   `<meta charset="utf-8">` and `<meta name="viewport" content="width=device-width">`
+ *   if not already present.
+ * @param options.mode - `"auto"` (default) registers middleware automatically.
+ *   `"manual"` requires you to add the middleware yourself via the `middleware()`
+ *   export from `@grepco/astro-pagemeta/runtime`.
+ * @param options.includeExternalPages - When `true`, also processes pages
+ *   injected by other integrations (not just project pages).
+ * @example
+ * ```ts
+ * // astro.config.ts
+ * import pagemeta from "@grepco/astro-pagemeta";
+ *
+ * export default defineConfig({
+ *   integrations: [pagemeta({ defaults: { title: "My Site" } })],
+ * });
+ * ```
+ */
 export default defineIntegration({
     name: "@grepco/astro-pagemeta",
     optionsSchema,

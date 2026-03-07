@@ -4,6 +4,7 @@ import eslint from "@eslint/js";
 import json from "@eslint/json";
 import prettier from "eslint-config-prettier";
 import astro from "eslint-plugin-astro";
+import jsdoc from "eslint-plugin-jsdoc";
 import pkgJson from "eslint-plugin-package-json";
 import perfectionist from "eslint-plugin-perfectionist";
 import unicorn from "eslint-plugin-unicorn";
@@ -92,6 +93,18 @@ export default defineConfig([
                     allowBoolean: true
                 }
             ]
+        }
+    },
+    {
+        extends: [jsdoc.configs["flat/recommended-typescript-error"]],
+        files: ["src/**/*.ts"],
+        rules: {
+            // But when JSDoc exists, require meaningful content
+            "jsdoc/require-description": "error",
+            // Don't require JSDoc on every function — only enforce style when present
+            "jsdoc/require-jsdoc": "off",
+            "jsdoc/require-param-description": "error",
+            "jsdoc/require-returns-description": "error"
         }
     },
     {

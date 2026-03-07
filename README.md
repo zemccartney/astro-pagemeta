@@ -1,8 +1,12 @@
-# pagemeta
-
-<!-- TODO TOC -->
+# astro-pagemeta
 
 An Astro integration for setting your pages' meta tags
+
+- [What is this?](#what-is-this)
+- [When should I use this?](#when-should-i-use-this)
+- [Installation](#installation)
+- [Basic Usage](#basic-usage)
+- [Documentation](#documentation)
 
 ## What is this?
 
@@ -13,15 +17,13 @@ An Astro integration that aims to simplify setting metadata tags for your pages 
 
 ## When should I use this?
 
-To be clear, you can use this integration for any Astro site, the below is just the main scenario I was solving for (myself, primarily, too, so your mileage may vary :) )
-
 - You need to set metadata for your sites' pages
 - You've structured your pages using one or more [layouts](https://docs.astro.build/en/basics/layouts/), which own the `<head />`
-- you don't like setting metadata by passing props down to your layouts and
-    - EITHER auto-setting metadata with zero layout changes at the expense of HTML streaming
-    - OR your site relies on HTML streaming to performantly serve some or all pages and you can live with adding an element to your template's `<head />`
+- You don't like setting metadata by passing props down to your layouts and either:
+    - Auto-setting metadata with zero layout changes at the expense of [HTML streaming](./docs/streaming.md), or
+    - Your site relies on HTML streaming to performantly serve some or all pages and you can live with adding an element to your template's `<head />`
 
-Why the HTML streaming caveat? It's a bit in the weeds; check out the [in-depth explanation](./docs/streaming.md) to hopefully clear up any questions.
+The HTML streaming caveat is the most significant tradeoff of this integration. See the [in-depth explanation](./docs/streaming.md) for details.
 
 ## Installation
 
@@ -72,22 +74,17 @@ export default defineConfig({
     site: "https://www.example.com",
     integrations: [
         pagemeta({
-            // ctx is Astro's render context i.e. the signature of the Astro global
-            defaults: (ctx) => {
-                const base = {
-                    origin: ctx.site,
-                    pathname: ctx.url.pathname
-                };
-
-                if (ctx.url.pathname !== "/") {
-                    base.name = "ACME";
-                    base.separator = " | ";
-                }
+            defaults: {
+                origin: "https://www.example.com",
+                name: "ACME",
+                separator: " | "
             }
         })
     ]
 });
 ```
+
+Defaults can also be a function that receives [Astro's render context](https://docs.astro.build/en/reference/api-reference/), enabling per-request logic. See the [API reference](./docs/API.md#defaults) and [usage examples](./docs/usage.md) for details.
 
 ... then set whatever metadata you need within your pages
 
@@ -167,10 +164,12 @@ setPagemeta(Astro, {
 </html>
 ```
 
+Metadata set via `setPagemeta` takes precedence over defaults, which take precedence over hardcoded template tags. See [How Metadata Merges](./docs/usage.md#how-metadata-merges) for the full picture.
+
 ## Documentation
 
-There's a pile more you can do with this integration. The following docs should have you covered, but if you find any gaps or have any questions, don't hesitate to file an issue.
+There's more you can do with this integration. The following docs should have you covered, but if you find any gaps or have any questions, don't hesitate to file an issue.
 
 - [API Reference](./docs/API.md)
-- [Usage In-Depth](./docs/usage.md) (defaults system, JSON-LD, Custom extensions / escape hatches, manual middleware)
+- [Usage In-Depth](./docs/usage.md) (merge hierarchy, custom extensions, behavior notes)
 - [Interoperating with Astro's HTML Streaming](./docs/streaming.md)

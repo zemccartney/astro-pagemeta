@@ -2,17 +2,21 @@
 
 A catalog of usage examples and finer-grained documentation of how the integration works
 
-## Defaults
+- [How Metadata Merges](#how-metadata-merges)
+- [Custom Extensions](#custom-extensions)
+- [Behavior Notes](#behavior-notes)
 
-It might not be immediately apparent how all the ways you can set metadata work together, what's their order of precedence.
+## How Metadata Merges
 
-The full cascade is as follows (later overwrite earlier)
+There are three ways metadata can end up in your `<head>`, and it might not be immediately apparent how they interact. The full cascade is (later overwrites earlier):
 
-1. Hardcoded tags
-2. Defaults
-3. Explicitly set i.e. `setPagemeta`
+1. **Hardcoded tags** — elements in your template's `<head>`
+2. **Defaults** — set via the integration's `defaults` option
+3. **`setPagemeta`** — called in page frontmatter or middleware
 
-And the integration navigates this cascade by always deduplicating: if a matching element already exists in the <head>, its value is updated in place rather than adding a duplicate.
+The integration deduplicates at each layer: if a matching element already exists in the `<head>`, its value is updated in place rather than adding a duplicate.
+
+`setPagemeta` itself can be called multiple times within a single request (e.g., once in middleware, once in the page). Calls are merged: top-level properties are shallow-merged (later calls win), while `custom` is deep-merged one level.
 
 So, given
 
@@ -38,7 +42,7 @@ export default defineConfig({
 ---
 import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
 
-setPagemeta({
+setPagemeta(Astro, {
     author: "Author — Explicit"
 });
 ---
@@ -106,21 +110,19 @@ You might expect, per `rehype-meta`'s [`copyright` processing](https://github.co
 />
 ```
 
-Instead, it outputs nothing. `rehype-meta` doesn't see the existing author content and since `copyright` depends on the `author` option being set, `copyright` is ignored.
+Instead, it outputs nothing. `rehype-meta` doesn't see the existing author content, and since `copyright` depends on the `author` option being set, it's ignored. This is a known limitation. Workaround: declare all metadata via the integration's APIs instead of hardcoding in templates.
 
-Given the workaround is to declare all metadata with the integration's APIs instead of in your templates and that fixing would likely mean some form of vendoring and refactoring `rehype-meta` (maybe? not sure, haven't thought too hard about it), this is considered an edge case at time of writing, won't fix unless this behavior proves enough of a pain over time.
+## Custom Extensions
 
-## Customization
+### Design rationale
 
-### Theory / brain dump
-
-The `custom` property of [`PagemetaOptions`](./API.md#pagemetaoptions) is not just for adding any and all tags. It's really a general purpose escape hatch that hopefully allows you to fix any limitations of `rehype-meta`'s API "in post"
+The `custom` property of [`PagemetaOptions`](./API.md#pagemetaoptions-1) is a general-purpose escape hatch from `rehype-meta`'s API.
 
 The mental model: `rehype-meta` options describe _inputs_ to a tag-generation process. `custom` describes the _outputs_ you want, overriding whatever that process produced.
 
-In the integration's processing pipeline, your `custom` input is processed _after_ `rehype-meta` has done its work, which means it can override anything in the final `<head>` output: not just add tags that `rehype-meta` doesn't know about, but also replace tags that `rehype-meta` already set. This matters because rehype-meta has a dependent-keys design: many output tags are derived from combinations of input properties. `og: true` gates all OG tags. The `<title>` element is computed from `title + separator + name`. The canonical `<link>` is derived from `origin + pathname`. If you want fine-grained control — e.g., override just `og:image:alt` without touching `og:image`, or set an exact `<title>` without it being concatenated with a site name — rehype-meta doesn't offer that.
+In the integration's pipeline, `custom` is processed _after_ `rehype-meta` has done its work, which means it can override anything in the final `<head>` output — not just add tags that `rehype-meta` doesn't know about, but also replace tags it already set. This matters because rehype-meta has a dependent-keys design: many output tags are derived from combinations of input properties. `og: true` gates all OG tags. The `<title>` element is computed from `title + separator + name`. The canonical `<link>` is derived from `origin + pathname`. If you want fine-grained control — e.g., override just `og:image:alt` without touching `og:image`, or set an exact `<title>` without it being concatenated with a site name — `rehype-meta` doesn't offer that. `custom` does.
 
-Enough word soup, an example:
+For example:
 
 ```astro
 ---
@@ -169,16 +171,18 @@ And you'd get
 </head>
 ```
 
-### Reference
+Some keys receive special handling to allow overriding any tag the integration might produce. See the [complete key reference](./API.md#custom) in the API docs.
 
-To make this whole escape hatch thing work i.e. allow overriding any tags that might be changed/output by the integration, `custom` has special handling for some keys. Here's a complete catalog of all its handling rules.
+## Behavior Notes
 
-| `custom` key                                                                          | Output                                        |
-| ------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `title`                                                                               | `<title>{value}</title>`                      |
-| `meta:charSet`                                                                        | `<meta charset="{value}" />`                  |
-| `link:rel:canonical`                                                                  | `<link rel="canonical" href="{value}" />`     |
-| `og:*`, `article:*`, `book:*`, `music:*`, `profile:*`, `video:*`, `fb:*`, `payment:*` | `<meta property="{key}" content="{value}" />` |
-| Any other key                                                                         | `<meta name="{key}" content="{value}" />`     |
+**When `setPagemeta` is never called**: If defaults are configured, they still apply. If no defaults are set and `setPagemeta` is never called, the middleware skips processing entirely — the response passes through unmodified.
 
-All keys deduplicate: if a matching element already exists in the `<head>`, its value is updated in place rather than adding a duplicate.
+**Opting out of processing**: Pass `false` to `setPagemeta` to skip all defaults and tag injection for the current request:
+
+```ts
+setPagemeta(Astro, false);
+```
+
+**`compressHTML` integration**: The integration respects Astro's [`compressHTML`](https://docs.astro.build/en/reference/configuration-reference/#compresshtml) config option. When enabled, injected whitespace is stripped and JSON-LD output is minified. When disabled (the default), JSON-LD is pretty-printed with 2-space indentation.
+
+**`Head` component passthrough**: When no metadata is resolved (no defaults, no `setPagemeta` call), the `Head` component renders its slot children as-is without running them through the rehype pipeline — zero processing overhead.

@@ -8,19 +8,13 @@ To use this integration with HTML streaming:
 - replace any hardcoded `<head />`s in your templates with the `Head.astro` component
 - live without the `includeExternalPages` integration option i.e. since this approach requires editing your templates, you won't be able to factor it into any pages added by integrations unless those integrations provide a way to edit said pages' templates
 
-## Background
+## The Problem
 
-The problem: by default (in `"auto"` mode), this integration disables Astro's HTML streaming. Not great!
-
-Let's get into why and how to workaround, but first, just enough background
-
-In on-demand rendering, Astro serves pages in chunks across component boundaries via [HTML streaming](https://docs.astro.build/en/guides/on-demand-rendering/#html-streaming). As [their recipe shows](https://docs.astro.build/en/recipes/streaming-improve-page-performance/), if a component contains some async work i.e. needs to `await` something, Astro's smart enough to figure that out and serve non-awaiting parts of the page, so the user sees some of your content sooner while the more time-intensive pieces load. Great for reducing your [server's response times](https://developer.chrome.com/docs/performance/insights/document-latency).
-
-If you want to get even more into it, I highly recommend reading this [deep dive](https://angelika.me/2025/03/16/implications-of-astro-html-streaming/).
+By default (in `"auto"` mode), this integration disables Astro's HTML streaming. The middleware must consume the entire response to process the `<head>`, which means the end user waits for every component to resolve before seeing anything.
 
 ## Why?
 
-By default, the integration works by injecting a middleware decides which pages to process and then processes your input into meta tags added to the outgoing HTML. You can also opt into this same behavior via `"manual"` mode, then manually using the [`middleware()` export](./API.md#middleware).
+The integration works by injecting a middleware that processes your metadata input into tags added to the outgoing HTML. You can also opt into this same behavior via `"manual"` mode, then manually using the [`middleware()` export](./API.md#middleware).
 
 That is, the integration tends to naively assume we're only ever acting on a full response, not part of one i.e. one component of many used to build up a page.
 
@@ -44,7 +38,9 @@ For pages that would otherwise quickly load simpler parts while waiting on more 
 The `rehype`-based pipeline needs to see the entire document to process it because we need to see the completely resolved
 `<head />` to know how to modify it: what tags already exist so we can know which to overwrite vs. add. And to see the entire document, we need to wait for the entire thing to load.
 
-This limitation is just fine for static sites (you're always serving static HTML, no computation to await) or SSR sites that don't leverage streaming, whether due to their data loading patterns (needing to fetch everything up front) or that most/all of their pages are quick to render (I suspect the latter case isn't particularly real, but noting for completeness; your SSR site won't crash just by using this integration in `"auto"` mode, but it will respond differently).
+This limitation is fine for static sites (always serving static HTML, no computation to await) or SSR sites that don't leverage streaming, whether due to their data loading patterns (needing to fetch everything up front) or pages that are quick to render.
+
+For background on HTML streaming in Astro: in on-demand rendering, Astro serves pages in chunks across component boundaries via [HTML streaming](https://docs.astro.build/en/guides/on-demand-rendering/#html-streaming). If a component needs to `await` something, Astro serves non-awaiting parts first, reducing [server response times](https://developer.chrome.com/docs/performance/insights/document-latency). See also this [deep dive](https://angelika.me/2025/03/16/implications-of-astro-html-streaming/).
 
 But for SSR sites that lean on HTML streaming in any capacity, this limitation is a non-starter.
 
@@ -65,7 +61,7 @@ component in place of `<head />`
 ---
 // layouts/Layout.astro
 
-import Head from "@grepco/astro-pagemeta/Head.astro";
+import Head from "@grepco/astro-pagemeta/Head";
 ---
 
 <html>
@@ -84,7 +80,7 @@ import Head from "@grepco/astro-pagemeta/Head.astro";
 
 import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
 
-setPagemeta({
+setPagemeta(Astro, {
     title: "Contact Us!"
 });
 ---

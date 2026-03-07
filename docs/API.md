@@ -1,5 +1,14 @@
 # API Reference
 
+- [Default export](#default-export)
+    - [pagemeta(options?)](#pagemetaoptions)
+- [Runtime](#runtime)
+    - [setPagemeta(ctx, options)](#setpagemetactx-options)
+    - [middleware()](#middleware)
+- [Head](#head)
+- [Types](#types)
+    - [PagemetaOptions](#pagemetaoptions-1)
+
 ## Default export
 
 ```ts
@@ -81,7 +90,7 @@ This option does NOT overwrite these tags if already hardcoded in your template,
 
 Determines if the middleware, whether added automatically in `"auto"` mode or setup manually in `"manual"` mode, skips external pages i.e. those added by other integrations. The integration defaults to false, assuming you want to apply metadata automatically only to pages under your control, that you can reason about directly e.g. the templates for an integration's pages might not be accessible, such that you might not be able to say how this integration would affect those pages, assuming you'd even want to set metadata on them. In other words, this integration assumes you mean to add metadata only to pages you've written yourself.
 
-This option is a no-op when using the [`Pagemeta.astro` component](#pagemetaastro) instead of middleware.
+This option is a no-op when using the [`Head` component](#head) instead of middleware.
 
 ## Runtime
 
@@ -104,24 +113,32 @@ Doesn't return anything
 #### options
 
 - Required/Optional: required
-- Type: [`PagemetaOptions`](#pagemetaoptions)
-- Default: `false`
+- Type: `PagemetaOptions | false`
 
-An object describing the metadata you want to set for the current request. See the [`PagemetaOptions`](#pagemetaoptions) reference for supported tags.
+An object describing the metadata you want to set for the current request. See the [`PagemetaOptions`](#pagemetaoptions-1) reference for supported tags.
+
+Passing `false` is a hard opt-out: it skips all defaults and tag injection for the current request.
+
+Multiple calls to `setPagemeta` within the same request merge their inputs. Top-level properties are shallow-merged (later calls win), while the `custom` property is deep-merged one level. This is useful for setting base values in middleware that pages can selectively override.
 
 ### middleware()
 
 A function that returns the same middleware the integration automatically injects when in `"auto"` mode.
 
-Use when in `"manual"` mode and you want to control this middleware's order relative to others in your project, modeled after [Astro's manual i18n routing](https://docs.astro.build/en/guides/internationalization/#manual)
+Use when in `"manual"` mode and you want to control this middleware's order relative to others in your project, modeled after [Astro's manual i18n routing](https://docs.astro.build/en/guides/internationalization/#manual).
+
+For example, if your auth middleware redirects unauthenticated users, you'd want it to run before pagemeta so redirected responses aren't needlessly processed:
 
 ```ts
-import { middleware } from "@grepco/astro-pagemeta/runtime";
+import { middleware as pagemetaMiddleware } from "@grepco/astro-pagemeta/runtime";
 import { defineMiddleware, sequence } from "astro:middleware";
 
-const myCustomMiddleware = defineMiddleware(...);
+const auth = defineMiddleware(async (ctx, next) => {
+    if (!ctx.locals.user) return ctx.redirect("/login");
+    return next();
+});
 
-export const onRequest = sequence(custom, middleware());
+export const onRequest = sequence(auth, pagemetaMiddleware());
 ```
 
 ## Head
@@ -165,10 +182,10 @@ An object describing the metadata that should be added to a document's `<head />
 - Type: `Record<string, string>` an object mapping arbitrary string keys to string content
 - Default: none
 
-Define custom extensions and overrides to `rehype-meta`'s managed tags. See [the usage examples](./usage.md#custom) for a more detailed picture of what you can do with this option, including certain keys that have special handling.
+Define custom extensions and overrides to `rehype-meta`'s managed tags. See [the usage examples](./usage.md#custom-extensions) for a more detailed picture of what you can do with this option.
 
 ```ts
-setPagemeta({
+setPagemeta(Astro, {
     custom: {
         robots: "no-index" // rehype-meta doesn't know about <meta name="robots" />
     }
@@ -184,7 +201,19 @@ would yield
 />
 ```
 
-This is really a general-purpose escape hatch from the tradeoffs of `rehype-meta`'s API, which is powerful, but narrowly-scoped, [explicitly](https://github.com/rehypejs/rehype-meta/tree/main?tab=readme-ov-file#what-is-this) not designed to be everything for everyone. To this maintainer's eye, these tradeoffs add up to a win for most of what you'd ever care to do with meta tags, but of course `most !== all`.
+This is a general-purpose escape hatch from `rehype-meta`'s API, which is powerful but narrowly-scoped — [explicitly](https://github.com/rehypejs/rehype-meta/tree/main?tab=readme-ov-file#what-is-this) not designed to cover every possible meta tag. See the [usage examples](./usage.md#custom-extensions) for a deeper look at the design rationale and how `custom` interacts with `rehype-meta`'s output.
+
+Some keys receive special handling to allow overriding any tag the integration might produce:
+
+| `custom` key                                                                          | Output                                        |
+| ------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `title`                                                                               | `<title>{value}</title>`                      |
+| `meta:charSet`                                                                        | `<meta charset="{value}" />`                  |
+| `link:rel:canonical`                                                                  | `<link rel="canonical" href="{value}" />`     |
+| `og:*`, `article:*`, `book:*`, `music:*`, `profile:*`, `video:*`, `fb:*`, `payment:*` | `<meta property="{key}" content="{value}" />` |
+| Any other key                                                                         | `<meta name="{key}" content="{value}" />`     |
+
+All keys deduplicate: if a matching element already exists in the `<head>`, its value is updated in place rather than adding a duplicate.
 
 **jsonLd**
 
@@ -197,7 +226,7 @@ One or more [JSON-LD objects](https://json-ld.org/) encoding types in schema.org
 Array input is automatically wrapped in a [top-level graph node](https://github.com/google/schema-dts?tab=readme-ov-file#graphs-and-ids), so your objects can then reference each other by their ids.
 
 ```ts
-setPagemeta({
+setPagemeta(Astro, {
     jsonLd: {
         "@type": "NewsArticle",
         headline: "BREAKING NEWS AT THIS HOUR",

@@ -35,7 +35,8 @@
         "src/virtual.d.ts"
     ],
     "scripts": {
-        "check": "pnpm lint:fix && pnpm fmt:fix && pnpm typecheck",
+        "check": "pnpm check:engines && pnpm lint:fix && pnpm fmt:fix && pnpm typecheck",
+        "check:engines": "node scripts/check-engines.ts",
         "deps": "ncu -p pnpm -i --format group --cooldown 3d",
         "fmt": "prettier --check .",
         "fmt:fix": "prettier --write .",
@@ -44,7 +45,7 @@
         "lint:fix": "eslint --flag unstable_native_nodejs_ts_config --fix",
         "prepare": "git rev-parse --git-dir > /dev/null 2>&1 && lefthook install || true",
         "test": "vitest --run",
-        "typecheck": "tsc --noEmit"
+        "typecheck": "tsc --noEmit -p src/tsconfig.json && tsc --noEmit"
     },
     "dependencies": {
         "astro-integration-kit": "^0.19.1",

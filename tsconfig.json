@@ -26,13 +26,7 @@
         "verbatimModuleSyntax": true,
 
         // output / publishing
-        // "noEmitOnError": true,
-        // "sourceMap": true,
-        // "declaration": true,
-        // "declarationMap": true,
-        // File Layout
         "rootDir": ".",
-        "outDir": "./dist",
 
         // typechecking
         "strict": true,

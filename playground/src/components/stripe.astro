@@ -1,0 +1,25 @@
+---
+// copied from https://angelika.me/2025/03/16/implications-of-astro-html-streaming/
+
+const { color, sleep } = Astro.props;
+
+function doSleep(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+if (sleep) {
+    await doSleep(sleep);
+}
+---
+
+<div style={`background-color: ${color};`}>...</div>
+
+<style>
+    div {
+        font-size: 30px;
+        height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>

@@ -1,48 +1,7 @@
 {
     "compilerOptions": {
-        // environment
-        "lib": ["esnext"],
-        "module": "nodenext",
-        "skipLibCheck": true,
-        "target": "es2022",
-        "types": [
-            // pull in to support using astro: protocol modules within our test fixtures, for which we never generate
-            // types outside our temp directories (see the isolatedFixture utility)
-            "astro/client",
-            "node"
-        ],
-        "jsx": "preserve",
-
-        // module system behavior
-        "allowImportingTsExtensions": true,
-        "esModuleInterop": true,
-        "isolatedModules": true,
-        "moduleDetection": "force",
-        "noUncheckedSideEffectImports": true,
-        // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-7.html#path-rewriting-for-relative-paths
-        // can write out imports as .ts, not .js (supports direct execution, recommended by node's
-        // docs for type-stripping https://nodejs.org/docs/latest-v22.x/api/typescript.html#type-stripping)
-        "rewriteRelativeImportExtensions": true,
-        "verbatimModuleSyntax": true,
-
-        // output / publishing
-        "rootDir": ".",
-
-        // typechecking
-        "strict": true,
-        "allowJs": false,
-        "erasableSyntaxOnly": true,
-        "exactOptionalPropertyTypes": true,
-        "noFallthroughCasesInSwitch": true,
-        "noImplicitOverride": true,
-        "noPropertyAccessFromIndexSignature": true,
-        "noUncheckedIndexedAccess": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true
+        "types": ["node"]
     },
-    "exclude": [
-        ".plan", // replicate global git ignore settings
-        "**/dist",
-        "playground" // sample app for local experimentation
-    ]
+    "extends": "./tsconfig.base.json",
+    "files": ["eslint.config.ts"]
 }

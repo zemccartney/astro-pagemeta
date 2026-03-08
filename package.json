@@ -1,70 +1,25 @@
 {
-    "name": "@grepco/astro-pagemeta",
+    "name": "astro-pagemeta-workspace",
     "version": "0.0.0",
-    "description": "An Astro integration for setting your pages' meta tags",
-    "keywords": [
-        "astro",
-        "astro-integration",
-        "seo"
-    ],
-    "homepage": "https://github.com/zemccartney/astro-pagemeta",
-    "bugs": {
-        "url": "https://github.com/zemccartney/astro-pagemeta/issues"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/zemccartney/astro-pagemeta"
-    },
-    "license": "MIT",
-    "author": "Zack McCartney <zack@grepco.net>",
-    "sideEffects": false,
+    "private": true,
     "type": "module",
-    "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "default": "./dist/index.js"
-        },
-        "./Head": "./src/Head.astro",
-        "./runtime": "./src/runtime.ts"
-    },
-    "files": [
-        "dist",
-        "src/Head.astro",
-        "src/core.ts",
-        "src/runtime.ts",
-        "src/virtual.d.ts"
-    ],
     "scripts": {
-        "check": "pnpm check:engines && pnpm lint:fix && pnpm fmt:fix && pnpm typecheck",
-        "check:engines": "node scripts/check-engines.ts",
         "deps": "ncu -p pnpm -i --format group --cooldown 3d",
         "fmt": "prettier --check .",
         "fmt:fix": "prettier --write .",
         "lint": "eslint --flag unstable_native_nodejs_ts_config",
-        "lint:debug": "eslint --flag unstable_native_nodejs_ts_config --inspect-config",
+        "lint:debug": "config-inspector",
         "lint:fix": "eslint --flag unstable_native_nodejs_ts_config --fix",
         "prepare": "git rev-parse --git-dir > /dev/null 2>&1 && lefthook install || true",
-        "test": "vitest --run",
-        "typecheck": "tsc --noEmit -p src/tsconfig.json && tsc --noEmit"
-    },
-    "dependencies": {
-        "astro-integration-kit": "^0.19.1",
-        "hast-util-select": "^6.0.4",
-        "rehype": "^13.0.2",
-        "rehype-meta": "^4.0.1",
-        "rehype-minify-whitespace": "^6.0.2",
-        "schema-dts": "^1.1.5"
+        "typecheck": "pnpm -r typecheck"
     },
     "devDependencies": {
-        "@astrojs/node": "^9.5.3",
         "@eslint-community/eslint-plugin-eslint-comments": "^4.6.0",
         "@eslint/compat": "^2.0.2",
+        "@eslint/config-inspector": "^1.5.0",
         "@eslint/js": "^9.39.2",
         "@eslint/json": "^1.0.1",
-        "@inox-tools/astro-tests": "^0.8.1",
-        "@types/hast": "^3.0.4",
-        "@types/node": "^25.2.3",
-        "astro": "^5.17.2",
+        "@types/node": "catalog:",
         "eslint": "^9.39.2",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-astro": "^1.5.0",
@@ -73,28 +28,16 @@
         "eslint-plugin-package-json": "^0.88.2",
         "eslint-plugin-perfectionist": "^5.5.0",
         "eslint-plugin-unicorn": "^63.0.0",
-        "globals": "^17.3.0",
+        "eslint-plugin-workspaces": "^0.12.0",
         "lefthook": "^2.1.1",
         "npm-check-updates": "^19.3.2",
         "prettier": "^3.8.1",
         "prettier-plugin-astro": "^0.14.1",
-        "rehype-parse": "^9.0.1",
-        "typescript": "^5.9.3",
-        "typescript-eslint": "^8.55.0",
-        "unified": "^11.0.5",
-        "vite": "^6.4.1",
-        "vitest": "^4.0.18"
-    },
-    "peerDependencies": {
-        "astro": "5.x.x"
+        "typescript": "catalog:",
+        "typescript-eslint": "^8.55.0"
     },
     "packageManager": "pnpm@10.30.3",
     "engines": {
         "node": "24"
-    },
-    "publishConfig": {
-        "engines": {
-            "node": "18.20.8 || ^20.3.0 || >=22.0.0"
-        }
     }
 }

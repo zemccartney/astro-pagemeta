@@ -1,0 +1,39 @@
+---
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+import Stripe from "../components/stripe.astro";
+import Layout from "../layouts/layout.astro";
+
+setPagemeta(Astro, {
+    name: "POSTCONE",
+    og: true,
+    title: "STREAMMM"
+});
+---
+
+<Layout>
+    <Stripe
+        color="red"
+        sleep={0}
+    />
+    <Stripe
+        color="orange"
+        sleep={500}
+    />
+    <Stripe
+        color="yellow"
+        sleep={2000}
+    />
+    <Stripe
+        color="green"
+        sleep={0}
+    />
+    <Stripe
+        color="blue"
+        sleep={0}
+    />
+    <Stripe
+        color="purple"
+        sleep={4000}
+    />
+</Layout>

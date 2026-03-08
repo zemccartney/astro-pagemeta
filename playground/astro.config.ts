@@ -1,34 +1,18 @@
 import node from "@astrojs/node";
+import pagemeta from "@grepco/astro-pagemeta";
 import { defineConfig } from "astro/config";
-
-import pagemeta from "../src/index.ts";
 
 export default defineConfig({
     adapter: node({
         mode: "standalone"
     }),
-    /* i18n: {
-        defaultLocale: "en",
-        fallback: { fr: "es" },
-        locales: ["en", "fr", "es"],
-        routing: {
-            fallbackType: "rewrite",
-            prefixDefaultLocale: false
-        }
-    },*/
+    compressHTML: false,
     integrations: [
         pagemeta({
-            mode: "auto",
             addRequiredGlobalMeta: true,
-            defaults: (ctx) => ({
-                // type: "website",
-                author: "Jane Doe",
-                origin: ctx.site?.origin,
-                image: "provolone.com"
-            })
+            mode: "manual"
         })
     ],
-    site: "https://www.playground.com",
     output: "server",
-    compressHTML: true
+    site: "https://www.playground.com"
 });

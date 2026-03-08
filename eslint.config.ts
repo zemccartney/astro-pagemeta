@@ -8,8 +8,8 @@ import jsdoc from "eslint-plugin-jsdoc";
 import pkgJson from "eslint-plugin-package-json";
 import perfectionist from "eslint-plugin-perfectionist";
 import unicorn from "eslint-plugin-unicorn";
+import workspaces from "eslint-plugin-workspaces";
 import { defineConfig } from "eslint/config";
-import globals from "globals";
 import Path from "node:path";
 import tseslint from "typescript-eslint";
 
@@ -20,8 +20,21 @@ export default defineConfig([
     {
         ignores: [
             ".claude",
-            ".plan" // replicate global ignore settings
+            ".plan" // replicate global git ignore settings
         ]
+    },
+    workspaces.configs.recommended,
+    {
+        // fixtures import @grepco/astro-pagemeta instead of writing a relative import
+        // from within the isolated fixtures directory, which wouldn't correspond
+        // to the correct source files from where the fixture files actually are on disk
+        files: [
+            "packages/astro-pagemeta/tests/integration/fixtures/**",
+            "packages/astro-pagemeta/tests/integration/middleware/sequence.middleware.ts"
+        ],
+        rules: {
+            "workspaces/no-absolute-imports": "off"
+        }
     },
     {
         extends: [comments.recommended],
@@ -30,15 +43,14 @@ export default defineConfig([
         }
     },
     {
-        extends: [
-            pkgJson.configs["recommended-publishable"],
-            pkgJson.configs.stylistic
-        ]
-    },
-    {
         extends: [json.configs.recommended],
         files: ["**/*.json"],
-        ignores: ["package.json", "package-lock.json", "tsconfig.json"],
+        ignores: [
+            "**/package.json",
+            "**/package-lock.json",
+            "**/tsconfig.json",
+            "**/tsconfig.*.json"
+        ],
         language: "json/json",
         rules: {
             "json/sort-keys": "error"
@@ -96,28 +108,6 @@ export default defineConfig([
         }
     },
     {
-        extends: [jsdoc.configs["flat/recommended-typescript-error"]],
-        files: ["src/**/*.ts"],
-        rules: {
-            // But when JSDoc exists, require meaningful content
-            "jsdoc/require-description": "error",
-            // Don't require JSDoc on every function — only enforce style when present
-            "jsdoc/require-jsdoc": "off",
-            "jsdoc/require-param-description": "error",
-            "jsdoc/require-returns-description": "error"
-        }
-    },
-    {
-        files: ["*.ts"],
-        languageOptions: {
-            globals: {
-                ...globals.node
-            }
-        }
-    },
-    // Probably overkill, only astro files are fixtures, but figure might as well
-    // have some guardrails against dumb mistakes, assuming not in the way and easy to add here
-    {
         extends: [astro.configs.recommended, astro.configs["jsx-a11y-strict"]],
         files: ["**/*.astro"],
         rules: {
@@ -127,5 +117,27 @@ export default defineConfig([
             "unicorn/prefer-module": ["off"]
         }
     },
+
+    /** rules for publishables */
+    {
+        extends: [
+            pkgJson.configs["recommended-publishable"],
+            pkgJson.configs.stylistic
+        ],
+        files: ["packages/**/package.json"]
+    },
+    {
+        extends: [jsdoc.configs["flat/recommended-typescript-error"]],
+        files: ["packages/**/*.ts"],
+        rules: {
+            // But when JSDoc exists, require meaningful content
+            "jsdoc/require-description": "error",
+            // Don't require JSDoc on every function — only enforce style when present
+            "jsdoc/require-jsdoc": "off",
+            "jsdoc/require-param-description": "error",
+            "jsdoc/require-returns-description": "error"
+        }
+    },
+
     prettier
 ]);

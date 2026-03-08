@@ -1,28 +1,61 @@
 ---
-import { setPagemeta } from "../../../src/runtime";
+import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+
+import Layout from "../layouts/layout.astro";
 
 setPagemeta(Astro, {
+    custom: {
+        "link:rel:canonical": "humungadunga.com"
+    },
     description: "English page description",
-    title: "English Page",
-    // origin: "bunga.com",
-    origin: null,
+    jsonLd: [
+        {
+            "@type": "NewsArticle",
+            datePublished: "2026-03-11",
+            headline: "BREAKING NEWS AT THIS HOUR"
+        },
+        // example copied from https://github.com/google/schema-dts?tab=readme-ov-file#graphs-and-ids
+        {
+            "@id": "https://my.site/#alyssa",
+            "@type": "Person",
+            hasOccupation: {
+                "@type": "Occupation",
+                name: "LISP Hacker",
+                qualifications: "Knows LISP"
+            },
+            mainEntityOfPage: { "@id": "https://my.site/about/#page" },
+            name: "Alyssa P. Hacker",
+            subjectOf: { "@id": "https://my.site/about/#page" }
+        },
+        {
+            "@id": "https://my.site/#site",
+            "@type": "AboutPage",
+            description: "The personal website of LISP legend Alyssa P. Hacker",
+            inLanguage: "en-US",
+            mainEntity: { "@id": "https://my.site/#alyssa" },
+            name: "Alyssa P. Hacker's Website",
+            url: "https://my.site"
+        },
+        {
+            "@id": "https://my.site/about/#page",
+            "@type": "WebPage",
+            about: { "@id": "https://my.site/#alyssa" },
+            inLanguage: "en-US",
+            isPartOf: {
+                "@id": "https://my.site/#site"
+            },
+            mainEntity: { "@id": "https://my.site/#alyssa" },
+            name: "About | Alyssa P. Hacker's Website",
+            url: "https://my.site/about/"
+        }
+    ],
+    name: "Playground",
+    og: true,
+    ogNameInTitle: true,
+    origin: Astro.url.origin,
     pathname: "/zzz",
     separator: " ",
-    og: true,
-    type: null,
-    image: null,
-    name: null,
-    ogNameInTitle: true,
-    jsonLd: {
-        "@type": "ArtGallery",
-        "@id": "111",
-        acceptedPaymentMethod: "card"
-    },
-    custom: {
-        // title: "ZZZZ",
-        "og:image:alt": "My alt text"
-        // "link:rel:canonical": "DUNGA.com"
-    }
+    title: "Home of the Playground"
 });
 ---
 
@@ -32,14 +65,6 @@ setPagemeta(Astro, {
     }
 </style>
 
-<html lang="en">
-    <head
-        ><meta
-            name="keywords"
-            content="foo, bar baz, qux"
-        />
-    </head>
-    <body>
-        <p>English content</p>
-    </body>
-</html>
+<Layout>
+    <p>My home page content</p>
+</Layout>

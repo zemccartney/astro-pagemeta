@@ -1,15 +1,29 @@
-### security (see https://pnpm.io/supply-chain-security)
+packages:
+    - packages/*
+    - playground
 
 blockExoticSubdeps: true
-minimumReleaseAge: 4320 # 3 days
+
+catalog:
+    "@types/node": ^24.11.0
+    astro: ^5.18.0
+    typescript: ^5.9.3
+
+disallowWorkspaceCycles: true
+
+failIfNoMatch: true
+
+ignoreWorkspaceRootCheck: true
+
+minimumReleaseAge: 4320
+
 onlyBuiltDependencies:
     - esbuild
     - lefthook
     - sharp
 
 trustPolicy: no-downgrade
+
 trustPolicyExclude:
-    # Currently triggering "High-risk trust downgrade for "vite@6.4.1" (possible package takeover)
-    # This error happened while installing the dependencies of astro@5.17.3"
-    # unclear why, revisit later and turn this on as viable
-    - "vite@6.4.1"
+    - vite@6.4.1
+    - chokidar@4.0.3

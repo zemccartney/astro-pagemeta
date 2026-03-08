@@ -11,6 +11,9 @@ export const parseHtml = (html: string) =>
  * Select elements matching a CSS selector from parsed HTML and normalize
  * to a `{ tag, properties }` shape. Titles get `{ text }` as their
  * properties; everything else gets the raw hast properties object.
+ * @param html - Raw HTML string to parse
+ * @param selector - CSS selector to match elements
+ * @returns Array of `{ tag, properties }` objects
  */
 export const query = (html: string, selector: string) => {
     const tree = parseHtml(html);
@@ -37,6 +40,8 @@ export const query = (html: string, selector: string) => {
  *
  * This aligns with Astro's behavior: Astro appears to add doctypes
  * for non-partial renders only
+ * @param html - Raw HTML string to check
+ * @returns `true` if the HTML lacks a doctype (is a fragment)
  */
 export const isFragment = (html: string): boolean => {
     const tree = parseHtml(html);
@@ -61,6 +66,8 @@ export const extractJsonLd = (html: string): unknown[] => {
  * Unlike `extractMeta` which only captures meta/title/link, this captures
  * everything — useful for verifying that Astro-injected assets (styles,
  * scripts) survive rehype processing.
+ * @param html - Raw HTML string to parse
+ * @returns Array of `{ tag, properties, textContent? }` objects
  */
 export const extractHeadElements = (html: string) => {
     assertValidDocumentStructure(html);
@@ -84,6 +91,7 @@ export const extractHeadElements = (html: string) => {
  * Validates that raw HTML has well-formed document structure before
  * rehype parsing normalizes it away. Catches issues like nested
  * `<head>` elements that rehype silently flattens.
+ * @param html - Raw HTML string to validate
  */
 export function assertValidDocumentStructure(html: string): void {
     const headMatches = html.match(/<head[\s>]/gi);
@@ -115,6 +123,8 @@ export const extractMeta = (html: string) => {
  * island per page — sufficient for our test fixtures.
  *
  * Throws if no server island URL is found in the HTML.
+ * @param html - Raw HTML string to search
+ * @returns The server island preload href
  */
 export const extractServerIslandUrl = (html: string): string => {
     const tree = parseHtml(html);

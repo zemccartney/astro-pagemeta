@@ -1,0 +1,19 @@
+{
+    "name": "playground",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "astro build",
+        "dev": "astro dev",
+        "preview": "astro preview",
+        "typecheck": "astro check"
+    },
+    "dependencies": {
+        "@astrojs/check": "^0.9.6",
+        "@astrojs/node": "^9.5.4",
+        "@grepco/astro-pagemeta": "workspace:*",
+        "astro": "catalog:",
+        "typescript": "catalog:"
+    }
+}

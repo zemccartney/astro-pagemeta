@@ -1,7 +1,7 @@
 ---
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 
-setPagemeta(Astro, {
+metadata(Astro, {
     custom: { robots: "noindex, nofollow" },
     title: "Template Override Test"
 });
@@ -17,6 +17,6 @@ setPagemeta(Astro, {
         />
     </head>
     <body>
-        <p>Template has robots meta, setPagemeta replaces it</p>
+        <p>Template has robots meta, metadata replaces it</p>
     </body>
 </html>

@@ -31,7 +31,7 @@ describe("static-defaults / static / dev server", () => {
         await devServer.stop();
     });
 
-    test("applies defaults to page without setPagemeta()", async () => {
+    test("applies defaults to page without metadata()", async () => {
         const response = await fixture.fetch("/");
         const html = await response.text();
         const headMeta = extractMeta(html);
@@ -117,7 +117,7 @@ describe("static-defaults / static / dev server", () => {
         ]);
     });
 
-    test("full cascade: setPagemeta > defaults > template", async () => {
+    test("full cascade: metadata > defaults > template", async () => {
         const response = await fixture.fetch("/full-cascade");
         const html = await response.text();
         const headMeta = extractMeta(html);
@@ -125,7 +125,7 @@ describe("static-defaults / static / dev server", () => {
         // All 3 sources contribute:
         // - Template: charset, generator, og:site_name (preserved)
         // - Defaults: description, author (added)
-        // - setPagemeta: title (overrides defaults and template)
+        // - metadata: title (overrides defaults and template)
         //
         // Template metadata survives because:
         // - generator: rehype-meta doesn't manage this tag
@@ -143,7 +143,7 @@ describe("static-defaults / static / dev server", () => {
                 },
                 tag: "meta"
             },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
+            { properties: { text: "Title from metadata" }, tag: "title" },
             {
                 properties: {
                     content: "Default site description",
@@ -167,7 +167,7 @@ describe("static-defaults / static / build", () => {
         await fixture.build(config);
     });
 
-    test("applies defaults to page without setPagemeta()", async () => {
+    test("applies defaults to page without metadata()", async () => {
         const html = await fixture.readFile("/index.html");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
         const headMeta = extractMeta(html!);
@@ -253,7 +253,7 @@ describe("static-defaults / static / build", () => {
         ]);
     });
 
-    test("full cascade: setPagemeta > defaults > template", async () => {
+    test("full cascade: metadata > defaults > template", async () => {
         const html = await fixture.readFile("/full-cascade/index.html");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
         const headMeta = extractMeta(html!);
@@ -261,7 +261,7 @@ describe("static-defaults / static / build", () => {
         // All 3 sources contribute:
         // - Template: charset, generator, og:site_name (preserved)
         // - Defaults: description, author (added)
-        // - setPagemeta: title (overrides defaults and template)
+        // - metadata: title (overrides defaults and template)
         //
         // Template metadata survives because:
         // - generator: rehype-meta doesn't manage this tag
@@ -279,7 +279,7 @@ describe("static-defaults / static / build", () => {
                 },
                 tag: "meta"
             },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
+            { properties: { text: "Title from metadata" }, tag: "title" },
             {
                 properties: {
                     content: "Default site description",

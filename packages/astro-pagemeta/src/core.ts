@@ -6,7 +6,7 @@ import { rehype } from "rehype";
 import rehypeMeta from "rehype-meta";
 import rehypeMinifyWhitespace from "rehype-minify-whitespace";
 
-import type { PagemetaOptions, PagemetaProcessorConfig } from "./types.ts";
+import type { MetadataOptions, MetadataProcessorConfig } from "./types.ts";
 
 // Trailing newline after injected elements, matching rehype-meta's formatting
 // convention of separating head children with line breaks for readability.
@@ -143,7 +143,7 @@ function rehypeCustomMeta(meta: Record<string, string>) {
 
 /**
  * Rehype plugin that extracts the children of the `<head>` element,
- * discarding the document wrapper. Used by the `<Pagemeta>` component
+ * discarding the document wrapper. Used by the `<Head>` component
  * to produce inline head content from rehype-meta's document-mode output.
  * @returns A rehype transform that replaces the tree with `<head>` children.
  */
@@ -222,14 +222,14 @@ export const isHtmlDocument = (html: string) =>
  * @example
  * ```astro
  * ---
- * import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
- * setPagemeta(Astro, { title: "My Page", description: "A description" });
+ * import { metadata } from "@grepco/astro-pagemeta/runtime";
+ * metadata(Astro, { title: "My Page", description: "A description" });
  * ---
  * ```
  */
-export const setPagemeta = (
+export const metadata = (
     ctx: Readonly<APIContext>,
-    data: false | Readonly<PagemetaOptions>
+    data: false | Readonly<MetadataOptions>
 ): void => {
     if (data === false) {
         // @ts-expect-error -- index type error, not worrying about it given we're coordinating with our own symbol
@@ -244,12 +244,12 @@ export const setPagemeta = (
     ) {
         throw new Error(
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- handling type-indifferent runtime possibility
-            `[pagemeta] setPagemeta data must be an object or false, got ${data === null ? "null" : typeof data}`
+            `[pagemeta] metadata data must be an object or false, got ${data === null ? "null" : typeof data}`
         );
     }
 
     // @ts-expect-error -- index type error, not worrying about it given we're coordinating with our own symbol
-    const pageMeta = ctx.locals[LOCALS_KEY] as PagemetaOptions | undefined;
+    const pageMeta = ctx.locals[LOCALS_KEY] as MetadataOptions | undefined;
 
     // @ts-expect-error -- index type error, not worrying about it given we're coordinating with our own symbol
     ctx.locals[LOCALS_KEY] = {
@@ -261,14 +261,14 @@ export const setPagemeta = (
     };
 };
 
-export function createPagemetaProcessor(config: PagemetaProcessorConfig) {
+export function createMetadataProcessor(config: MetadataProcessorConfig) {
     return {
         getHtmlProcessor: ({
             fragment = false,
             metadata
         }: {
             fragment?: boolean;
-            metadata: PagemetaOptions;
+            metadata: MetadataOptions;
         }) => {
             const { custom, jsonLd, ...rehypeMetaOptions } = metadata;
             const processor = rehype().use(rehypeMeta, rehypeMetaOptions);
@@ -294,20 +294,20 @@ export function createPagemetaProcessor(config: PagemetaProcessorConfig) {
             return config.routePatterns.some((r) => r.test(pathname));
         },
 
-        resolvePagemeta: (
+        resolveMetadata: (
             ctx: Readonly<APIContext>
-        ): PagemetaOptions | undefined => {
+        ): MetadataOptions | undefined => {
             // @ts-expect-error -- index type error, not worrying about it given we're coordinating with our own symbol
             const pageMeta = ctx.locals[LOCALS_KEY] as
                 | false // hard opt-out i.e. skip any defaults, don't set any meta tags
-                | PagemetaOptions
+                | MetadataOptions
                 | undefined;
 
             if (pageMeta === false) {
                 return;
             }
 
-            let computedDefaults: PagemetaOptions;
+            let computedDefaults: MetadataOptions;
             if (typeof config.defaults === "function") {
                 const result = config.defaults(ctx);
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- handling type-indifferent runtime possibility

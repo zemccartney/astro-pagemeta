@@ -40,7 +40,7 @@ describe("function-defaults / SSR / dev server", () => {
         await devServer.stop();
     });
 
-    test("applies defaults to page without setPagemeta()", async () => {
+    test("applies defaults to page without metadata()", async () => {
         const response = await fixture.fetch("/");
         expect(extractMeta(await response.text())).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
@@ -123,13 +123,13 @@ describe("function-defaults / SSR / dev server", () => {
         ]);
     });
 
-    test("full cascade: setPagemeta > function defaults > template", async () => {
+    test("full cascade: metadata > function defaults > template", async () => {
         const response = await fixture.fetch("/full-cascade");
 
         // All 3 sources contribute:
         // - Template: charset, generator, og:site_name (preserved)
         // - Function defaults: author, description (using pathname)
-        // - setPagemeta: title (overrides function default)
+        // - metadata: title (overrides function default)
         //
         // Template metadata survives because:
         // - generator: rehype-meta doesn't manage this tag
@@ -147,7 +147,7 @@ describe("function-defaults / SSR / dev server", () => {
                 },
                 tag: "meta"
             },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
+            { properties: { text: "Title from metadata" }, tag: "title" },
             {
                 properties: {
                     content: "Page at /full-cascade",
@@ -171,7 +171,7 @@ describe("function-defaults / SSR / build", () => {
         app = await fixture.loadTestAdapterApp();
     });
 
-    test("applies defaults to page without setPagemeta()", async () => {
+    test("applies defaults to page without metadata()", async () => {
         const response = await app.render(new Request("https://example.com/"));
         expect(extractMeta(await response.text())).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
@@ -262,7 +262,7 @@ describe("function-defaults / SSR / build", () => {
         ]);
     });
 
-    test("full cascade: setPagemeta > function defaults > template", async () => {
+    test("full cascade: metadata > function defaults > template", async () => {
         const response = await app.render(
             new Request("https://example.com/full-cascade")
         );
@@ -270,7 +270,7 @@ describe("function-defaults / SSR / build", () => {
         // All 3 sources contribute:
         // - Template: charset, generator, og:site_name (preserved)
         // - Function defaults: author, description (using pathname)
-        // - setPagemeta: title (overrides function default)
+        // - metadata: title (overrides function default)
         //
         // Template metadata survives because:
         // - generator: rehype-meta doesn't manage this tag
@@ -288,7 +288,7 @@ describe("function-defaults / SSR / build", () => {
                 },
                 tag: "meta"
             },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
+            { properties: { text: "Title from metadata" }, tag: "title" },
             {
                 properties: {
                     content: "Page at /full-cascade",

@@ -3,9 +3,9 @@ import type { APIContext } from "astro";
 import { describe, expect, test } from "vitest";
 
 import {
-    createPagemetaProcessor,
+    createMetadataProcessor,
     isHtmlDocument,
-    setPagemeta
+    metadata
 } from "../../src/core.ts";
 import { extractJsonLd, extractMeta } from "../utils/html-parse.ts";
 
@@ -39,8 +39,8 @@ describe("isHtmlDocument", () => {
     });
 });
 
-describe("setPagemeta", () => {
-    const processor = createPagemetaProcessor({
+describe("metadata", () => {
+    const processor = createMetadataProcessor({
         addRequiredGlobalMeta: false,
         compressHTML: false,
         routePatterns: []
@@ -48,15 +48,15 @@ describe("setPagemeta", () => {
 
     test("stores metadata", () => {
         const ctx = mockContext();
-        setPagemeta(ctx, { title: "Hello" });
-        expect(processor.resolvePagemeta(ctx)).toEqual({ title: "Hello" });
+        metadata(ctx, { title: "Hello" });
+        expect(processor.resolveMetadata(ctx)).toEqual({ title: "Hello" });
     });
 
     test("merges multiple calls", () => {
         const ctx = mockContext();
-        setPagemeta(ctx, { title: "Hello" });
-        setPagemeta(ctx, { description: "World" });
-        expect(processor.resolvePagemeta(ctx)).toEqual({
+        metadata(ctx, { title: "Hello" });
+        metadata(ctx, { description: "World" });
+        expect(processor.resolveMetadata(ctx)).toEqual({
             description: "World",
             title: "Hello"
         });
@@ -64,17 +64,17 @@ describe("setPagemeta", () => {
 
     test("merges custom meta shallowly", () => {
         const ctx = mockContext();
-        setPagemeta(ctx, { custom: { author: "Alice" } });
-        setPagemeta(ctx, { custom: { robots: "noindex" } });
-        expect(processor.resolvePagemeta(ctx)).toEqual({
+        metadata(ctx, { custom: { author: "Alice" } });
+        metadata(ctx, { custom: { robots: "noindex" } });
+        expect(processor.resolveMetadata(ctx)).toEqual({
             custom: { author: "Alice", robots: "noindex" }
         });
     });
 
     test("false opt-out stores false", () => {
         const ctx = mockContext();
-        setPagemeta(ctx, false);
-        expect(processor.resolvePagemeta(ctx)).toBeUndefined();
+        metadata(ctx, false);
+        expect(processor.resolveMetadata(ctx)).toBeUndefined();
     });
 
     test("throws on null", () => {
@@ -82,7 +82,7 @@ describe("setPagemeta", () => {
         expect(() => {
             // @ts-expect-error -- testing invalid input
             // eslint-disable-next-line unicorn/no-null -- testing invalid input
-            setPagemeta(ctx, null);
+            metadata(ctx, null);
         }).toThrow("got null");
     });
 
@@ -90,14 +90,14 @@ describe("setPagemeta", () => {
         const ctx = mockContext();
         expect(() => {
             // @ts-expect-error -- testing invalid input
-            setPagemeta(ctx, "bad");
+            metadata(ctx, "bad");
         }).toThrow("got string");
     });
 });
 
-describe("createPagemetaProcessor", () => {
+describe("createMetadataProcessor", () => {
     describe("isPageRoute", () => {
-        const processor = createPagemetaProcessor({
+        const processor = createMetadataProcessor({
             addRequiredGlobalMeta: false,
             compressHTML: false,
             routePatterns: [/^\/$/, /^\/about\/?$/]
@@ -115,47 +115,47 @@ describe("createPagemetaProcessor", () => {
         });
     });
 
-    describe("resolvePagemeta", () => {
+    describe("resolveMetadata", () => {
         test("returns undefined when no metadata set and no defaults", () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
             });
             const ctx = mockContext();
-            expect(processor.resolvePagemeta(ctx)).toBeUndefined();
+            expect(processor.resolveMetadata(ctx)).toBeUndefined();
         });
 
         test("returns page metadata when set", () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
             });
             const ctx = mockContext();
-            setPagemeta(ctx, { title: "My Page" });
-            expect(processor.resolvePagemeta(ctx)).toEqual({
+            metadata(ctx, { title: "My Page" });
+            expect(processor.resolveMetadata(ctx)).toEqual({
                 title: "My Page"
             });
         });
 
         test("merges object defaults with page metadata", () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 defaults: { description: "Default desc", title: "Default" },
                 routePatterns: []
             });
             const ctx = mockContext();
-            setPagemeta(ctx, { title: "Override" });
-            expect(processor.resolvePagemeta(ctx)).toEqual({
+            metadata(ctx, { title: "Override" });
+            expect(processor.resolveMetadata(ctx)).toEqual({
                 description: "Default desc",
                 title: "Override"
             });
         });
 
         test("calls function defaults with context", () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 defaults: (ctx) => ({
@@ -166,27 +166,27 @@ describe("createPagemetaProcessor", () => {
             const ctx = mockContext({
                 url: new URL("https://example.com/about")
             });
-            setPagemeta(ctx, { description: "About us" });
-            expect(processor.resolvePagemeta(ctx)).toEqual({
+            metadata(ctx, { description: "About us" });
+            expect(processor.resolveMetadata(ctx)).toEqual({
                 description: "About us",
                 title: "Page: /about"
             });
         });
 
         test("returns undefined on false opt-out", () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 defaults: { title: "Default" },
                 routePatterns: []
             });
             const ctx = mockContext();
-            setPagemeta(ctx, false);
-            expect(processor.resolvePagemeta(ctx)).toBeUndefined();
+            metadata(ctx, false);
+            expect(processor.resolveMetadata(ctx)).toBeUndefined();
         });
 
         test("throws when function defaults returns non-object", () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 // @ts-expect-error -- testing invalid return type
@@ -195,14 +195,14 @@ describe("createPagemetaProcessor", () => {
                 routePatterns: []
             });
             const ctx = mockContext();
-            setPagemeta(ctx, { title: "Trigger resolve" });
-            expect(() => processor.resolvePagemeta(ctx)).toThrow(
+            metadata(ctx, { title: "Trigger resolve" });
+            expect(() => processor.resolveMetadata(ctx)).toThrow(
                 "defaults function must return an object, got null"
             );
         });
 
         test("throws when function defaults returns string", () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 // @ts-expect-error -- testing invalid return type
@@ -210,14 +210,14 @@ describe("createPagemetaProcessor", () => {
                 routePatterns: []
             });
             const ctx = mockContext();
-            setPagemeta(ctx, { title: "Trigger resolve" });
-            expect(() => processor.resolvePagemeta(ctx)).toThrow(
+            metadata(ctx, { title: "Trigger resolve" });
+            expect(() => processor.resolveMetadata(ctx)).toThrow(
                 "defaults function must return an object, got string"
             );
         });
 
         test("throws when function defaults throws", () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 defaults: () => {
@@ -226,22 +226,22 @@ describe("createPagemetaProcessor", () => {
                 routePatterns: []
             });
             const ctx = mockContext();
-            setPagemeta(ctx, { title: "Trigger resolve" });
-            expect(() => processor.resolvePagemeta(ctx)).toThrow(
+            metadata(ctx, { title: "Trigger resolve" });
+            expect(() => processor.resolveMetadata(ctx)).toThrow(
                 "Intentional error in defaults"
             );
         });
 
         test("merges custom meta from defaults and page", () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 defaults: { custom: { author: "Default Author" } },
                 routePatterns: []
             });
             const ctx = mockContext();
-            setPagemeta(ctx, { custom: { robots: "noindex" } });
-            expect(processor.resolvePagemeta(ctx)).toEqual({
+            metadata(ctx, { custom: { robots: "noindex" } });
+            expect(processor.resolveMetadata(ctx)).toEqual({
                 custom: { author: "Default Author", robots: "noindex" }
             });
         });
@@ -249,7 +249,7 @@ describe("createPagemetaProcessor", () => {
 
     describe("getHtmlProcessor", () => {
         test("injects title into HTML", async () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
@@ -269,7 +269,7 @@ describe("createPagemetaProcessor", () => {
         });
 
         test("injects description meta tag", async () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
@@ -289,7 +289,7 @@ describe("createPagemetaProcessor", () => {
         });
 
         test("injects custom meta with OG property attribute", async () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
@@ -314,7 +314,7 @@ describe("createPagemetaProcessor", () => {
         });
 
         test("injects JSON-LD script", async () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
@@ -341,7 +341,7 @@ describe("createPagemetaProcessor", () => {
         });
 
         test("minifies JSON-LD when compressHTML is true", async () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: true,
                 routePatterns: []
@@ -366,7 +366,7 @@ describe("createPagemetaProcessor", () => {
         });
 
         test("pretty-prints JSON-LD when compressHTML is false", async () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
@@ -389,7 +389,7 @@ describe("createPagemetaProcessor", () => {
         });
 
         test("adds required global meta via custom keys", async () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
@@ -420,7 +420,7 @@ describe("createPagemetaProcessor", () => {
         });
 
         test("skips required global meta when already present", async () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
@@ -447,7 +447,7 @@ describe("createPagemetaProcessor", () => {
         });
 
         test("fragment mode returns head contents only", async () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
@@ -470,7 +470,7 @@ describe("createPagemetaProcessor", () => {
         });
 
         test("canonical link injection", async () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
@@ -499,7 +499,7 @@ describe("createPagemetaProcessor", () => {
 
         describe("template interaction", () => {
             test("preserves existing template meta tags", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -527,7 +527,7 @@ describe("createPagemetaProcessor", () => {
             });
 
             test("overrides existing template title", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -550,7 +550,7 @@ describe("createPagemetaProcessor", () => {
             });
 
             test("template title survives when title is false", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -573,7 +573,7 @@ describe("createPagemetaProcessor", () => {
             });
 
             test("creates head when document has none", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -596,7 +596,7 @@ describe("createPagemetaProcessor", () => {
 
         describe("custom meta edge cases", () => {
             test("replaces existing template meta in-place", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -624,7 +624,7 @@ describe("createPagemetaProcessor", () => {
             });
 
             test("custom title creates title element when no rehype-meta title", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -644,7 +644,7 @@ describe("createPagemetaProcessor", () => {
             });
 
             test("custom canonical overrides template canonical", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -679,7 +679,7 @@ describe("createPagemetaProcessor", () => {
             });
 
             test("custom OG overrides rehype-meta computed OG", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -712,7 +712,7 @@ describe("createPagemetaProcessor", () => {
 
         describe("JSON-LD", () => {
             test("array wraps in @graph", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -741,7 +741,7 @@ describe("createPagemetaProcessor", () => {
             });
 
             test("template JSON-LD preserved alongside injected", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -776,7 +776,7 @@ describe("createPagemetaProcessor", () => {
 
         describe("defaults cascade with HTML", () => {
             test("three-way cascade: defaults + page + template", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     defaults: { title: "Default" },
@@ -784,13 +784,13 @@ describe("createPagemetaProcessor", () => {
                 });
 
                 const ctx = mockContext();
-                setPagemeta(ctx, { description: "Page desc" });
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- setPagemeta guarantees metadata
-                const metadata = processor.resolvePagemeta(ctx)!;
+                metadata(ctx, { description: "Page desc" });
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- metadata guarantees resolved
+                const resolved = processor.resolveMetadata(ctx)!;
 
                 const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="generator" content="Astro"></head><body></body></html>`;
                 const result = await processor
-                    .getHtmlProcessor({ metadata })
+                    .getHtmlProcessor({ metadata: resolved })
                     .process(html);
 
                 const meta = extractMeta(String(result));
@@ -809,7 +809,7 @@ describe("createPagemetaProcessor", () => {
             });
 
             test("defaults override template title", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     defaults: { title: "Default" },
@@ -818,13 +818,13 @@ describe("createPagemetaProcessor", () => {
 
                 // No page metadata — only defaults apply
                 const ctx = mockContext();
-                setPagemeta(ctx, {});
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- defaults guarantee metadata
-                const metadata = processor.resolvePagemeta(ctx)!;
+                metadata(ctx, {});
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- defaults guarantee resolved
+                const resolved = processor.resolveMetadata(ctx)!;
 
                 const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Template</title></head><body></body></html>`;
                 const result = await processor
-                    .getHtmlProcessor({ metadata })
+                    .getHtmlProcessor({ metadata: resolved })
                     .process(html);
 
                 const meta = extractMeta(String(result));
@@ -844,7 +844,7 @@ describe("createPagemetaProcessor", () => {
             };
 
             test("only charset missing — injects charset only", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -873,7 +873,7 @@ describe("createPagemetaProcessor", () => {
             });
 
             test("only viewport missing — injects viewport only", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -901,7 +901,7 @@ describe("createPagemetaProcessor", () => {
             });
 
             test("no head element — both injected into rehype-created head", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -929,7 +929,7 @@ describe("createPagemetaProcessor", () => {
             });
 
             test("without required globals custom — does not inject charset/viewport", async () => {
-                const processor = createPagemetaProcessor({
+                const processor = createMetadataProcessor({
                     addRequiredGlobalMeta: false,
                     compressHTML: false,
                     routePatterns: []
@@ -958,9 +958,9 @@ describe("createPagemetaProcessor", () => {
         });
     });
 
-    describe("resolvePagemeta — additional error cases", () => {
+    describe("resolveMetadata — additional error cases", () => {
         test("throws when function defaults returns undefined", () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 // @ts-expect-error -- testing invalid return type
@@ -969,14 +969,14 @@ describe("createPagemetaProcessor", () => {
                 routePatterns: []
             });
             const ctx = mockContext();
-            setPagemeta(ctx, { title: "Trigger" });
-            expect(() => processor.resolvePagemeta(ctx)).toThrow(
+            metadata(ctx, { title: "Trigger" });
+            expect(() => processor.resolveMetadata(ctx)).toThrow(
                 "defaults function must return an object, got undefined"
             );
         });
 
         test("throws when function defaults returns number", () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 // @ts-expect-error -- testing invalid return type
@@ -984,14 +984,14 @@ describe("createPagemetaProcessor", () => {
                 routePatterns: []
             });
             const ctx = mockContext();
-            setPagemeta(ctx, { title: "Trigger" });
-            expect(() => processor.resolvePagemeta(ctx)).toThrow(
+            metadata(ctx, { title: "Trigger" });
+            expect(() => processor.resolveMetadata(ctx)).toThrow(
                 "defaults function must return an object, got number"
             );
         });
 
         test("throws when function defaults returns false", () => {
-            const processor = createPagemetaProcessor({
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 // @ts-expect-error -- testing invalid return type
@@ -999,32 +999,32 @@ describe("createPagemetaProcessor", () => {
                 routePatterns: []
             });
             const ctx = mockContext();
-            setPagemeta(ctx, { title: "Trigger" });
-            expect(() => processor.resolvePagemeta(ctx)).toThrow(
+            metadata(ctx, { title: "Trigger" });
+            expect(() => processor.resolveMetadata(ctx)).toThrow(
                 "defaults function must return an object, got boolean"
             );
         });
     });
 
-    describe("setPagemeta + resolvePagemeta + getHtmlProcessor integration", () => {
-        test("multiple setPagemeta calls merge into final HTML output", async () => {
-            const processor = createPagemetaProcessor({
+    describe("metadata + resolveMetadata + getHtmlProcessor integration", () => {
+        test("multiple metadata calls merge into final HTML output", async () => {
+            const processor = createMetadataProcessor({
                 addRequiredGlobalMeta: false,
                 compressHTML: false,
                 routePatterns: []
             });
 
             const ctx = mockContext();
-            setPagemeta(ctx, { title: "My Title" });
-            setPagemeta(ctx, {
+            metadata(ctx, { title: "My Title" });
+            metadata(ctx, {
                 custom: { "og:image": "https://example.com/img.png" },
                 description: "My Desc"
             });
 
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- setPagemeta guarantees metadata
-            const metadata = processor.resolvePagemeta(ctx)!;
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- metadata guarantees resolved
+            const resolved = processor.resolveMetadata(ctx)!;
             const result = await processor
-                .getHtmlProcessor({ metadata })
+                .getHtmlProcessor({ metadata: resolved })
                 .process(MINIMAL_HTML);
 
             const meta = extractMeta(String(result));

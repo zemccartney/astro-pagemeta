@@ -47,7 +47,7 @@ describe("SSR / dev server", () => {
         ]);
     });
 
-    test("page without setPagemeta() passes through unmodified", async () => {
+    test("page without metadata() passes through unmodified", async () => {
         const response = await fixture.fetch("/no-meta");
         const html = await response.text();
         const headMeta = extractMeta(html);
@@ -125,7 +125,7 @@ describe("SSR / dev server", () => {
         ]);
     });
 
-    test("multiple setPagemeta calls merge metadata", async () => {
+    test("multiple metadata calls merge metadata", async () => {
         const response = await fixture.fetch("/override");
         const html = await response.text();
         const headMeta = extractMeta(html);
@@ -150,12 +150,12 @@ describe("SSR / dev server", () => {
         ]);
     });
 
-    test("setPagemeta overrides template title and preserves other template meta", async () => {
-        const response = await fixture.fetch("/template-setpagemeta");
+    test("metadata overrides template title and preserves other template meta", async () => {
+        const response = await fixture.fetch("/template-metadata");
         const html = await response.text();
         const headMeta = extractMeta(html);
 
-        // setPagemeta overrides template title, adds description
+        // metadata overrides template title, adds description
         // Template's generator meta is preserved
         expect(headMeta).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
@@ -163,10 +163,10 @@ describe("SSR / dev server", () => {
                 properties: { content: "Astro", name: "generator" },
                 tag: "meta"
             },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
+            { properties: { text: "Title from metadata" }, tag: "title" },
             {
                 properties: {
-                    content: "Description from setPagemeta",
+                    content: "Description from metadata",
                     name: "description"
                 },
                 tag: "meta"
@@ -192,10 +192,10 @@ describe("SSR / dev server", () => {
     });
 
     // Template metadata that rehype-meta manages (like <title>) cannot be
-    // removed via setPagemeta — only replaced with a truthy value. Even
+    // removed via metadata — only replaced with a truthy value. Even
     // explicitly setting title to false doesn't remove the template's
     // <title>. There's no way to negate a template tag short of opting out
-    // entirely with setPagemeta(Astro, false), which skips everything.
+    // entirely with metadata(Astro, false), which skips everything.
     test("setting title: false does not remove template title", async () => {
         const response = await fixture.fetch("/template-title-only");
         const html = await response.text();
@@ -203,11 +203,11 @@ describe("SSR / dev server", () => {
 
         expect(headMeta).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
-            // Template title survives despite setPagemeta({ title: false })
+            // Template title survives despite metadata({ title: false })
             { properties: { text: "Template Title" }, tag: "title" },
             {
                 properties: {
-                    content: "Description from setPagemeta",
+                    content: "Description from metadata",
                     name: "description"
                 },
                 tag: "meta"
@@ -307,7 +307,7 @@ describe("SSR / build", () => {
         ]);
     });
 
-    test("page without setPagemeta() passes through unmodified", async () => {
+    test("page without metadata() passes through unmodified", async () => {
         const response = await app.render(
             new Request("https://example.com/no-meta")
         );
@@ -389,7 +389,7 @@ describe("SSR / build", () => {
         ]);
     });
 
-    test("multiple setPagemeta calls merge metadata", async () => {
+    test("multiple metadata calls merge metadata", async () => {
         const response = await app.render(
             new Request("https://example.com/override")
         );
@@ -416,14 +416,14 @@ describe("SSR / build", () => {
         ]);
     });
 
-    test("setPagemeta overrides template title and preserves other template meta", async () => {
+    test("metadata overrides template title and preserves other template meta", async () => {
         const response = await app.render(
-            new Request("https://example.com/template-setpagemeta")
+            new Request("https://example.com/template-metadata")
         );
         const html = await response.text();
         const headMeta = extractMeta(html);
 
-        // setPagemeta overrides template title, adds description
+        // metadata overrides template title, adds description
         // Template's generator meta is preserved
         expect(headMeta).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
@@ -431,10 +431,10 @@ describe("SSR / build", () => {
                 properties: { content: "Astro", name: "generator" },
                 tag: "meta"
             },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
+            { properties: { text: "Title from metadata" }, tag: "title" },
             {
                 properties: {
-                    content: "Description from setPagemeta",
+                    content: "Description from metadata",
                     name: "description"
                 },
                 tag: "meta"
@@ -473,7 +473,7 @@ describe("SSR / build", () => {
             { properties: { text: "Template Title" }, tag: "title" },
             {
                 properties: {
-                    content: "Description from setPagemeta",
+                    content: "Description from metadata",
                     name: "description"
                 },
                 tag: "meta"

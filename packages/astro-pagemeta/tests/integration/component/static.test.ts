@@ -4,9 +4,9 @@ import pagemeta from "../../../src/index.ts";
 import { extractMeta } from "../../utils/html-parse.ts";
 import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 
-// Demonstrates that the <Pagemeta> component works with static rendering —
+// Demonstrates that the <Head> component works with static rendering —
 // it isn't dependent on SSR. Static builds still have middleware and locals
-// during build-time rendering, so resolvePagemeta() works the same way.
+// during build-time rendering, so resolveMetadata() works the same way.
 const { cleanup, fixture } = await isolatedFixture("component");
 
 const config = {

@@ -1,9 +1,9 @@
 ---
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 
-// setPagemeta is called, but no <Pagemeta> component is used.
+// metadata is called, but no <Pagemeta> component is used.
 // In manual mode, nothing should be injected without the component or middleware.
-setPagemeta(Astro, {
+metadata(Astro, {
     description: "This should not appear",
     title: "Should Not Appear"
 });

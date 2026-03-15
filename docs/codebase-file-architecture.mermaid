@@ -4,9 +4,9 @@ title: Codebase File Architecture
 flowchart TD
     subgraph Source["Source (src/)"]
         INDEX["index.ts<br/>Integration entry<br/>Vite plugin + hooks"]
-        RUNTIME["runtime.ts<br/>setPagemeta()<br/>resolvePagemeta()<br/>isPageRoute()"]
+        RUNTIME["runtime.ts<br/>metadata()<br/>resolveMetadata()<br/>isPageRoute()"]
         MIDDLEWARE["middleware.ts<br/>Post-render HTML processing"]
-        TYPES["types.ts<br/>SetPagemeta, ResolvePagemeta,<br/>IsPageRoute"]
+        TYPES["types.ts<br/>MetadataOptions,<br/>MetadataProcessorConfig"]
         VIRTUAL_D["virtual.d.ts<br/>Module declarations"]
 
         TYPES -->|types used by| RUNTIME
@@ -34,7 +34,7 @@ flowchart TD
     end
 
     subgraph Fixtures["Test Fixtures (tests/fixtures/)"]
-        FIX_BASIC["basic/<br/>index, complex, no-meta,<br/>no-head, override,<br/>template-setpagemeta"]
+        FIX_BASIC["basic/<br/>index, complex, no-meta,<br/>no-head, override,<br/>template-metadata"]
         FIX_DEFAULTS["defaults/<br/>index, override, opt-out,<br/>template-defaults, full-cascade"]
         FIX_MW["middleware-defaults/<br/>src/middleware.ts +<br/>without-meta, with-override,<br/>partial-override"]
         FIX_ROUTE["route-filtering/<br/>server island, API routes,<br/>partials, rewrites"]

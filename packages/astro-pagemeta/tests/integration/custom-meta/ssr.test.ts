@@ -74,7 +74,7 @@ describe("custom-meta / SSR", async () => {
             ]);
         });
 
-        test("deep merges custom across multiple setPagemeta calls", async () => {
+        test("deep merges custom across multiple metadata calls", async () => {
             const response = await fixture.fetch("/merge-calls");
             const html = await response.text();
             const meta = extractMeta(html);
@@ -299,7 +299,7 @@ describe("custom-meta / SSR", async () => {
             ]);
         });
 
-        test("deep merges custom across multiple setPagemeta calls", async () => {
+        test("deep merges custom across multiple metadata calls", async () => {
             const response = await app.render(
                 new Request("https://example.com/merge-calls")
             );
@@ -505,7 +505,7 @@ describe("custom-meta with defaults / SSR", async () => {
             await devServer.stop();
         });
 
-        test("defaults custom applies when no setPagemeta()", async () => {
+        test("defaults custom applies when no metadata()", async () => {
             const response = await fixture.fetch("/defaults-only");
             const html = await response.text();
             const meta = extractMeta(html);
@@ -564,7 +564,7 @@ describe("custom-meta with defaults / SSR", async () => {
             app = await fixture.loadTestAdapterApp();
         });
 
-        test("defaults custom applies when no setPagemeta()", async () => {
+        test("defaults custom applies when no metadata()", async () => {
             const response = await app.render(
                 new Request("https://example.com/defaults-only")
             );

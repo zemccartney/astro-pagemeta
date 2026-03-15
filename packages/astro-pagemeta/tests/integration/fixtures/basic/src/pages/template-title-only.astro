@@ -1,10 +1,10 @@
 ---
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 
 // Explicitly sets title to false — a user might expect this to remove
 // the template title, but rehype-meta only replaces with truthy values.
-setPagemeta(Astro, {
-    description: "Description from setPagemeta",
+metadata(Astro, {
+    description: "Description from metadata",
     // negation, which would undo default setting, doesn't delete hardcoded elements
     // eslint-disable-next-line unicorn/no-null -- null feels like clearer indicator of intentional negation
     title: null
@@ -19,7 +19,7 @@ setPagemeta(Astro, {
     </head>
     <body>
         <p>
-            Tests that setting title to false in setPagemeta does not remove a
+            Tests that setting title to false in metadata does not remove a
             template title
         </p>
     </body>

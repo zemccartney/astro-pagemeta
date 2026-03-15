@@ -1,11 +1,11 @@
 declare module "virtual:pagemeta/config" {
     import type { APIContext } from "astro";
-    type PagemetaOptions = import("./types.ts").PagemetaOptions;
+    type MetadataOptions = import("./types.ts").MetadataOptions;
 
     export const routePatterns: RegExp[];
     export const defaults:
-        | ((ctx: APIContext) => PagemetaOptions)
-        | PagemetaOptions
+        | ((ctx: APIContext) => MetadataOptions)
+        | MetadataOptions
         | undefined;
     export const compressHTML: boolean;
     export const addRequiredGlobalMeta: boolean;

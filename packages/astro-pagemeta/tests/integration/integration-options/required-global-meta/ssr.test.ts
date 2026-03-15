@@ -111,7 +111,7 @@ describe("addRequiredGlobalMeta enabled", async () => {
                 },
                 tag: "meta"
             });
-            // setPagemeta values still present
+            // metadata values still present
             expect(headMeta).toContainEqual({
                 properties: { text: "No Head Page" },
                 tag: "title"
@@ -216,7 +216,7 @@ describe("addRequiredGlobalMeta enabled", async () => {
 });
 
 // addRequiredGlobalMeta: true, no defaults — verifies injection
-// even when no setPagemeta() call and no defaults are configured
+// even when no metadata() call and no defaults are configured
 describe("addRequiredGlobalMeta enabled, no defaults", async () => {
     const { cleanup, fixture } = await isolatedFixture("required-global-meta", {
         adapter: testAdapter(),
@@ -240,7 +240,7 @@ describe("addRequiredGlobalMeta enabled, no defaults", async () => {
             await devServer.stop();
         });
 
-        test("injects charset and viewport on page with no setPagemeta call", async () => {
+        test("injects charset and viewport on page with no metadata call", async () => {
             const response = await fixture.fetch("/no-meta");
             const html = await response.text();
             const headMeta = extractMeta(html);
@@ -267,7 +267,7 @@ describe("addRequiredGlobalMeta enabled, no defaults", async () => {
             app = await fixture.loadTestAdapterApp();
         });
 
-        test("injects charset and viewport on page with no setPagemeta call", async () => {
+        test("injects charset and viewport on page with no metadata call", async () => {
             const response = await app.render(
                 new Request("https://example.com/no-meta")
             );
@@ -328,12 +328,12 @@ describe("addRequiredGlobalMeta disabled (default)", async () => {
             expect(viewports).toHaveLength(0);
         });
 
-        test("page without setPagemeta does not get injected meta", async () => {
+        test("page without metadata does not get injected meta", async () => {
             const response = await fixture.fetch("/no-meta");
             const html = await response.text();
             const headMeta = extractMeta(html);
 
-            // No setPagemeta + no defaults that trigger metadata = no processing
+            // No metadata + no defaults that trigger metadata = no processing
             // Only the default title from integration defaults
             expect(headMeta).toEqual([
                 { properties: { text: "Default" }, tag: "title" }

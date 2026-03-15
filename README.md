@@ -91,10 +91,10 @@ Defaults can also be a function that receives [Astro's render context](https://d
 ```astro
 ---
 // index.astro
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 import Layout from "../layouts/Layout.astro";
 
-setPagemeta(Astro, {
+metadata(Astro, {
     name: "ACME Corporation Unlimited",
     description: "This is my home page, described!"
 });
@@ -108,10 +108,10 @@ setPagemeta(Astro, {
 ```astro
 ---
 // about.astro
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 import Layout from "../layouts/Layout.astro";
 
-setPagemeta(Astro, {
+metadata(Astro, {
     title: "My About Page",
     description: "This page is about about us"
 });
@@ -164,7 +164,7 @@ setPagemeta(Astro, {
 </html>
 ```
 
-Metadata set via `setPagemeta` takes precedence over defaults, which take precedence over hardcoded template tags. See [How Metadata Merges](./docs/usage.md#how-metadata-merges) for the full picture.
+Metadata set via `metadata` takes precedence over defaults, which take precedence over hardcoded template tags. See [How Metadata Merges](./docs/usage.md#how-metadata-merges) for the full picture.
 
 ## Documentation
 

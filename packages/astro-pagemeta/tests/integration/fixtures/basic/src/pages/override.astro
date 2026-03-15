@@ -1,15 +1,15 @@
 ---
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 
 // First call sets initial metadata
-setPagemeta(Astro, {
+metadata(Astro, {
     author: "Initial Author",
     description: "Initial description",
     title: "Initial Title"
 });
 
 // Second call merges: overrides title, keeps author, adds new field
-setPagemeta(Astro, {
+metadata(Astro, {
     description: "Overridden description",
     name: "Site Name",
     title: "Overridden Title"
@@ -22,7 +22,7 @@ setPagemeta(Astro, {
         <meta charset="utf-8" />
     </head>
     <body>
-        <h1>Multiple setPagemeta Calls</h1>
+        <h1>Multiple metadata Calls</h1>
         <p>
             Tests that subsequent calls merge metadata, overriding on conflict.
         </p>

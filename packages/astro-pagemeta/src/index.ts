@@ -8,17 +8,17 @@ import {
 } from "astro-integration-kit";
 import { z } from "astro/zod";
 
-import type { PagemetaOptions } from "./types.ts";
+import type { MetadataOptions } from "./types.ts";
 
 const optionsSchema = z
     .object({
         addRequiredGlobalMeta: z.boolean().optional().default(false),
         defaults: z
             .union([
-                z.custom<(ctx: APIContext) => PagemetaOptions>(
+                z.custom<(ctx: APIContext) => MetadataOptions>(
                     (val) => typeof val === "function"
                 ),
-                z.custom<PagemetaOptions>(
+                z.custom<MetadataOptions>(
                     (val) =>
                         typeof val === "object" &&
                         val !== null &&
@@ -90,7 +90,7 @@ function createConfigPlugin({
 /**
  * Astro integration that automatically injects page metadata (`<title>`,
  * `<meta>`, Open Graph tags, JSON-LD) into rendered HTML. Pages set their
- * metadata via `setPagemeta()` in frontmatter; the integration handles
+ * metadata via `metadata()` in frontmatter; the integration handles
  * the rest via post-render middleware.
  * @param options - Integration configuration
  * @param options.defaults - Default metadata applied to all pages. Can be

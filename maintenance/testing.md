@@ -10,7 +10,7 @@ In short, favor test clunkiness and redundancy for the sake of having documentar
 - Fixtures
     - contain pages with logic necessary to trigger behaviors under test
     - test cases = integration options + fixture pages
-        - output we're interested in is a product integration options + pages (meta tags set + calls to setPagemeta)
+        - output we're interested in is a product integration options + pages (meta tags set + calls to metadata)
     - could conceivably have 1 fixture for all tests, but thought it would be easier to reason about scope of tests, impact of changing any given file, by coupling fixture files to only one test directory i.e. if every test file uses the same fixture, how would you ever change them? just always add more files?
     - should only ever use APIs / functionality usable across static and server rendering, unless tests apply only to one environment / rendering mode or the other
         - solve for variance by supporting injecting files into shared fixtures to solve for rendering-mode-specific tests

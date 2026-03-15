@@ -1,14 +1,14 @@
 ---
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 
 // First call sets robots and generator
-setPagemeta(Astro, {
+metadata(Astro, {
     custom: { generator: "Astro", robots: "index, follow" },
     title: "Merge Calls Test"
 });
 
 // Second call overrides robots, adds viewport
-setPagemeta(Astro, {
+metadata(Astro, {
     custom: { robots: "noindex", viewport: "width=device-width" }
 });
 ---
@@ -19,6 +19,6 @@ setPagemeta(Astro, {
         <meta charset="utf-8" />
     </head>
     <body>
-        <p>Two setPagemeta calls with meta deep merge</p>
+        <p>Two metadata calls with meta deep merge</p>
     </body>
 </html>

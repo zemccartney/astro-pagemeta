@@ -13,18 +13,18 @@ import { isolatedFixture } from "../../utils/isolated-fixture.ts";
  * The integration registers middleware with `order: "post"`, making it
  * the inner wrapper. User middleware is the outer wrapper:
  *
- *   User middleware (before next)  — setPagemeta() sets defaults
+ *   User middleware (before next)  — metadata() sets defaults
  *     → next()
  *       Integration middleware (before next)
  *         → next()
- *           Page renders — setPagemeta() overrides
+ *           Page renders — metadata() overrides
  *         Integration after-next: reads final metadata, injects tags
  *       Returns processed Response
  *     User middleware (after next) — sees already-processed HTML
  *   Returns final Response
  *
  * This means user middleware can set defaults before next() that
- * pages can selectively override via setPagemeta().
+ * pages can selectively override via metadata().
  */
 
 const { cleanup, fixture } = await isolatedFixture("middleware/ordering", {
@@ -49,7 +49,7 @@ describe("middleware-ordering / SSR / dev server", () => {
         await devServer.stop();
     });
 
-    test("page without setPagemeta gets middleware defaults", async () => {
+    test("page without metadata gets middleware defaults", async () => {
         const response = await fixture.fetch("/without-meta");
         const html = await response.text();
         const headMeta = extractMeta(html);
@@ -112,7 +112,7 @@ describe("middleware-ordering / SSR / build", () => {
         app = await fixture.loadTestAdapterApp();
     });
 
-    test("page without setPagemeta gets middleware defaults", async () => {
+    test("page without metadata gets middleware defaults", async () => {
         const response = await app.render(
             new Request("https://example.com/without-meta")
         );

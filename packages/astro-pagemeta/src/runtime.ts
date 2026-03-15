@@ -6,11 +6,11 @@ import {
     routePatterns
 } from "virtual:pagemeta/config";
 
-import { createPagemetaProcessor, isHtmlDocument } from "./core.ts";
+import { createMetadataProcessor, isHtmlDocument } from "./core.ts";
 
-export { setPagemeta } from "./core.ts";
+export { metadata } from "./core.ts";
 
-const processor = createPagemetaProcessor({
+const processor = createMetadataProcessor({
     addRequiredGlobalMeta,
     compressHTML,
     defaults,
@@ -41,9 +41,9 @@ export const middleware = () => {
             return response;
         }
 
-        const metadata = processor.resolvePagemeta(ctx);
+        const resolved = processor.resolveMetadata(ctx);
 
-        if (!metadata) {
+        if (!resolved) {
             return response;
         }
 
@@ -72,7 +72,9 @@ export const middleware = () => {
             });
         }
 
-        const htmlProcessor = processor.getHtmlProcessor({ metadata });
+        const htmlProcessor = processor.getHtmlProcessor({
+            metadata: resolved
+        });
         const processed = await htmlProcessor.process(html);
 
         return new Response(String(processed), {

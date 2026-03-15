@@ -6,7 +6,7 @@
  * Use in place of a hardcoded <head> in layouts. Reuses the same rehype
  * pipeline as the auto-mode middleware. Slot children (template meta tags)
  * are processed through rehype-meta, which handles deduplication — e.g.,
- * a template <title> is replaced if setPagemeta() sets a title.
+ * a template <title> is replaced if metadata() sets a title.
  *
  * Why rehypeHeadContentsOnly instead of rehype's fragment mode:
  * rehype-meta only operates on documents (it looks for a <head> element).
@@ -28,7 +28,7 @@
  */
 import Processor from "./runtime";
 
-const metadata = Processor.resolvePagemeta(Astro);
+const metadata = Processor.resolveMetadata(Astro);
 const templateMeta =
     Astro.slots.has("default") ? await Astro.slots.render("default") : "";
 

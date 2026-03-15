@@ -3,11 +3,11 @@
 - [Default export](#default-export)
     - [pagemeta(options?)](#pagemetaoptions)
 - [Runtime](#runtime)
-    - [setPagemeta(ctx, options)](#setpagemetactx-options)
+    - [metadata(ctx, options)](#metadatactx-options)
     - [middleware()](#middleware)
 - [Head](#head)
 - [Types](#types)
-    - [PagemetaOptions](#pagemetaoptions-1)
+    - [MetadataOptions](#metadataoptions-1)
 
 ## Default export
 
@@ -29,7 +29,7 @@ Returns an [Astro integration](https://docs.astro.build/en/reference/integration
 ```ts
 {
     mode?: "auto" | "manual";
-    defaults?: ((ctx: APIContext) => PagemetaOptions) | PagemetaOptions;
+    defaults?: ((ctx: APIContext) => MetadataOptions) | MetadataOptions;
     addRequiredGlobalMeta?: boolean;
     includeExternalPages?: boolean;
 }
@@ -53,7 +53,7 @@ Controls how `astro-pagemeta` injects your metadata into the HTML that Astro gen
 ##### defaults
 
 - Required/Optional: optional
-- Type: Either a `PagemetaOptions` object or a function that receives Astro's rendering context and returns a `PagemetaOptions` object
+- Type: Either a `MetadataOptions` object or a function that receives Astro's rendering context and returns a `MetadataOptions` object
 - Default: none
 
 Set tags by default for all requests.
@@ -95,12 +95,12 @@ This option is a no-op when using the [`Head` component](#head) instead of middl
 ## Runtime
 
 ```ts
-import { middleware, setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { middleware, metadata } from "@grepco/astro-pagemeta/runtime";
 ```
 
 Warning: usable only within an astro project (internally relies on a virtual module, a product of Vite's pipeline)
 
-### setPagemeta(ctx, options)
+### metadata(ctx, options)
 
 A function for setting the metadata configuration for the current request
 
@@ -113,13 +113,13 @@ Doesn't return anything
 #### options
 
 - Required/Optional: required
-- Type: `PagemetaOptions | false`
+- Type: `MetadataOptions | false`
 
-An object describing the metadata you want to set for the current request. See the [`PagemetaOptions`](#pagemetaoptions-1) reference for supported tags.
+An object describing the metadata you want to set for the current request. See the [`MetadataOptions`](#pagemetaoptions-1) reference for supported tags.
 
 Passing `false` is a hard opt-out: it skips all defaults and tag injection for the current request.
 
-Multiple calls to `setPagemeta` within the same request merge their inputs. Top-level properties are shallow-merged (later calls win), while the `custom` property is deep-merged one level. This is useful for setting base values in middleware that pages can selectively override.
+Multiple calls to `metadata` within the same request merge their inputs. Top-level properties are shallow-merged (later calls win), while the `custom` property is deep-merged one level. This is useful for setting base values in middleware that pages can selectively override.
 
 ### middleware()
 
@@ -158,17 +158,17 @@ import Head from "@grepco/astro-pagemeta/Head";
 
 A component that renders a `<head>` element, implementing the same metadata processing as the middleware added in `"auto"` mode, but without consuming the entire response stream — applying your metadata input on top of its children only.
 
-Use this in place of a hardcoded `<head />` in your layouts. Slot children (your hardcoded meta tags) are processed through `rehype-meta`, which handles deduplication — e.g., a template `<title>` is replaced if `setPagemeta()` sets a title.
+Use this in place of a hardcoded `<head />` in your layouts. Slot children (your hardcoded meta tags) are processed through `rehype-meta`, which handles deduplication — e.g., a template `<title>` is replaced if `metadata()` sets a title.
 
 When you need to preserve Astro's HTML streaming for your site, use this together with `"manual"` mode. See the [streaming documentation](./streaming.md) for details.
 
 ## Types
 
-### PagemetaOptions
+### MetadataOptions
 
 ```ts
 import type { Options } from "rehype-meta";
-interface PagemetaOptions extends Options {
+interface MetadataOptions extends Options {
     custom?: Record<string, string>;
     jsonLd?: JsonLd | JsonLd[];
 }
@@ -185,7 +185,7 @@ An object describing the metadata that should be added to a document's `<head />
 Define custom extensions and overrides to `rehype-meta`'s managed tags. See [the usage examples](./usage.md#custom-extensions) for a more detailed picture of what you can do with this option.
 
 ```ts
-setPagemeta(Astro, {
+metadata(Astro, {
     custom: {
         robots: "no-index" // rehype-meta doesn't know about <meta name="robots" />
     }
@@ -226,7 +226,7 @@ One or more [JSON-LD objects](https://json-ld.org/) encoding types in schema.org
 Array input is automatically wrapped in a [top-level graph node](https://github.com/google/schema-dts?tab=readme-ov-file#graphs-and-ids), so your objects can then reference each other by their ids.
 
 ```ts
-setPagemeta(Astro, {
+metadata(Astro, {
     jsonLd: {
         "@type": "NewsArticle",
         headline: "BREAKING NEWS AT THIS HOUR",

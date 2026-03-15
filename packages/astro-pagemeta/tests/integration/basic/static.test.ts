@@ -41,7 +41,7 @@ describe("static / dev server", () => {
         ]);
     });
 
-    test("page without setPagemeta() passes through unmodified", async () => {
+    test("page without metadata() passes through unmodified", async () => {
         const response = await fixture.fetch("/no-meta");
         const html = await response.text();
         const headMeta = extractMeta(html);
@@ -119,7 +119,7 @@ describe("static / dev server", () => {
         ]);
     });
 
-    test("multiple setPagemeta calls merge metadata", async () => {
+    test("multiple metadata calls merge metadata", async () => {
         const response = await fixture.fetch("/override");
         const html = await response.text();
         const headMeta = extractMeta(html);
@@ -144,12 +144,12 @@ describe("static / dev server", () => {
         ]);
     });
 
-    test("setPagemeta overrides template title and preserves other template meta", async () => {
-        const response = await fixture.fetch("/template-setpagemeta");
+    test("metadata overrides template title and preserves other template meta", async () => {
+        const response = await fixture.fetch("/template-metadata");
         const html = await response.text();
         const headMeta = extractMeta(html);
 
-        // setPagemeta overrides template title, adds description
+        // metadata overrides template title, adds description
         // Template's generator meta is preserved
         expect(headMeta).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
@@ -157,10 +157,10 @@ describe("static / dev server", () => {
                 properties: { content: "Astro", name: "generator" },
                 tag: "meta"
             },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
+            { properties: { text: "Title from metadata" }, tag: "title" },
             {
                 properties: {
-                    content: "Description from setPagemeta",
+                    content: "Description from metadata",
                     name: "description"
                 },
                 tag: "meta"
@@ -195,7 +195,7 @@ describe("static / dev server", () => {
             { properties: { text: "Template Title" }, tag: "title" },
             {
                 properties: {
-                    content: "Description from setPagemeta",
+                    content: "Description from metadata",
                     name: "description"
                 },
                 tag: "meta"
@@ -227,7 +227,7 @@ describe("static / build", () => {
         ]);
     });
 
-    test("page without setPagemeta() passes through unmodified", async () => {
+    test("page without metadata() passes through unmodified", async () => {
         const html = await fixture.readFile("/no-meta/index.html");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
         const headMeta = extractMeta(html!);
@@ -305,7 +305,7 @@ describe("static / build", () => {
         ]);
     });
 
-    test("multiple setPagemeta calls merge metadata", async () => {
+    test("multiple metadata calls merge metadata", async () => {
         const html = await fixture.readFile("/override/index.html");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
         const headMeta = extractMeta(html!);
@@ -330,12 +330,12 @@ describe("static / build", () => {
         ]);
     });
 
-    test("setPagemeta overrides template title and preserves other template meta", async () => {
-        const html = await fixture.readFile("/template-setpagemeta/index.html");
+    test("metadata overrides template title and preserves other template meta", async () => {
+        const html = await fixture.readFile("/template-metadata/index.html");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
         const headMeta = extractMeta(html!);
 
-        // setPagemeta overrides template title, adds description
+        // metadata overrides template title, adds description
         // Template's generator meta is preserved
         expect(headMeta).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
@@ -343,10 +343,10 @@ describe("static / build", () => {
                 properties: { content: "Astro", name: "generator" },
                 tag: "meta"
             },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
+            { properties: { text: "Title from metadata" }, tag: "title" },
             {
                 properties: {
-                    content: "Description from setPagemeta",
+                    content: "Description from metadata",
                     name: "description"
                 },
                 tag: "meta"
@@ -381,7 +381,7 @@ describe("static / build", () => {
             { properties: { text: "Template Title" }, tag: "title" },
             {
                 properties: {
-                    content: "Description from setPagemeta",
+                    content: "Description from metadata",
                     name: "description"
                 },
                 tag: "meta"

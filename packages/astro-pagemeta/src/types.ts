@@ -7,7 +7,7 @@ import type { Thing } from "schema-dts";
  * for arbitrary custom meta tags and JSON-LD structured data.
  * @see https://github.com/rehypejs/rehype-meta#options
  */
-export interface PagemetaOptions extends Options {
+export interface MetadataOptions extends Options {
     /**
      * Arbitrary key-value pairs injected as `<meta>` tags. Keys matching
      * Open Graph prefixes (`og:`, `article:`, etc.) use the `property`
@@ -24,12 +24,12 @@ export interface PagemetaOptions extends Options {
     jsonLd?: Thing | Thing[];
 }
 
-export interface PagemetaProcessorConfig {
+export interface MetadataProcessorConfig {
     addRequiredGlobalMeta: boolean;
     compressHTML: boolean;
     defaults?:
-        | ((ctx: APIContext) => PagemetaOptions)
-        | PagemetaOptions
+        | ((ctx: APIContext) => MetadataOptions)
+        | MetadataOptions
         | undefined;
     routePatterns: RegExp[];
 }

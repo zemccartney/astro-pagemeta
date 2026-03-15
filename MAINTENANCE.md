@@ -122,7 +122,7 @@ await fixture.build(config);
 
 For consistency, related test suites should cover the same scenarios. For example, both `static-defaults` and `function-defaults` test:
 
-1. Defaults applied to page without `setPagemeta()`
+1. Defaults applied to page without `metadata()`
 2. Page-level metadata overrides defaults
 3. `metadata: false` skips all defaults
 

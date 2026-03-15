@@ -8,7 +8,7 @@ import { extractMeta } from "../../utils/html-parse.ts";
 import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 
 // No defaults configured — demonstrates the component gracefully handles
-// the absence of any metadata (no defaults, no setPagemeta call).
+// the absence of any metadata (no defaults, no metadata call).
 // Common scenario: integration in layout template, but a given page
 // doesn't need custom meta tags.
 const { cleanup, fixture } = await isolatedFixture("component", {

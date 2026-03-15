@@ -37,7 +37,7 @@ describe("static-defaults / SSR / dev server", () => {
         await devServer.stop();
     });
 
-    test("applies defaults to page without setPagemeta()", async () => {
+    test("applies defaults to page without metadata()", async () => {
         const response = await fixture.fetch("/");
         const html = await response.text();
         const headMeta = extractMeta(html);
@@ -123,7 +123,7 @@ describe("static-defaults / SSR / dev server", () => {
         ]);
     });
 
-    test("full cascade: setPagemeta > defaults > template", async () => {
+    test("full cascade: metadata > defaults > template", async () => {
         const response = await fixture.fetch("/full-cascade");
         const html = await response.text();
         const headMeta = extractMeta(html);
@@ -131,7 +131,7 @@ describe("static-defaults / SSR / dev server", () => {
         // All 3 sources contribute:
         // - Template: charset, generator, og:site_name (preserved)
         // - Defaults: description, author (added)
-        // - setPagemeta: title (overrides defaults and template)
+        // - metadata: title (overrides defaults and template)
         //
         // Template metadata survives because:
         // - generator: rehype-meta doesn't manage this tag
@@ -149,7 +149,7 @@ describe("static-defaults / SSR / dev server", () => {
                 },
                 tag: "meta"
             },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
+            { properties: { text: "Title from metadata" }, tag: "title" },
             {
                 properties: {
                     content: "Default site description",
@@ -176,7 +176,7 @@ describe("static-defaults / SSR / build", () => {
         app = await fixture.loadTestAdapterApp();
     });
 
-    test("applies defaults to page without setPagemeta()", async () => {
+    test("applies defaults to page without metadata()", async () => {
         const response = await app.render(new Request("https://example.com/"));
         const html = await response.text();
         const headMeta = extractMeta(html);
@@ -268,7 +268,7 @@ describe("static-defaults / SSR / build", () => {
         ]);
     });
 
-    test("full cascade: setPagemeta > defaults > template", async () => {
+    test("full cascade: metadata > defaults > template", async () => {
         const response = await app.render(
             new Request("https://example.com/full-cascade")
         );
@@ -278,7 +278,7 @@ describe("static-defaults / SSR / build", () => {
         // All 3 sources contribute:
         // - Template: charset, generator, og:site_name (preserved)
         // - Defaults: description, author (added)
-        // - setPagemeta: title (overrides defaults and template)
+        // - metadata: title (overrides defaults and template)
         //
         // Template metadata survives because:
         // - generator: rehype-meta doesn't manage this tag
@@ -296,7 +296,7 @@ describe("static-defaults / SSR / build", () => {
                 },
                 tag: "meta"
             },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
+            { properties: { text: "Title from metadata" }, tag: "title" },
             {
                 properties: {
                     content: "Default site description",

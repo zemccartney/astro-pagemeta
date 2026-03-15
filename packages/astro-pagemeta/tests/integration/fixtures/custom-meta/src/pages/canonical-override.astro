@@ -1,9 +1,9 @@
 ---
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 
 // rehype-meta derives canonical from origin + pathname
 // custom link:rel:canonical overrides the computed result directly
-setPagemeta(Astro, {
+metadata(Astro, {
     custom: { "link:rel:canonical": "https://canonical.example.com/override" },
     og: true,
     origin: "https://example.com",

@@ -78,9 +78,9 @@ import Head from "@grepco/astro-pagemeta/Head";
 ---
 // pages/contact.astro
 
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 
-setPagemeta(Astro, {
+metadata(Astro, {
     title: "Contact Us!"
 });
 ---
@@ -92,6 +92,6 @@ setPagemeta(Astro, {
 - Within the `<head />`, renders the result of running `<Head />`'s children through the integration's processing, applying any input metadata
 - Tags that the integration doesn't manage passthrough unmodified. So, for example, any stylesheet or scripts won't be mangled or removed
 
-Which is all to say, the component uses the same core — `rehype` processing pipeline and mechanics for resolving your defaults and `setPagemeta` input into a final metadata config — as the middleware, but scopes the work only to contents of your `<Head />`. The integration's processing is now part of generating the response instead of depending on it.
+Which is all to say, the component uses the same core — `rehype` processing pipeline and mechanics for resolving your defaults and `metadata` input into a final metadata config — as the middleware, but scopes the work only to contents of your `<Head />`. The integration's processing is now part of generating the response instead of depending on it.
 
 Lastly, `<Head />` is in no way dependent on SSR or `"manual"` mode; it only works together with those settings to re-enable HTML streaming with this integration. It works in static rendering. It even works in `"auto"` mode (entirely redundant with the middleware processing that follows, purely performance overhead, but works nonetheless).

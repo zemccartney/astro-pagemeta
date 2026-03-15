@@ -1,10 +1,10 @@
 ---
 import Head from "@grepco/astro-pagemeta/Head";
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 
 import Styled from "../components/Styled.astro";
 
-setPagemeta(Astro, {
+metadata(Astro, {
     description: "Page with styled component",
     title: "Styled Page"
 });

@@ -2,16 +2,16 @@
 
 ## What This Is
 
-An Astro integration (`@grepco/astro-pagemeta`) that simplifies setting page metadata (title, description, OG tags). Users call `setPagemeta(Astro, {...})` in page frontmatter, and the integration automatically injects the corresponding meta tags into the rendered HTML via post-render middleware.
+An Astro integration (`@grepco/astro-pagemeta`) that simplifies setting page metadata (title, description, OG tags). Users call `metadata(Astro, {...})` in page frontmatter, and the integration automatically injects the corresponding meta tags into the rendered HTML via post-render middleware.
 
 ## Architecture
 
 Four source files:
 
 1. **`src/index.ts`** — Integration entry point. Creates a Vite plugin that generates the `virtual:pagemeta/config` module, registers middleware with `order: "post"`, collects route patterns from `astro:routes:resolved`, and invalidates the virtual module during dev when routes change.
-2. **`src/runtime.ts`** — Exports `setPagemeta()`, `resolvePagemeta()`, and `isPageRoute()`. Imported at runtime as `@grepco/astro-pagemeta/runtime` (via `package.json` exports mapping to this file directly — no stub). Uses a private `Symbol("pagemeta")` key for `Astro.locals` storage.
-3. **`src/middleware.ts`** — Post-render middleware. Filters non-page routes via `isPageRoute()`, skips HTML fragments (no doctype), resolves metadata via `resolvePagemeta()`, and processes HTML with `rehype` + `rehype-meta` + optional `rehype-minify-whitespace`.
-4. **`src/types.ts`** — TypeScript types for the three exported functions.
+2. **`src/runtime.ts`** — Exports `metadata()` and `middleware()`. Imported at runtime as `@grepco/astro-pagemeta/runtime` (via `package.json` exports mapping to this file directly — no stub). Uses a private `Symbol("pagemeta")` key for `Astro.locals` storage.
+3. **`src/middleware.ts`** — Post-render middleware. Filters non-page routes via `isPageRoute()`, skips HTML fragments (no doctype), resolves metadata via `resolveMetadata()`, and processes HTML with `rehype` + `rehype-meta` + optional `rehype-minify-whitespace`.
+4. **`src/types.ts`** — TypeScript types (`MetadataOptions`, `MetadataProcessorConfig`).
 
 Type declarations for both the public module and the internal virtual module live in `src/virtual.d.ts`.
 
@@ -29,7 +29,7 @@ Function serialization means **closures don't work** — any function default mu
 ### Data Flow
 
 ```
-Page frontmatter: setPagemeta(Astro, { title: "My Page" })
+Page frontmatter: metadata(Astro, { title: "My Page" })
     ↓
 Stores in Astro.locals[Symbol("pagemeta")] — merges with prior calls
     ↓
@@ -37,7 +37,7 @@ Page renders HTML
     ↓
 Middleware (post order) intercepts response:
   1. isPageRoute(pathname) → skip API routes, server islands, endpoints
-  2. resolvePagemeta(context) → merge defaults + page metadata
+  2. resolveMetadata(context) → merge defaults + page metadata
   3. isHtmlDocument check → skip fragments (partials, server islands)
   4. rehype + rehype-meta → inject tags into <head>
   5. If addRequiredGlobalMeta: inject charset/viewport if missing
@@ -49,10 +49,10 @@ Modified HTML response returned
 ### Metadata Merge Hierarchy (highest priority wins)
 
 ```
-setPagemeta() > integration defaults > template <meta> tags
+metadata() > integration defaults > template <meta> tags
 ```
 
-User middleware can also call `setPagemeta()` before `next()` to set per-request defaults that pages can override. Passing `false` to `setPagemeta()` is a hard opt-out — skips all defaults and tag injection.
+User middleware can also call `metadata()` before `next()` to set per-request defaults that pages can override. Passing `false` to `metadata()` is a hard opt-out — skips all defaults and tag injection.
 
 ## Testing
 
@@ -62,7 +62,7 @@ Uses `@inox-tools/astro-tests` which wraps Astro's CLI APIs (`astro dev`, `astro
 
 ```
 tests/
-├── basic/                     # Core setPagemeta functionality
+├── basic/                     # Core metadata() functionality
 │   ├── ssr.test.ts            # SSR dev + build
 │   └── static.test.ts         # Static dev + build
 ├── integration-options/
@@ -163,9 +163,9 @@ describe("SSR / build", () => {
 ## Key Files
 
 - `src/index.ts` — Integration entry, Vite plugin, route collection
-- `src/runtime.ts` — `setPagemeta()`, `resolvePagemeta()`, `isPageRoute()`
+- `src/runtime.ts` — `metadata()`, `middleware()`
 - `src/middleware.ts` — Post-render middleware using `defineMiddleware` from `astro/middleware`
-- `src/types.ts` — Public type exports (`SetPagemeta`, `ResolvePagemeta`, `IsPageRoute`)
+- `src/types.ts` — Public type exports (`MetadataOptions`, `MetadataProcessorConfig`)
 - `src/virtual.d.ts` — Module declarations for `@grepco/astro-pagemeta/runtime` and `virtual:pagemeta/config`
 - `MAINTENANCE.md` — Detailed test organization guide, known quirks, and architecture decisions
 
@@ -180,7 +180,7 @@ describe("SSR / build", () => {
 
 1. **Runtime import path**: `@grepco/astro-pagemeta/runtime` — maps directly to `src/runtime.ts` via package.json exports
 2. **Middleware typing**: Use `defineMiddleware` from `astro/middleware` (not `astro:middleware` — that's for user-land code)
-3. **Symbol-based locals**: `Symbol("pagemeta")` is defined in `runtime.ts`, never exported, shared between `setPagemeta` and `resolvePagemeta`
+3. **Symbol-based locals**: `Symbol("pagemeta")` is defined in `core.ts`, never exported, shared between `metadata` and `resolveMetadata`
 4. **HTML document detection**: Middleware checks `/^<!doctype\s/i` to distinguish full documents from fragments (server islands, partials)
 5. **Route filtering**: Only project page routes get processed. API routes, endpoints, server islands, and config redirects are skipped via `isPageRoute()` which matches against patterns from `astro:routes:resolved`. `includeExternalPages: true` opts in integration-injected pages.
 6. **Dev route invalidation**: When Astro re-fires `astro:routes:resolved` on page file add/remove during dev, the integration updates route patterns and invalidates the virtual module via `server.moduleGraph.invalidateModule()` — no server restart needed.

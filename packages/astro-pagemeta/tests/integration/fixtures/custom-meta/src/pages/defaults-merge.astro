@@ -1,8 +1,8 @@
 ---
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 
 // Page custom should deep-merge with defaults' custom
-setPagemeta(Astro, {
+metadata(Astro, {
     custom: { generator: "Custom Generator", viewport: "width=device-width" }
 });
 ---

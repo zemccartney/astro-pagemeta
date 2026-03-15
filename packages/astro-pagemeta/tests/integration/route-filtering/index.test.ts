@@ -129,10 +129,10 @@ describe("route-filtering", async () => {
         });
 
         // The template includes <!doctype html> and the frontmatter calls
-        // setPagemeta(), but astro appears to strip the doctype from all
+        // metadata(), but astro appears to strip the doctype from all
         // non-page renders. Since this page exports `partial = true`, the response has no doctype and the
         // middleware's isHtmlDocument() check classifies it as a fragment,
-        // skipping all metadata injection. setPagemeta() and integration
+        // skipping all metadata injection. metadata() and integration
         // defaults are both silently ignored.
         test("partial with full document template not processed", async () => {
             const response = await fixture.fetch("/partial-full-doc");
@@ -140,7 +140,7 @@ describe("route-filtering", async () => {
 
             // Astro strips doctype — response is classified as fragment
             expect(isFragment(html)).toBe(true);
-            // Only template-level metadata survives; setPagemeta() and defaults ignored
+            // Only template-level metadata survives; metadata() and defaults ignored
             expect(extractMeta(html)).toEqual([
                 { properties: { charSet: "utf-8" }, tag: "meta" }
             ]);

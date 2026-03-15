@@ -44,7 +44,7 @@ describe("component / SSR / dev server", () => {
         const headMeta = extractMeta(html);
 
         // Only the hardcoded charset — no title, description, or author
-        // despite setPagemeta() call and configured defaults
+        // despite metadata() call and configured defaults
         expect(headMeta).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" }
         ]);

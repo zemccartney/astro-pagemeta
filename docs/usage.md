@@ -12,11 +12,11 @@ There are three ways metadata can end up in your `<head>`, and it might not be i
 
 1. **Hardcoded tags** — elements in your template's `<head>`
 2. **Defaults** — set via the integration's `defaults` option
-3. **`setPagemeta`** — called in page frontmatter or middleware
+3. **`metadata`** — called in page frontmatter or middleware
 
 The integration deduplicates at each layer: if a matching element already exists in the `<head>`, its value is updated in place rather than adding a duplicate.
 
-`setPagemeta` itself can be called multiple times within a single request (e.g., once in middleware, once in the page). Calls are merged: top-level properties are shallow-merged (later calls win), while `custom` is deep-merged one level.
+`metadata` itself can be called multiple times within a single request (e.g., once in middleware, once in the page). Calls are merged: top-level properties are shallow-merged (later calls win), while `custom` is deep-merged one level.
 
 So, given
 
@@ -40,9 +40,9 @@ export default defineConfig({
 
 ```astro
 ---
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 
-setPagemeta(Astro, {
+metadata(Astro, {
     author: "Author — Explicit"
 });
 ---
@@ -79,13 +79,13 @@ The final `<head />` would be:
 </head>
 ```
 
-One wrinkle: while hard-coded tags are replaced, they aren't actually input to `rehype-meta`, which means they don't influence its output like your defaults or input to `setPagemeta`
+One wrinkle: while hard-coded tags are replaced, they aren't actually input to `rehype-meta`, which means they don't influence its output like your defaults or input to `metadata`
 
 For example,
 
 ```astro
 ---
-setPagemeta(Astro, {
+metadata(Astro, {
     copyright: true
 });
 ---
@@ -116,7 +116,7 @@ Instead, it outputs nothing. `rehype-meta` doesn't see the existing author conte
 
 ### Design rationale
 
-The `custom` property of [`PagemetaOptions`](./API.md#pagemetaoptions-1) is a general-purpose escape hatch from `rehype-meta`'s API.
+The `custom` property of [`MetadataOptions`](./API.md#metadataoptions-1) is a general-purpose escape hatch from `rehype-meta`'s API.
 
 The mental model: `rehype-meta` options describe _inputs_ to a tag-generation process. `custom` describes the _outputs_ you want, overriding whatever that process produced.
 
@@ -126,9 +126,9 @@ For example:
 
 ```astro
 ---
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 
-setPagemeta(Astro, {
+metadata(Astro, {
     og: true
 });
 ---
@@ -152,7 +152,7 @@ As `rehype-meta` defaults `og:type` to `website` and only supports that and `art
 But OpenGraph documents plenty of other types. So if you were marking up, say, a movie, you could do:
 
 ```ts
-setPagemeta(Astro, {
+metadata(Astro, {
     og: true,
     custom: {
         "og:type": "video.movie"
@@ -175,14 +175,14 @@ Some keys receive special handling to allow overriding any tag the integration m
 
 ## Behavior Notes
 
-**When `setPagemeta` is never called**: If defaults are configured, they still apply. If no defaults are set and `setPagemeta` is never called, the middleware skips processing entirely — the response passes through unmodified.
+**When `metadata` is never called**: If defaults are configured, they still apply. If no defaults are set and `metadata` is never called, the middleware skips processing entirely — the response passes through unmodified.
 
-**Opting out of processing**: Pass `false` to `setPagemeta` to skip all defaults and tag injection for the current request:
+**Opting out of processing**: Pass `false` to `metadata` to skip all defaults and tag injection for the current request:
 
 ```ts
-setPagemeta(Astro, false);
+metadata(Astro, false);
 ```
 
 **`compressHTML` integration**: The integration respects Astro's [`compressHTML`](https://docs.astro.build/en/reference/configuration-reference/#compresshtml) config option. When enabled, injected whitespace is stripped and JSON-LD output is minified. When disabled (the default), JSON-LD is pretty-printed with 2-space indentation.
 
-**`Head` component passthrough**: When no metadata is resolved (no defaults, no `setPagemeta` call), the `Head` component renders its slot children as-is without running them through the rehype pipeline — zero processing overhead.
+**`Head` component passthrough**: When no metadata is resolved (no defaults, no `metadata` call), the `Head` component renders its slot children as-is without running them through the rehype pipeline — zero processing overhead.

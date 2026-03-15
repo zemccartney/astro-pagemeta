@@ -37,7 +37,7 @@ describe("function-defaults / static / dev server", () => {
         await devServer.stop();
     });
 
-    test("applies defaults to page without setPagemeta()", async () => {
+    test("applies defaults to page without metadata()", async () => {
         const response = await fixture.fetch("/");
         expect(extractMeta(await response.text())).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" },
@@ -120,13 +120,13 @@ describe("function-defaults / static / dev server", () => {
         ]);
     });
 
-    test("full cascade: setPagemeta > function defaults > template", async () => {
+    test("full cascade: metadata > function defaults > template", async () => {
         const response = await fixture.fetch("/full-cascade");
 
         // All 3 sources contribute:
         // - Template: charset, generator, og:site_name (preserved)
         // - Function defaults: author, description (using pathname)
-        // - setPagemeta: title (overrides function default)
+        // - metadata: title (overrides function default)
         //
         // Template metadata survives because:
         // - generator: rehype-meta doesn't manage this tag
@@ -144,7 +144,7 @@ describe("function-defaults / static / dev server", () => {
                 },
                 tag: "meta"
             },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
+            { properties: { text: "Title from metadata" }, tag: "title" },
             {
                 properties: {
                     content: "Page at /full-cascade",
@@ -165,7 +165,7 @@ describe("function-defaults / static / build", () => {
         await fixture.build({ ...config, build: { format: "directory" } });
     });
 
-    test("applies defaults to page without setPagemeta()", async () => {
+    test("applies defaults to page without metadata()", async () => {
         const html = await fixture.readFile("/index.html");
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
         expect(extractMeta(html!)).toEqual([
@@ -253,13 +253,13 @@ describe("function-defaults / static / build", () => {
         ]);
     });
 
-    test("full cascade: setPagemeta > function defaults > template", async () => {
+    test("full cascade: metadata > function defaults > template", async () => {
         const html = await fixture.readFile("/full-cascade/index.html");
 
         // All 3 sources contribute:
         // - Template: charset, generator, og:site_name (preserved)
         // - Function defaults: author, description (using pathname)
-        // - setPagemeta: title (overrides function default)
+        // - metadata: title (overrides function default)
         //
         // Template metadata survives because:
         // - generator: rehype-meta doesn't manage this tag
@@ -278,7 +278,7 @@ describe("function-defaults / static / build", () => {
                 },
                 tag: "meta"
             },
-            { properties: { text: "Title from setPagemeta" }, tag: "title" },
+            { properties: { text: "Title from metadata" }, tag: "title" },
             {
                 properties: {
                     content: "Page at /full-cascade/",

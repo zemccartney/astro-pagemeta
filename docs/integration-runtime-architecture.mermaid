@@ -13,16 +13,16 @@ flowchart TD
     end
 
     subgraph RequestTime["Request Time"]
-        PAGE["Page Frontmatter<br/>setPagemeta(Astro, {...})"]
+        PAGE["Page Frontmatter<br/>metadata(Astro, {...})"]
         PAGE -->|stores via Symbol| LOCALS["Astro.locals[Symbol]<br/>metadata object"]
 
-        USER_MW["User Middleware (optional)<br/>setPagemeta(ctx, defaults)<br/>before next()"]
+        USER_MW["User Middleware (optional)<br/>metadata(ctx, defaults)<br/>before next()"]
         USER_MW -->|can also store| LOCALS
 
         MW["src/middleware.ts<br/>post-order middleware"]
         MW -->|"1. isPageRoute(pathname)"| ROUTE_CHECK{Page route?}
         ROUTE_CHECK -->|No: API, endpoint,<br/>server island| PASS[Pass through unchanged]
-        ROUTE_CHECK -->|Yes| RESOLVE["2. resolvePagemeta(ctx)"]
+        ROUTE_CHECK -->|Yes| RESOLVE["2. resolveMetadata(ctx)"]
 
         RESOLVE -->|reads| LOCALS
         RESOLVE -->|reads| VMOD

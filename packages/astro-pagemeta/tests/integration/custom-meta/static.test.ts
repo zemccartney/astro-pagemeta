@@ -67,7 +67,7 @@ describe("custom-meta / static", async () => {
             ]);
         });
 
-        test("deep merges custom across multiple setPagemeta calls", async () => {
+        test("deep merges custom across multiple metadata calls", async () => {
             const response = await fixture.fetch("/merge-calls");
             const html = await response.text();
             const meta = extractMeta(html);
@@ -278,7 +278,7 @@ describe("custom-meta / static", async () => {
             ]);
         });
 
-        test("deep merges custom across multiple setPagemeta calls", async () => {
+        test("deep merges custom across multiple metadata calls", async () => {
             const html = await fixture.readFile("/merge-calls/index.html");
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
             const meta = extractMeta(html!);
@@ -473,7 +473,7 @@ describe("custom-meta with defaults / static", async () => {
             await devServer.stop();
         });
 
-        test("defaults custom applies when no setPagemeta()", async () => {
+        test("defaults custom applies when no metadata()", async () => {
             const response = await fixture.fetch("/defaults-only");
             const html = await response.text();
             const meta = extractMeta(html);
@@ -529,7 +529,7 @@ describe("custom-meta with defaults / static", async () => {
             await fixture.build(config);
         });
 
-        test("defaults custom applies when no setPagemeta()", async () => {
+        test("defaults custom applies when no metadata()", async () => {
             const html = await fixture.readFile("/defaults-only/index.html");
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test will fail if null
             const meta = extractMeta(html!);

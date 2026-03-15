@@ -1,9 +1,9 @@
 ---
-import { setPagemeta } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/astro-pagemeta/runtime";
 
 import Greeting from "../components/greeting.astro";
 
-setPagemeta(Astro, {
+metadata(Astro, {
     description: "Page with server island",
     title: "Server Island Page"
 });

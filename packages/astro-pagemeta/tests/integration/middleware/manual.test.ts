@@ -11,7 +11,7 @@ import { isolatedFixture } from "../../utils/isolated-fixture.ts";
  * Manual middleware mode tests.
  *
  * When `mode: "manual"` is set, the integration does NOT register its
- * middleware. Pages calling setPagemeta() have no effect unless the
+ * middleware. Pages calling metadata() have no effect unless the
  * user handles processing in their own middleware or uses the component.
  */
 

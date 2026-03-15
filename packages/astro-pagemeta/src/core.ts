@@ -6,14 +6,14 @@ import { rehype } from "rehype";
 import rehypeMeta from "rehype-meta";
 import rehypeMinifyWhitespace from "rehype-minify-whitespace";
 
-import type { PagemetaOptions } from "./types.ts";
+import type { PagemetaOptions, PagemetaProcessorConfig } from "./types.ts";
 
 // Trailing newline after injected elements, matching rehype-meta's formatting
 // convention of separating head children with line breaks for readability.
 // Stripped by rehype-minify-whitespace when compressHTML is enabled.
-export const newline = (): Text => ({ type: "text", value: "\n" });
+const newline = (): Text => ({ type: "text", value: "\n" });
 
-export const LOCALS_KEY = Symbol("pagemeta");
+const LOCALS_KEY = Symbol("pagemeta");
 
 // OGP-defined prefixes (https://ogp.me/) that use the `property` attribute
 // on meta tags instead of `name`. Includes `fb:` which is widely used in
@@ -29,14 +29,14 @@ const OG_PREFIXES = [
     "payment:"
 ];
 
-export const isOgProperty = (key: string) =>
+const isOgProperty = (key: string) =>
     OG_PREFIXES.some((prefix) => key.startsWith(prefix));
 
 const CANONICAL_KEY = "link:rel:canonical";
 
 const CHARSET_KEY = "meta:charSet";
 
-export function rehypeCustomMeta(meta: Record<string, string>) {
+function rehypeCustomMeta(meta: Record<string, string>) {
     return (tree: Root) => {
         const head = select("head", tree);
         if (!head) return;
@@ -147,7 +147,7 @@ export function rehypeCustomMeta(meta: Record<string, string>) {
  * to produce inline head content from rehype-meta's document-mode output.
  * @returns A rehype transform that replaces the tree with `<head>` children.
  */
-export function rehypeHeadContentsOnly() {
+function rehypeHeadContentsOnly() {
     // eslint-disable-next-line unicorn/consistent-function-scoping -- prefer consistency with other plugins
     return (tree: Root) => {
         const head = select("head", tree);
@@ -169,7 +169,7 @@ export function rehypeHeadContentsOnly() {
 // eslint-disable-next-line perfectionist/sort-modules -- collocate with main user of type
 type FakeSchema = Record<string, unknown> | Record<string, unknown>[];
 
-export function rehypeJsonLd({
+function rehypeJsonLd({
     compressHTML,
     jsonLd
 }: {
@@ -260,16 +260,6 @@ export const setPagemeta = (
         :   {})
     };
 };
-
-export interface PagemetaProcessorConfig {
-    addRequiredGlobalMeta: boolean;
-    compressHTML: boolean;
-    defaults?:
-        | ((ctx: APIContext) => PagemetaOptions)
-        | PagemetaOptions
-        | undefined;
-    routePatterns: RegExp[];
-}
 
 export function createPagemetaProcessor(config: PagemetaProcessorConfig) {
     return {

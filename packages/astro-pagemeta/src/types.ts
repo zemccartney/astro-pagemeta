@@ -1,3 +1,4 @@
+import type { APIContext } from "astro";
 import type { Options } from "rehype-meta";
 import type { Thing } from "schema-dts";
 
@@ -21,4 +22,14 @@ export interface PagemetaOptions extends Options {
      * @see https://schema.org
      */
     jsonLd?: Thing | Thing[];
+}
+
+export interface PagemetaProcessorConfig {
+    addRequiredGlobalMeta: boolean;
+    compressHTML: boolean;
+    defaults?:
+        | ((ctx: APIContext) => PagemetaOptions)
+        | PagemetaOptions
+        | undefined;
+    routePatterns: RegExp[];
 }

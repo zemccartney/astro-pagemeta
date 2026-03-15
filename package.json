@@ -8,10 +8,11 @@
         "fmt": "prettier --check .",
         "fmt:fix": "prettier --write .",
         "lint": "eslint --flag unstable_native_nodejs_ts_config",
-        "lint:debug": "config-inspector",
+        "lint:debug": "pnpx @eslint/config-inspector",
         "lint:fix": "eslint --flag unstable_native_nodejs_ts_config --fix",
         "prepare": "git rev-parse --git-dir > /dev/null 2>&1 && lefthook install || true",
-        "typecheck": "pnpm -r typecheck"
+        "typecheck": "pnpm -r typecheck",
+        "knip": "knip --production --strict"
     },
     "devDependencies": {
         "@eslint-community/eslint-plugin-eslint-comments": "^4.6.0",
@@ -29,6 +30,7 @@
         "eslint-plugin-perfectionist": "^5.5.0",
         "eslint-plugin-unicorn": "^63.0.0",
         "eslint-plugin-workspaces": "^0.12.0",
+        "knip": "^5.86.0",
         "lefthook": "^2.1.1",
         "npm-check-updates": "^19.3.2",
         "prettier": "^3.8.1",
@@ -36,7 +38,7 @@
         "typescript": "catalog:",
         "typescript-eslint": "^8.55.0"
     },
-    "packageManager": "pnpm@10.30.3",
+    "packageManager": "pnpm@10.32.1",
     "engines": {
         "node": "24"
     }

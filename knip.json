@@ -1,0 +1,13 @@
+{
+    "$schema": "https://unpkg.com/knip@5/schema.json",
+    "ignore": [".plan/**"],
+    "ignoreWorkspaces": ["playground"],
+    "tags": ["-lintignore"],
+    "workspaces": {
+        ".": {},
+        "packages/astro-pagemeta": {
+            "ignore": ["scripts/**", "tests/**", "src/virtual.d.ts"],
+            "ignoreDependencies": ["schema-dts"]
+        }
+    }
+}

@@ -5,7 +5,6 @@ import { describe, expect, test } from "vitest";
 import {
     createPagemetaProcessor,
     isHtmlDocument,
-    LOCALS_KEY,
     setPagemeta
 } from "../../src/core.ts";
 import { extractJsonLd, extractMeta } from "../utils/html-parse.ts";
@@ -41,19 +40,23 @@ describe("isHtmlDocument", () => {
 });
 
 describe("setPagemeta", () => {
-    test("stores metadata in locals via symbol", () => {
+    const processor = createPagemetaProcessor({
+        addRequiredGlobalMeta: false,
+        compressHTML: false,
+        routePatterns: []
+    });
+
+    test("stores metadata", () => {
         const ctx = mockContext();
         setPagemeta(ctx, { title: "Hello" });
-        // @ts-expect-error -- accessing via symbol
-        expect(ctx.locals[LOCALS_KEY]).toEqual({ title: "Hello" });
+        expect(processor.resolvePagemeta(ctx)).toEqual({ title: "Hello" });
     });
 
     test("merges multiple calls", () => {
         const ctx = mockContext();
         setPagemeta(ctx, { title: "Hello" });
         setPagemeta(ctx, { description: "World" });
-        // @ts-expect-error -- accessing via symbol
-        expect(ctx.locals[LOCALS_KEY]).toEqual({
+        expect(processor.resolvePagemeta(ctx)).toEqual({
             description: "World",
             title: "Hello"
         });
@@ -63,8 +66,7 @@ describe("setPagemeta", () => {
         const ctx = mockContext();
         setPagemeta(ctx, { custom: { author: "Alice" } });
         setPagemeta(ctx, { custom: { robots: "noindex" } });
-        // @ts-expect-error -- accessing via symbol
-        expect(ctx.locals[LOCALS_KEY]).toEqual({
+        expect(processor.resolvePagemeta(ctx)).toEqual({
             custom: { author: "Alice", robots: "noindex" }
         });
     });
@@ -72,8 +74,7 @@ describe("setPagemeta", () => {
     test("false opt-out stores false", () => {
         const ctx = mockContext();
         setPagemeta(ctx, false);
-        // @ts-expect-error -- accessing via symbol
-        expect(ctx.locals[LOCALS_KEY]).toBe(false);
+        expect(processor.resolvePagemeta(ctx)).toBeUndefined();
     });
 
     test("throws on null", () => {

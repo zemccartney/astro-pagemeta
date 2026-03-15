@@ -7,12 +7,12 @@
         "deps": "ncu -p pnpm -i --format group --cooldown 3d",
         "fmt": "prettier --check .",
         "fmt:fix": "prettier --write .",
+        "knip": "knip --production --strict",
         "lint": "eslint --flag unstable_native_nodejs_ts_config",
         "lint:debug": "pnpx @eslint/config-inspector",
         "lint:fix": "eslint --flag unstable_native_nodejs_ts_config --fix",
         "prepare": "git rev-parse --git-dir > /dev/null 2>&1 && lefthook install || true",
-        "typecheck": "pnpm -r typecheck",
-        "knip": "knip --production --strict"
+        "typecheck": "pnpm -r typecheck"
     },
     "devDependencies": {
         "@eslint-community/eslint-plugin-eslint-comments": "^4.6.0",

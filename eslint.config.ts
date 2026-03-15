@@ -65,6 +65,13 @@ export default defineConfig([
         }
     },
     {
+        extends: [pkgJson.configs.recommended, pkgJson.configs.stylistic],
+        files: ["package.json"],
+        rules: {
+            "package-json/require-description": "off"
+        }
+    },
+    {
         extends: [
             eslint.configs.recommended,
             tseslint.configs.strict,

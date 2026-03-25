@@ -1,4 +1,4 @@
-import type { APIContext } from "astro";
+import type { APIContext, AstroIntegration } from "astro";
 import type { ViteDevServer } from "vite";
 
 import {
@@ -8,7 +8,7 @@ import {
 } from "astro-integration-kit";
 import { z } from "astro/zod";
 
-import type { MetadataOptions } from "./types.ts";
+import type { IntegrationOptions, MetadataOptions } from "./types.ts";
 
 const optionsSchema = z
     .object({
@@ -114,82 +114,85 @@ function createConfigPlugin({
  * });
  * ```
  */
-export default defineIntegration({
-    name: "@grepco/astro-pagemeta",
-    optionsSchema,
-    setup: ({ options }) => {
-        const { resolve } = createResolver(import.meta.url);
-        const configPlugin = createConfigPlugin({
-            addRequiredGlobalMeta: options.addRequiredGlobalMeta,
-            defaults: options.defaults
-        });
+const pagemeta: (options?: IntegrationOptions) => AstroIntegration =
+    defineIntegration({
+        name: "@grepco/astro-pagemeta",
+        optionsSchema,
+        setup: ({ options }) => {
+            const { resolve } = createResolver(import.meta.url);
+            const configPlugin = createConfigPlugin({
+                addRequiredGlobalMeta: options.addRequiredGlobalMeta,
+                defaults: options.defaults
+            });
 
-        // Captured in astro:server:setup so astro:routes:resolved can
-        // invalidate the virtual config module during dev. On the first
-        // astro:routes:resolved call (before the server exists) the module
-        // hasn't been loaded yet, so invalidation is unnecessary.
-        let viteServer: undefined | ViteDevServer;
-        let isRestart = false;
+            // Captured in astro:server:setup so astro:routes:resolved can
+            // invalidate the virtual config module during dev. On the first
+            // astro:routes:resolved call (before the server exists) the module
+            // hasn't been loaded yet, so invalidation is unnecessary.
+            let viteServer: undefined | ViteDevServer;
+            let isRestart = false;
 
-        return {
-            hooks: {
-                "astro:config:setup": (params) => {
-                    addVitePlugin(params, {
-                        plugin: configPlugin.plugin
-                    });
-
-                    if (options.mode !== "manual") {
-                        params.addMiddleware({
-                            entrypoint: resolve("./middleware.ts"),
-                            order: "post"
+            return {
+                hooks: {
+                    "astro:config:setup": (params) => {
+                        addVitePlugin(params, {
+                            plugin: configPlugin.plugin
                         });
-                    }
 
-                    isRestart = params.isRestart;
-                },
-                "astro:routes:resolved": ({ routes }) => {
-                    configPlugin.setRoutePatterns(
-                        routes
-                            .filter(
-                                (r) =>
-                                    r.type === "page" &&
-                                    (r.origin === "project" ||
-                                        (options.includeExternalPages &&
-                                            r.origin === "external"))
-                            )
-                            .map((r) => r.patternRegex)
-                    );
-
-                    /**
-                     * Invalidate the virtual module so consumers see updated
-                     * route patterns. Astro re-fires this hook on page file
-                     * add/remove in dev, so this keeps the config in sync
-                     * without a full server restart.
-                     *
-                     * Tied to restart b/c otherwise was causing test flakiness,
-                     * with the first test against a certain fixture, across apparently
-                     * random files, failing due to metadata failing to set, I assume
-                     * due to our virtual module losing state / invalidating just as
-                     * our test was triggering its usage. I guess? Unclear
-                     */
-                    if (viteServer && isRestart) {
-                        const mod =
-                            viteServer.moduleGraph.getModuleById(
-                                RESOLVED_CONFIG_ID
-                            );
-                        if (mod) {
-                            viteServer.moduleGraph.invalidateModule(mod);
+                        if (options.mode !== "manual") {
+                            params.addMiddleware({
+                                entrypoint: resolve("./middleware.js"),
+                                order: "post"
+                            });
                         }
+
+                        isRestart = params.isRestart;
+                    },
+                    "astro:routes:resolved": ({ routes }) => {
+                        configPlugin.setRoutePatterns(
+                            routes
+                                .filter(
+                                    (r) =>
+                                        r.type === "page" &&
+                                        (r.origin === "project" ||
+                                            (options.includeExternalPages &&
+                                                r.origin === "external"))
+                                )
+                                .map((r) => r.patternRegex)
+                        );
+
+                        /**
+                         * Invalidate the virtual module so consumers see updated
+                         * route patterns. Astro re-fires this hook on page file
+                         * add/remove in dev, so this keeps the config in sync
+                         * without a full server restart.
+                         *
+                         * Tied to restart b/c otherwise was causing test flakiness,
+                         * with the first test against a certain fixture, across apparently
+                         * random files, failing due to metadata failing to set, I assume
+                         * due to our virtual module losing state / invalidating just as
+                         * our test was triggering its usage. I guess? Unclear
+                         */
+                        if (viteServer && isRestart) {
+                            const mod =
+                                viteServer.moduleGraph.getModuleById(
+                                    RESOLVED_CONFIG_ID
+                                );
+                            if (mod) {
+                                viteServer.moduleGraph.invalidateModule(mod);
+                            }
+                        }
+                    },
+                    // eslint-disable-next-line perfectionist/sort-objects -- align with hooks execution order
+                    "astro:config:done": ({ config }) => {
+                        configPlugin.setCompressHTML(config.compressHTML);
+                    },
+                    "astro:server:setup": ({ server }) => {
+                        viteServer = server;
                     }
-                },
-                // eslint-disable-next-line perfectionist/sort-objects -- align with hooks execution order
-                "astro:config:done": ({ config }) => {
-                    configPlugin.setCompressHTML(config.compressHTML);
-                },
-                "astro:server:setup": ({ server }) => {
-                    viteServer = server;
                 }
-            }
-        };
-    }
-});
+            };
+        }
+    });
+
+export default pagemeta;

@@ -6,7 +6,11 @@ import { rehype } from "rehype";
 import rehypeMeta from "rehype-meta";
 import rehypeMinifyWhitespace from "rehype-minify-whitespace";
 
-import type { MetadataOptions, MetadataProcessorConfig } from "./types.ts";
+import type {
+    MetadataOptions,
+    MetadataProcessor,
+    MetadataProcessorConfig
+} from "./types.ts";
 
 // Trailing newline after injected elements, matching rehype-meta's formatting
 // convention of separating head children with line breaks for readability.
@@ -205,7 +209,7 @@ function rehypeJsonLd({
     };
 }
 
-export const isHtmlDocument = (html: string) =>
+export const isHtmlDocument = (html: string): boolean =>
     /^<!doctype\s/i.test(html.trimStart());
 
 /**
@@ -261,7 +265,9 @@ export const metadata = (
     };
 };
 
-export function createMetadataProcessor(config: MetadataProcessorConfig) {
+export function createMetadataProcessor(
+    config: MetadataProcessorConfig
+): MetadataProcessor {
     return {
         getHtmlProcessor: ({
             fragment = false,

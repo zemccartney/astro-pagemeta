@@ -13,28 +13,34 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/zemccartney/astro-pagemeta"
+        "url": "git+https://github.com/zemccartney/astro-pagemeta.git"
     },
     "license": "MIT",
     "author": "Zack McCartney <zack@grepco.net>",
     "sideEffects": false,
     "type": "module",
     "exports": {
-        ".": "./src/index.ts",
+        ".": {
+            "types": "./dist/index.d.mts",
+            "import": "./dist/index.mjs"
+        },
         "./Head": "./src/Head.astro",
-        "./runtime": "./src/runtime.ts"
+        "./runtime": {
+            "types": "./dist/runtime.d.mts",
+            "import": "./dist/runtime.mjs"
+        }
     },
     "files": [
-        "src/Head.astro",
-        "src/core.ts",
-        "src/index.ts",
-        "src/runtime.ts",
-        "src/virtual.d.ts"
+        "dist",
+        "src"
     ],
     "scripts": {
+        "build": "tsdown",
         "check:engines": "node scripts/check-engines.ts",
+        "dev": "tsdown --watch",
+        "pretest": "tsdown",
         "test": "vitest --run",
-        "typecheck": "tsc -b"
+        "typecheck": "tsdown && tsc -b"
     },
     "dependencies": {
         "astro-integration-kit": "^0.19.1",
@@ -45,11 +51,14 @@
         "schema-dts": "^1.1.5"
     },
     "devDependencies": {
+        "@arethetypeswrong/core": "^0.18.2",
         "@inox-tools/astro-tests": "^0.8.1",
         "@types/hast": "^3.0.4",
         "@types/node": "catalog:",
         "astro": "catalog:",
+        "publint": "^0.3.18",
         "rehype-parse": "^9.0.1",
+        "tsdown": "catalog:",
         "typescript": "catalog:",
         "unified": "^11.0.5",
         "vite": "^6.4.1",

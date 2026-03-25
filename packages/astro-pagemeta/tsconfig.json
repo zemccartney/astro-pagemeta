@@ -5,6 +5,11 @@
     },
     "exclude": [".test-tmp", "**/dist", "src"],
     "extends": "../../tsconfig.base.json",
-    "include": ["scripts/**/*.ts", "tests/**/*.ts", "vitest.config.ts"],
+    "include": [
+        "scripts/**/*.ts",
+        "tests/**/*.ts",
+        "tsdown.config.ts",
+        "vitest.config.ts"
+    ],
     "references": [{ "path": "./src" }]
 }

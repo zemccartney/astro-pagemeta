@@ -1,5 +1,7 @@
 # Project Context for AI Agents
 
+> **CRITICAL**: For all work, verify that changed files pass linting, typechecking, and formatting before considering work complete. Assess only files you changed.
+
 ## What This Is
 
 An Astro integration (`@grepco/astro-pagemeta`) that simplifies setting page metadata (title, description, OG tags). Users call `metadata(Astro, {...})` in page frontmatter, and the integration automatically injects the corresponding meta tags into the rendered HTML via post-render middleware.

@@ -1,3 +1,5 @@
+import type { MiddlewareHandler } from "astro";
+
 import { defineMiddleware } from "astro/middleware";
 import {
     addRequiredGlobalMeta,
@@ -6,11 +8,13 @@ import {
     routePatterns
 } from "virtual:pagemeta/config";
 
+import type { MetadataProcessor } from "./types.ts";
+
 import { createMetadataProcessor, isHtmlDocument } from "./core.ts";
 
 export { metadata } from "./core.ts";
 
-const processor = createMetadataProcessor({
+const processor: MetadataProcessor = createMetadataProcessor({
     addRequiredGlobalMeta,
     compressHTML,
     defaults,
@@ -33,7 +37,7 @@ export default processor;
  * export const onRequest = sequence(myMiddleware, pagemeta());
  * ```
  */
-export const middleware = () => {
+export const middleware = (): MiddlewareHandler => {
     return defineMiddleware(async (ctx, next) => {
         const response = await next();
 

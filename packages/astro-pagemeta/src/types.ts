@@ -2,6 +2,13 @@ import type { APIContext } from "astro";
 import type { Options } from "rehype-meta";
 import type { Thing } from "schema-dts";
 
+export interface IntegrationOptions {
+    addRequiredGlobalMeta?: boolean;
+    defaults?: ((ctx: APIContext) => MetadataOptions) | MetadataOptions;
+    includeExternalPages?: boolean;
+    mode?: "auto" | "manual";
+}
+
 /**
  * Metadata options for a page. Extends rehype-meta's `Options` with support
  * for arbitrary custom meta tags and JSON-LD structured data.
@@ -22,6 +29,15 @@ export interface MetadataOptions extends Options {
      * @see https://schema.org
      */
     jsonLd?: Thing | Thing[];
+}
+
+export interface MetadataProcessor {
+    getHtmlProcessor: (opts: {
+        fragment?: boolean;
+        metadata: MetadataOptions;
+    }) => { process(file: string): Promise<{ toString(): string }> };
+    isPageRoute: (pathname: string) => boolean;
+    resolveMetadata: (ctx: Readonly<APIContext>) => MetadataOptions | undefined;
 }
 
 export interface MetadataProcessorConfig {

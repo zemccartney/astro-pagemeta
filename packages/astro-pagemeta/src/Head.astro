@@ -26,7 +26,12 @@
  * let rehype-meta operate normally on the <head>, then strip the wrapper with
  * rehypeHeadContentsOnly to get just the head children for inline rendering.
  */
-import Processor from "./runtime";
+// Uses the package specifier (not a relative import) so this resolves to the
+// same runtime module instance as metadata() calls in pages. A relative import
+// would load src/runtime.ts separately from dist/runtime.mjs, creating two
+// Symbol("pagemeta") instances and breaking metadata sharing.
+// eslint-disable-next-line workspaces/no-absolute-imports -- must resolve through package exports to share Symbol instance with dist/runtime.mjs
+import Processor from "@grepco/astro-pagemeta/runtime";
 
 const metadata = Processor.resolveMetadata(Astro);
 const templateMeta =

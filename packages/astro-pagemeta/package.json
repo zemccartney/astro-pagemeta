@@ -35,6 +35,8 @@
         "src"
     ],
     "scripts": {
+        "bench": "vitest bench --run",
+        "bench:report": "node scripts/bench-report.ts",
         "build": "tsdown",
         "check:engines": "node scripts/check-engines.ts",
         "dev": "tsdown --watch",

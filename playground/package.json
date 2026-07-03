@@ -4,6 +4,7 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "bench": "node scripts/bench.ts",
         "build": "astro build",
         "dev": "astro dev",
         "preview": "astro preview",
@@ -15,5 +16,9 @@
         "@grepco/astro-pagemeta": "workspace:*",
         "astro": "catalog:",
         "typescript": "catalog:"
+    },
+    "devDependencies": {
+        "@types/autocannon": "^7.12.7",
+        "autocannon": "^8.0.0"
     }
 }

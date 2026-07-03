@@ -19,7 +19,7 @@ export default defineConfig([
     includeIgnoreFile(gitignorePath),
     {
         ignores: [
-            ".claude",
+            "**/.claude",
             ".plan" // replicate global git ignore settings
         ]
     },
@@ -137,9 +137,9 @@ export default defineConfig([
         extends: [jsdoc.configs["flat/recommended-typescript-error"]],
         files: ["packages/**/*.ts"],
         rules: {
-            // But when JSDoc exists, require meaningful content
+            // When JSDoc exists, require meaningful content ...
             "jsdoc/require-description": "error",
-            // Don't require JSDoc on every function — only enforce style when present
+            // ... but don't require JSDoc on every function — only enforce style when present
             "jsdoc/require-jsdoc": "off",
             "jsdoc/require-param-description": "error",
             "jsdoc/require-returns-description": "error"

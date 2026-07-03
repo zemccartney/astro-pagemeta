@@ -1,7 +1,7 @@
-import { readFileSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 
-const read = (path: string) =>
-    JSON.parse(readFileSync(path, "utf-8")) as Record<string, unknown>;
+const read = async (path: string) =>
+    JSON.parse(await readFile(path, "utf-8")) as Record<string, unknown>;
 
 // Node major version → maximum ES lib year that version fully supports
 // https://github.com/microsoft/TypeScript/wiki/Node-Target-Mapping
@@ -13,9 +13,12 @@ const NODE_TO_ES_LIB: Record<number, number> = {
     26: 2025
 };
 
-const astro = read("node_modules/astro/package.json");
-const pkg = read("package.json");
-const srcTsconfig = read("src/tsconfig.json");
+const [astro, pkg, srcTsconfig, tsdownConfig] = await Promise.all([
+    read("node_modules/astro/package.json"),
+    read("package.json"),
+    read("src/tsconfig.json"),
+    readFile("tsdown.config.ts", "utf-8")
+]);
 
 // --- Check 1: publishConfig.engines.node matches Astro's engines.node ---
 
@@ -69,5 +72,22 @@ if (actualLib !== expectedLib) {
     );
 }
 
+// --- Check 3: tsdown target aligns with Astro's lowest Node version ---
+
+const targetMatch = /target:\s*["']node(\d+)["']/.exec(tsdownConfig);
+if (!targetMatch?.[1]) {
+    throw new Error(
+        'Could not parse target from tsdown.config.ts. Expected format: target: "node<major>"'
+    );
+}
+const tsdownNodeMajor = Number(targetMatch[1]);
+
+if (tsdownNodeMajor !== lowestNodeMajor) {
+    throw new Error(
+        `tsdown target is node${String(tsdownNodeMajor)}, should be node${String(lowestNodeMajor)} to match Astro's lowest supported Node version`
+    );
+}
+
 console.log(`Engines aligned: ${publishedEngines}`);
 console.log(`Lib aligned: ${actualLib} (Node ${String(lowestNodeMajor)})`);
+console.log(`tsdown target aligned: node${String(tsdownNodeMajor)}`);

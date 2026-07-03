@@ -6,6 +6,7 @@
     "exclude": [".test-tmp", "**/dist", "src"],
     "extends": "../../tsconfig.base.json",
     "include": [
+        "bench",
         "scripts/**/*.ts",
         "tests/**/*.ts",
         "tsdown.config.ts",

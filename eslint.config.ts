@@ -20,7 +20,7 @@ export default defineConfig([
     {
         ignores: [
             "**/.claude",
-            ".plan" // replicate global git ignore settings
+            "image-gen-wip" // frozen og-image prototype (pre-workspace code), kept as seed for the future image-gen milestone
         ]
     },
     workspaces.configs.recommended,

@@ -1,11 +1,12 @@
 {
     "$schema": "https://unpkg.com/knip@5/schema.json",
-    "ignore": [".plan/**"],
+    "ignore": ["image-gen-wip/**"],
     "ignoreWorkspaces": ["playground"],
     "tags": ["-lintignore"],
     "workspaces": {
         ".": {},
         "packages/astro-pagemeta": {
+            "entry": ["bench/*.bench.ts", "bench/fixtures/generate.ts"],
             "ignore": ["scripts/**", "tests/**", "src/virtual.d.ts"],
             "ignoreDependencies": ["schema-dts"]
         }

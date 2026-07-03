@@ -1,3 +1,4 @@
 packages/astro-pagemeta/BENCHMARKS.md
-.plan
 pnpm-lock.yaml
+.claude/settings.local.json
+image-gen-wip

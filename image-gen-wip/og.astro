@@ -1,0 +1,43 @@
+---
+import { resolveMeta } from "@page-meta/add";
+
+// TODO need to hardcode path due to error re: unable to find a renderer when using a dynamic import?
+// TODO Resolve path, given URL to component (or component name) relative to a file living in the pages directory
+import Component from "../../src/components/og-tpl-page.astro";
+
+// Necessary for reading query params
+export const prerender = false;
+
+const url = new URL(Astro.request.url);
+const rawRoute = url.searchParams.get("route");
+
+if (!rawRoute) {
+    throw new Error("must specify a route for open-graph image preview");
+}
+
+// TODO How do you derive a route pattern from the resolved path? lookup table?
+// TODO pass routePattern down to Component?
+const pathname = decodeURIComponent(rawRoute);
+
+const meta = resolveMeta(Astro);
+
+// TODO test
+if (!meta.og || !meta.image) {
+    throw new TypeError(
+        "route is configured to skip open-graph image generation"
+    );
+}
+
+// TODO also check for URL
+if (typeof meta.image === "string" || Array.isArray(meta.image)) {
+    throw new TypeError("route is configured with an existing image");
+}
+---
+
+<Component
+    meta={{
+        ...meta,
+        image: meta.image // TS being annoying, passing meta inline loses learning from type checks above
+    }}
+    pathname={pathname}
+/>

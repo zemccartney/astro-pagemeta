@@ -1,6 +1,15 @@
 # Dependency Management & Supply-Chain Security — Proposal
 
-_Status: DRAFT for discussion. Decision points marked ⚖️ — settle these, then fold the outcomes into ROADMAP M2/M4 and delete or archive this file._
+_Status: **DECIDED 2026-07-03** (Zack, via scratch/m1.md). Outcomes:_
+
+1. _Published `dependencies`: **caret ranges** ✓_
+2. _`minimumReleaseAge`: **7 days** ✓ (implemented: `pnpm-workspace.yaml` → 10080; `deps` script → `--cooldown 7d`. Note: ncu does not read pnpm's setting — verified, they're independent — and ncu's cooldown **silently skips any package whose latest release is under the window** (e.g. `@types/node` almost always), a documented registry limitation. pnpm's own gate still resolves those correctly at install.)_
+3. _Cadence: **Renovate, after M2** ✓ (Zack hasn't used it — walk through setup together)_
+4. _Scanners: **Socket only** + `pnpm audit` in CI ✓_
+5. _npm auth: **trusted publishing / OIDC** ✓_
+6. _hast-util-select cut: withdrawn (see Pillar 1)_
+
+_Also decided: **drop Astro v5 support** — v5's published Node floor (18.20.8 / 20.3) includes EOL Node versions; see ROADMAP M1 for the full support stance. Remaining implementation lands in M2 (CI/Socket/OIDC) and M4 (Renovate). The pillars below stay as the rationale record._
 
 **Goal (Zack's words):** upgrade dependencies with as few security worries as possible; reduce dependency count; have a foundational system — not ad-hoc vigilance — for a key maintenance routine.
 

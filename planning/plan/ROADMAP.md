@@ -26,22 +26,27 @@
 
 Astro shipped v6 (2026-03: Node 22+, Vite 7, dev server on Vite Environment API) and v7 (2026-06: Vite 8, Rust compiler default) while the project was paused. Full change summary + the tests they imply: [../artifacts/astro-6-7-changes.md](../artifacts/astro-6-7-changes.md). Test-system refresher before touching the suite: [../artifacts/testing-isolation.md](../artifacts/testing-isolation.md).
 
+_Decisions from deps-security.md folded in first (2026-07-03, scratch/m1.md) as guardrails: 7-day release age + workspace-wide `deps` script ✓ done; ranges kept; Renovate/Socket/OIDC land in M2/M4. **Astro v5 support dropped** (see policy below)._
+
+- [x] Baseline deps state via `pnpm deps` dry-run (2026-07-03): pagemeta package → astro-tests 1.0, aik 0.20 (moot — being removed), schema-dts 2, vitest 4.1, attw/publint patches; root → eslint-10 family, pnpm 11; catalog → tsdown 0.22, typescript 6. All majors need changelog reads during the upgrade session.
 - [ ] Bump `@inox-tools/astro-tests` 0.8.1 → 1.0.0; read its changelog for harness changes (double-registration / socket-error quirks may be fixed — check before working around them again)
-- [ ] Bump catalog `astro` → `^7`, run full suite, fix fallout
-    - Watch: `server.moduleGraph` invalidation (`src/index.ts` — Environment API deprecates it); doctype/partial detection under the Rust compiler (route-filtering tests cover it); `astro:routes:resolved` / `addMiddleware` / `compressHTML` still behave
+- [ ] Bump catalog `astro` → `^6` and update all deps to the baseline above; run full suite, fix fallout
+    - **Sequencing constraint (verified 2026-07-03): astro-tests 1.0.0 peers on `astro: ^6.0.8` only.** So M1 lands on Astro 6 (in Astro's support window); Astro 7 testing blocks on upstream harness support — watch the repo, consider filing/contributing, and add a 7 leg the moment it exists. Do NOT peer-override the harness to force 7.
+    - Watch: `server.moduleGraph` invalidation (`src/index.ts` — Environment API refactor lands in 6); doctype/partial detection (Rust compiler is opt-in experimental in 6 — test both compilers if feasible); `astro:routes:resolved` / `addMiddleware` / `compressHTML` still behave; 6.1's i18n fallback routes in route filtering
 - [ ] Migrate off deprecated `astro-integration-kit` ([migration guide](https://astro-integration-kit.netlify.app/migration-guide/)). Replaces: `defineIntegration`, `optionsSchema`/`astro/zod`, `createResolver`, `addVitePlugin` — all thin wrappers over plain Astro APIs. (Supply-chain note, corrected 2026-07-03: this sheds only `astro-integration-kit` + `pathe`. The "293 packages under aik" that `pnpm ls` shows is Astro itself resolved as a peer — consumers have it anyway. Honest numbers in [deps-security.md](./deps-security.md) Pillar 1.)
-- [ ] Test back-compat: does the same code pass against Astro 6? Against 5? (Use the version-switch script from M2 prep, or a throwaway `pnpm add astro@^6` + test run)
-- [ ] **Decide and record the version-support policy** (see below) and set `peerDependencies.astro` to exactly the range CI will prove
-- [ ] Raise Node floor to match: if v5 support kept, keep `publishConfig.engines` as-is; if 6+ only, simplify to `>=22` and bump tsdown `target`
+- [ ] Set `peerDependencies.astro` to `^6.0.0` (currently `^5.0.0` — confirmed wrong for the new stance); extend to `^6.0.0 || ^7.0.0` only when a 7 CI leg actually passes
+- [ ] Node floor: `publishConfig.engines` → `>=22.0.0` (matches Astro 6+; drops EOL 18/20); update `check:engines` script expectations and tsdown `target` to node22
+- [ ] README documents prerequisites (Astro and Node versions)
+- [ ] Maintenance doc succinctly capturing the support stance (below)
+- [ ] All tests and static checks pass
 
-**Version-support policy (proposed — confirm during M1):**
-Astro's own policy is security-fixes-for-one-previous-major only (today: 7 current, 6 maintained, 5 unmaintained). Ours:
+**Version-support policy (DECIDED 2026-07-03):** two independent constraints, both required:
 
-1. First-class support = every Astro major that Astro itself still maintains (currently 6 + 7). These run in CI, bugs against them get fixed.
-2. Older majors (5): supported only while it's free — i.e., the same code passes their CI leg without forks or workarounds. When it stops being free, drop the major **in a pagemeta major release** (semver-honest), noted in the changelog.
-3. Re-evaluate on every Astro major release, case by case: cost of compat vs. benefit of new APIs. No standing promise beyond the current peer range.
+1. **Astro majors:** first-class support = majors Astro itself still maintains (current + previous; today 6 + 7). Older majors kept only while free (same code, green CI leg) — **and** only if they clear constraint 2. Drops happen in a pagemeta major release, noted in the changelog.
+2. **Node floor:** never advertise support for EOL Node. `engines` is the enforcement point (today `>=22`). This is why v5 is out even as a "free" candidate: its published floor (Node 18.20.8 / ^20.3.0) includes EOL versions — supporting it would endorse unpatched foundations. Principle: encourage maintained foundational dependencies, enforced through our own floor.
+3. Re-evaluate on every Astro major and every Node EOL date, case by case. No standing promise beyond the current peer range. (Node EOL calendar: 18 ended 2025-04; 20 ended 2026-04; 22 runs to 2027-04; 24 is active LTS.)
 
-**Exit criteria:** suite green on Astro 7 (+ 6, + 5 if free); integration-kit gone; peer range and engines reflect reality; policy written into MAINTENANCE docs.
+**Exit criteria:** suite green on Astro 6 (7 leg pending upstream harness); integration-kit gone; peer `^6.0.0` + engines `>=22`; stance written into MAINTENANCE docs + README prerequisites.
 
 ## M2 — Publish pipeline + CI foundation _(2–3 sessions; goal: a real package on npm)_
 

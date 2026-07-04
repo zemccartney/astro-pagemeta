@@ -16,7 +16,7 @@ failIfNoMatch: true
 
 ignoreWorkspaceRootCheck: true
 
-minimumReleaseAge: 4320
+minimumReleaseAge: 10080
 
 onlyBuiltDependencies:
     - esbuild

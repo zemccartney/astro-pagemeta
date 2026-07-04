@@ -1,0 +1,7 @@
+- CSP
+- socket
+- font loading
+- cloudflare environment
+- astro upgrade
+- node upgrade
+- possible to use oxlint/fmt in astro now?

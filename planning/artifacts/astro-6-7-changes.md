@@ -49,7 +49,7 @@ Ordered by likelihood of actually biting:
 6. **New check: `src/fetch.ts` composition.** When users compose the pipeline via Hono, does integration-added middleware (`addMiddleware`, order "post") still run? At minimum a docs note; possibly a fixture.
 7. **Queued rendering** (default in 7): shouldn't matter — middleware still receives the complete response — but the streaming tests + `Head.astro` path are the guard. No new work unless something fails.
 8. **From the minors — i18n fallback routes for integrations (6.1):** new route surface that flows through `astro:routes:resolved`. Check how fallback routes present in the hook's metadata (`origin`? `type`?) and whether `isPageRoute()` should match them — a one-fixture question during M1.
-9. **Non-goal clarified:** Sätteri replaces _Astro's markdown_ pipeline, not anything pagemeta does — pagemeta uses rehype directly on rendered HTML, which is orthogonal. (The old RESUMING.md idea "move from unified to the rust engine" conflates the two; a Rust-based HTML transform is a separate, real backlog idea.)
+9. **Non-goal clarified:** Sätteri replaces _Astro's markdown_ pipeline and is orthogonal to pagemeta, which processes rendered HTML. A Rust-based _HTML_ processor chasing Sätteri-like gains is a separate, real idea — spec'd in BACKLOG under "Rust-based HTML processing."
 
 Also worth stealing for this repo's own DX: `astro dev --background` + `/_astro/status` + JSON logs are tailor-made for the AI-harness backlog items (agent-driven playground testing).
 

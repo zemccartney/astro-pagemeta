@@ -1,5 +1,4 @@
 import comments from "@eslint-community/eslint-plugin-eslint-comments/configs";
-import { includeIgnoreFile } from "@eslint/compat";
 import eslint from "@eslint/js";
 import json from "@eslint/json";
 import prettier from "eslint-config-prettier";
@@ -9,7 +8,7 @@ import pkgJson from "eslint-plugin-package-json";
 import perfectionist from "eslint-plugin-perfectionist";
 import unicorn from "eslint-plugin-unicorn";
 import workspaces from "eslint-plugin-workspaces";
-import { defineConfig } from "eslint/config";
+import { defineConfig, includeIgnoreFile } from "eslint/config";
 import Path from "node:path";
 import tseslint from "typescript-eslint";
 

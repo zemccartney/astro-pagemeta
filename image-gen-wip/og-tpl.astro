@@ -1,0 +1,88 @@
+---
+import type { PageMetaImageComponentProps } from "@page-meta/add";
+
+import BaseLayout from "../layouts/base.astro";
+import * as Utils from "../utils";
+import Logo from "./logo.astro";
+
+type Props = PageMetaImageComponentProps;
+
+const { meta, pathname, ...rest } = Astro.props;
+
+const slugRx = /^blog\/(?<slug>[^/]+)$/; // Matches "blog/" followed by one or more non-slash characters until the end
+const match = pathname
+    .replace(/^\//, "") // remove leading slash
+    .replace(/\/$/, "") // remove trailing slash
+    .match(slugRx);
+
+let post;
+if (match?.groups?.slug) {
+    post = await Utils.resolvePostId(match.groups.slug);
+}
+
+// TODO meta image width and height should be sync'd to puppeteer
+const aspectRatio = 1200 / 630;
+const imgWidth = post ? undefined : 200;
+---
+
+<style>
+    body {
+        background-image: unset;
+        background-color: unset;
+    }
+
+    .wrapper {
+        background-color: var(--color-primary-bg);
+        background-image: url("../assets/images/map.png");
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        font-family: var(--font-sans);
+        justify-content: center;
+        height: 100%;
+        width: 100%;
+
+        &:not(.post) {
+            .logo {
+                font-size: 9rem;
+            }
+        }
+    }
+
+    .wrapper.post {
+        align-items: center;
+        flex-direction: column;
+        gap: var(--spacing-four-rem);
+    }
+
+    h1 {
+        color: var(--color-primary-900);
+        font-size: var(--font-size-7xl);
+        font-style: italic;
+        letter-spacing: 0.05em;
+        max-width: 80%;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        text-transform: uppercase;
+        text-wrap: balance;
+    }
+</style>
+
+<BaseLayout>
+    <div
+        class:list={["wrapper", post && "post"]}
+        style={{
+            aspectRatio,
+            height: `${meta.image.height}px`,
+            width: `${meta.image.width}px`
+        }}
+    >
+        <Logo
+            class="logo"
+            {...rest}
+            imgWidth={imgWidth}
+        />
+        {post && <h1>{post.data.title}</h1>}
+    </div>
+</BaseLayout>

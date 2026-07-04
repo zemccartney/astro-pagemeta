@@ -238,7 +238,9 @@ const pagemeta = (options?: IntegrationOptions): AstroIntegration => {
             },
             // eslint-disable-next-line perfectionist/sort-objects -- align with hooks execution order
             "astro:config:done": ({ config }) => {
-                configPlugin.setCompressHTML(config.compressHTML);
+                // Astro 6.2+ allows "jsx" alongside booleans; any truthy
+                // value means Astro is compressing, so we minify too
+                configPlugin.setCompressHTML(Boolean(config.compressHTML));
             },
             "astro:server:setup": ({ server }) => {
                 viteServer = server;

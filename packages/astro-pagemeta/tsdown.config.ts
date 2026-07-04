@@ -11,6 +11,6 @@ export default defineConfig({
     failOnWarn: "ci-only",
     format: "esm",
     publint: true,
-    target: "node18",
+    target: "node22",
     tsconfig: "src/tsconfig.json"
 });

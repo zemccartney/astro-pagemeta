@@ -25,6 +25,13 @@ An Astro integration that aims to simplify setting metadata tags for your pages 
 
 The HTML streaming caveat is the most significant tradeoff of this integration. See the [in-depth explanation](./docs/streaming.md) for details.
 
+## Prerequisites
+
+This integration supports [the Astro versions Astro supports, on the Node versions Astro supports](https://docs.astro.build/en/upgrade-astro/#nodejs-support-and-upgrade-policies). Concretely, today:
+
+- **Astro** `^6.0.0`
+- **Node** `>=22.12.0` (Astro 6's own floor)
+
 ## Installation
 
 ### `astro add`

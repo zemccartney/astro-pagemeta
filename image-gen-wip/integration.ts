@@ -92,6 +92,7 @@ export default defineIntegration({
                                                 base.name = "GrepCo"; // TODO exclude site name and type from addPageMeta interface
                                                 base.separator = " | ";
                                                 base.ogNameInTitle = false;
+                                                base.pathname = ctx.url.pathname;
                                             }
                                         
                                             return {

@@ -1,6 +1,6 @@
 import type { AstroInlineConfig } from "astro";
 
-import { loadFixture } from "@inox-tools/astro-tests/astroFixture";
+import { loadFixture } from "@grepco/astro-fixture/astroFixture";
 import { cp, mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 

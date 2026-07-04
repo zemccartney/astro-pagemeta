@@ -5,6 +5,9 @@
     "tags": ["-lintignore"],
     "workspaces": {
         ".": {},
+        "packages/astro-fixture": {
+            "entry": ["src/astroFixture.ts", "src/testAdapter.ts"]
+        },
         "packages/astro-pagemeta": {
             "entry": ["bench/*.bench.ts", "bench/fixtures/generate.ts"],
             "ignore": ["scripts/**", "tests/**", "src/virtual.d.ts"],

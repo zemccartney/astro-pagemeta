@@ -90,6 +90,22 @@ importers:
         specifier: ^8.55.0
         version: 8.56.1(eslint@9.39.3(jiti@2.6.1))(typescript@5.9.3)
 
+  packages/astro-fixture:
+    dependencies:
+      undici:
+        specifier: ^7.15.0
+        version: 7.22.0
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.11.0
+      astro:
+        specifier: 'catalog:'
+        version: 5.18.0(@types/node@24.11.0)(jiti@2.6.1)(rollup@4.59.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
   packages/astro-pagemeta:
     dependencies:
       astro-integration-kit:
@@ -114,9 +130,9 @@ importers:
       '@arethetypeswrong/core':
         specifier: ^0.18.2
         version: 0.18.2
-      '@inox-tools/astro-tests':
-        specifier: ^0.8.1
-        version: 0.8.1(astro@5.18.0(@types/node@24.11.0)(jiti@2.6.1)(rollup@4.59.0)(typescript@5.9.3)(yaml@2.8.2))
+      '@grepco/astro-fixture':
+        specifier: workspace:*
+        version: link:../astro-fixture
       '@types/hast':
         specifier: ^3.0.4
         version: 3.0.4
@@ -873,14 +889,6 @@ packages:
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [win32]
-
-  '@inox-tools/astro-tests@0.8.1':
-    resolution: {integrity: sha512-n4hgkKgkrZShxP1nyTpKrtYDZWQHlw4sc+WPgMN5msb3+Q8ZB1EXIgJ4OjC4slJm+49clZRSCmDg5bfsVn87AA==}
-    peerDependencies:
-      astro: ^5.13.3
-
-  '@inox-tools/utils@0.8.1':
-    resolution: {integrity: sha512-SGjdzPcxJn6UOpSuxdg8Vm5s22EWhd4HSNWLymiN35+KbnoX3sgwoQMW4a6Zcv/HWdyZezl4Q7WUtZnt+UCuHw==}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -4785,23 +4793,6 @@ snapshots:
 
   '@img/sharp-win32-x64@0.34.5':
     optional: true
-
-  '@inox-tools/astro-tests@0.8.1(astro@5.18.0(@types/node@24.11.0)(jiti@2.6.1)(rollup@4.59.0)(typescript@5.9.3)(yaml@2.8.2))':
-    dependencies:
-      '@astrojs/internal-helpers': 0.7.5
-      '@astrojs/markdown-remark': 6.3.10
-      '@inox-tools/utils': 0.8.1
-      astro: 5.18.0(@types/node@24.11.0)(jiti@2.6.1)(rollup@4.59.0)(typescript@5.9.3)(yaml@2.8.2)
-      debug: 4.4.3
-      fast-glob: 3.3.3
-      shiki: 3.23.0
-      strip-ansi: 7.2.0
-      undici: 7.22.0
-      zod: 4.3.6
-    transitivePeerDependencies:
-      - supports-color
-
-  '@inox-tools/utils@0.8.1': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

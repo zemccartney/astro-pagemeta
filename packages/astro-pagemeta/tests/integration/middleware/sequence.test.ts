@@ -1,6 +1,6 @@
-import type { TestApp } from "@inox-tools/astro-tests/astroFixture";
+import type { TestApp } from "@grepco/astro-fixture/astroFixture";
 
-import testAdapter from "@inox-tools/astro-tests/testAdapter";
+import testAdapter from "@grepco/astro-fixture/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
 import pagemeta from "../../../src/index.ts";

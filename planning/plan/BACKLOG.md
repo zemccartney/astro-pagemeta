@@ -22,6 +22,7 @@
 
 - eslint 10 upgrade; or follow the oxlint/oxfmt/tsgo ports (watch Nakazawa)
 - Full Node-version CI matrix beyond the M2 minimal legs
+- Expand the test matrix to non-Node runtimes via Astro 6+'s Environment-API dev server — run the suite under real runtimes, starting with Cloudflare (workerd). Zack's old testing.md note anticipated exactly this ("when Astro 6 lands, test under different adapters… esp. cloudflare")
 - Bundle impact assessment for consumers (how?)
 - `isolatedDeclarations`-enabled tsconfig simplification (cosmetic; post-M1 only)
 - OpenSSF Scorecard badge

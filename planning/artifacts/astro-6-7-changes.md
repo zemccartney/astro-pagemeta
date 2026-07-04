@@ -50,3 +50,15 @@ Also worth stealing for this repo's own DX: `astro dev --background` + `/_astro/
 - **Sätteri natives** — math, container directives, wikilinks, smart punctuation without plugin stacks; fewer deps in your blog setup.
 - **Cloudflare adapter (v6+)** — if any grepco site targets Workers: real workerd + bindings in dev.
 - **`src/fetch.ts`** — probably unnecessary for content sites, but it's the escape hatch if you ever want Hono middleware (auth, rate limiting) around an Astro app.
+
+## Sources
+
+Bare URLs for quick access:
+
+- Astro 6.0 announcement — https://astro.build/blog/astro-6/
+- Astro 7.0 announcement — https://astro.build/blog/astro-7/
+- Upgrade to Astro v6 — https://docs.astro.build/en/guides/upgrade-to/v6/
+- Upgrade to Astro v7 — https://docs.astro.build/en/guides/upgrade-to/v7/
+- Astro upgrade + support policy (security fixes for one previous major; Node.js support rules) — https://docs.astro.build/en/upgrade-astro/
+- Astro 6 beta post (earlier detail on Environment API dev server) — https://astro.build/blog/astro-6-beta/
+- Astro release notes (granular changes between majors) — https://github.com/withastro/astro/releases

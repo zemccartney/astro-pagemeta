@@ -1,0 +1,1014 @@
+<!--
+  Source of the deployed roadmap artifact:
+  https://claude.ai/code/artifact/5d9c0454-9e00-420a-87dc-7a705c0c0128
+
+  This is a styled SNAPSHOT of planning/plan/ (ROADMAP.md is the record).
+  To update: edit this file to match the current plan state, then redeploy
+  with the Artifact tool, passing url: <the URL above> so it updates in
+  place instead of minting a new artifact.
+-->
+<title>pagemeta — Road to v1</title>
+<style>
+    :root {
+        --ground: #f7f8f5;
+        --panel: #ffffff;
+        --panel-edge: #e2e6e0;
+        --ink: #1b231f;
+        --ink-soft: #4c5852;
+        --ink-faint: #79857e;
+        --accent: #1e6b57;
+        --accent-soft: #e2efe9;
+        --copper: #a2652c;
+        --copper-soft: #f4e9dc;
+        --done: #2c7a4b;
+        --done-soft: #e3f0e6;
+        --next: #8a6a1f;
+        --next-soft: #f3ecd6;
+        --later: #8b948e;
+        --later-soft: #edf0ec;
+        --code-bg: #eef1ed;
+        --rail-line: #d5dbd4;
+    }
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --ground: #141917;
+            --panel: #1b211e;
+            --panel-edge: #2b342f;
+            --ink: #e3e9e4;
+            --ink-soft: #a8b4ac;
+            --ink-faint: #7c8880;
+            --accent: #52b394;
+            --accent-soft: #1e2f28;
+            --copper: #d19257;
+            --copper-soft: #2e2318;
+            --done: #5cb87f;
+            --done-soft: #1c2f22;
+            --next: #d3b25e;
+            --next-soft: #2e2914;
+            --later: #77827b;
+            --later-soft: #232a26;
+            --code-bg: #232b26;
+            --rail-line: #333d37;
+        }
+    }
+    :root[data-theme="dark"] {
+        --ground: #141917;
+        --panel: #1b211e;
+        --panel-edge: #2b342f;
+        --ink: #e3e9e4;
+        --ink-soft: #a8b4ac;
+        --ink-faint: #7c8880;
+        --accent: #52b394;
+        --accent-soft: #1e2f28;
+        --copper: #d19257;
+        --copper-soft: #2e2318;
+        --done: #5cb87f;
+        --done-soft: #1c2f22;
+        --next: #d3b25e;
+        --next-soft: #2e2914;
+        --later: #77827b;
+        --later-soft: #232a26;
+        --code-bg: #232b26;
+        --rail-line: #333d37;
+    }
+    :root[data-theme="light"] {
+        --ground: #f7f8f5;
+        --panel: #ffffff;
+        --panel-edge: #e2e6e0;
+        --ink: #1b231f;
+        --ink-soft: #4c5852;
+        --ink-faint: #79857e;
+        --accent: #1e6b57;
+        --accent-soft: #e2efe9;
+        --copper: #a2652c;
+        --copper-soft: #f4e9dc;
+        --done: #2c7a4b;
+        --done-soft: #e3f0e6;
+        --next: #8a6a1f;
+        --next-soft: #f3ecd6;
+        --later: #8b948e;
+        --later-soft: #edf0ec;
+        --code-bg: #eef1ed;
+        --rail-line: #d5dbd4;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+    html {
+        scroll-behavior: smooth;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+    }
+    body {
+        margin: 0;
+        background: var(--ground);
+        color: var(--ink);
+        font:
+            16px/1.6 -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            Roboto,
+            Helvetica,
+            Arial,
+            sans-serif;
+    }
+    code,
+    .mono {
+        font-family:
+            ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.86em;
+    }
+    code {
+        background: var(--code-bg);
+        padding: 0.1em 0.35em;
+        border-radius: 3px;
+    }
+    h1,
+    h2,
+    h3 {
+        font-family:
+            "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
+        line-height: 1.2;
+        text-wrap: balance;
+        margin: 0;
+    }
+    a {
+        color: var(--accent);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 2px;
+    }
+    a:focus-visible,
+    summary:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+        border-radius: 2px;
+    }
+
+    .shell {
+        display: grid;
+        grid-template-columns: 220px minmax(0, 1fr);
+        gap: 48px;
+        max-width: 1060px;
+        margin: 0 auto;
+        padding: 0 24px 96px;
+    }
+    @media (max-width: 780px) {
+        .shell {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 0;
+        }
+        nav.rail {
+            display: none;
+        }
+    }
+
+    /* ---------- header ---------- */
+    header.masthead {
+        grid-column: 1 / -1;
+        padding: 44px 0 28px;
+        border-bottom: 2px solid var(--ink);
+        margin-bottom: 36px;
+    }
+    .eyebrow {
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+    }
+    header.masthead h1 {
+        font-size: 40px;
+        font-weight: 600;
+        margin: 6px 0 4px;
+    }
+    .subtitle {
+        color: var(--ink-soft);
+        max-width: 62ch;
+        margin: 0;
+    }
+    .statusbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 28px;
+        margin-top: 22px;
+        font-variant-numeric: tabular-nums;
+    }
+    .stat {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+    }
+    .stat .k {
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+    }
+    .stat .v {
+        font-size: 15px;
+        font-weight: 600;
+    }
+    .stat .v.ok {
+        color: var(--done);
+    }
+    .stat .v.warn {
+        color: var(--copper);
+    }
+
+    /* ---------- rail nav ---------- */
+    nav.rail {
+        position: sticky;
+        top: 24px;
+        align-self: start;
+        font-size: 14px;
+    }
+    nav.rail .grp {
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin: 18px 0 6px;
+    }
+    nav.rail a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--ink-soft);
+        text-decoration: none;
+        padding: 3px 0;
+    }
+    nav.rail a:hover {
+        color: var(--accent);
+    }
+    .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex: none;
+    }
+    .dot.done {
+        background: var(--done);
+    }
+    .dot.next {
+        background: var(--next);
+    }
+    .dot.later {
+        background: none;
+        border: 1.5px solid var(--later);
+    }
+
+    /* ---------- milestones ---------- */
+    main {
+        min-width: 0;
+    }
+    section.mile {
+        border-left: 3px solid var(--rail-line);
+        padding: 4px 0 8px 26px;
+        margin-bottom: 40px;
+        scroll-margin-top: 24px;
+        position: relative;
+    }
+    section.mile.done {
+        border-left-color: var(--done);
+    }
+    section.mile.next {
+        border-left-color: var(--next);
+    }
+    .mile-head {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 4px;
+    }
+    .mcode {
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--accent);
+    }
+    section.mile h2 {
+        font-size: 25px;
+        font-weight: 600;
+    }
+    .badge {
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-size: 11px;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 2px 9px;
+        border-radius: 99px;
+        white-space: nowrap;
+    }
+    .badge.done {
+        background: var(--done-soft);
+        color: var(--done);
+    }
+    .badge.next {
+        background: var(--next-soft);
+        color: var(--next);
+    }
+    .badge.later {
+        background: var(--later-soft);
+        color: var(--later);
+    }
+    .mile .goal {
+        color: var(--ink-soft);
+        font-size: 14.5px;
+        margin: 0 0 14px;
+        max-width: 68ch;
+    }
+    .mile p,
+    .mile li {
+        max-width: 70ch;
+    }
+
+    ul.checks {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    ul.checks li {
+        padding-left: 28px;
+        position: relative;
+        font-size: 15px;
+    }
+    ul.checks li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 3px;
+        width: 15px;
+        height: 15px;
+        border: 1.5px solid var(--ink-faint);
+        border-radius: 4px;
+    }
+    ul.checks li.ticked {
+        color: var(--ink-soft);
+    }
+    ul.checks li.ticked::before {
+        background: var(--done);
+        border-color: var(--done);
+    }
+    ul.checks li.ticked::after {
+        content: "";
+        position: absolute;
+        left: 4.5px;
+        top: 6px;
+        width: 7px;
+        height: 4px;
+        border-left: 2px solid var(--ground);
+        border-bottom: 2px solid var(--ground);
+        transform: rotate(-45deg);
+    }
+    .exit {
+        margin-top: 16px;
+        font-size: 14px;
+        color: var(--ink-soft);
+        background: var(--accent-soft);
+        border-radius: 6px;
+        padding: 10px 14px;
+        max-width: 70ch;
+    }
+    .exit b {
+        color: var(--accent);
+    }
+
+    .policy {
+        margin-top: 16px;
+        border: 1px solid var(--panel-edge);
+        background: var(--panel);
+        border-radius: 8px;
+        padding: 14px 18px;
+        font-size: 14.5px;
+        max-width: 72ch;
+    }
+    .policy h3 {
+        font-size: 16px;
+        margin-bottom: 6px;
+    }
+    .policy ol {
+        margin: 6px 0 0;
+        padding-left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    /* ---------- decisions ---------- */
+    #decisions {
+        scroll-margin-top: 24px;
+        margin-bottom: 44px;
+    }
+    #decisions h2,
+    #backlog h2,
+    #map h2 {
+        font-size: 27px;
+        margin-bottom: 4px;
+    }
+    .sect-sub {
+        color: var(--ink-soft);
+        font-size: 14.5px;
+        margin: 0 0 18px;
+        max-width: 68ch;
+    }
+    .decision-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 14px;
+    }
+    .decision {
+        border: 1px solid var(--panel-edge);
+        border-top: 3px solid var(--copper);
+        background: var(--panel);
+        border-radius: 8px;
+        padding: 14px 16px;
+        font-size: 14.5px;
+    }
+    .decision .q {
+        font-weight: 650;
+        margin: 0 0 6px;
+    }
+    .decision .rec {
+        margin: 0;
+        color: var(--ink-soft);
+    }
+    .decision .rec b {
+        color: var(--copper);
+        font-weight: 650;
+    }
+
+    /* ---------- backlog & map ---------- */
+    #backlog,
+    #map {
+        scroll-margin-top: 24px;
+        margin-bottom: 44px;
+    }
+    details {
+        border: 1px solid var(--panel-edge);
+        background: var(--panel);
+        border-radius: 8px;
+        padding: 0;
+        margin-bottom: 10px;
+    }
+    details summary {
+        cursor: pointer;
+        padding: 11px 16px;
+        font-weight: 600;
+        font-size: 15px;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    details summary::before {
+        content: "▸";
+        color: var(--accent);
+        font-size: 12px;
+        transition: transform 0.15s;
+    }
+    details[open] summary::before {
+        transform: rotate(90deg);
+    }
+    @media (prefers-reduced-motion: reduce) {
+        details summary::before {
+            transition: none;
+        }
+    }
+    details summary .count {
+        color: var(--ink-faint);
+        font-weight: 400;
+        font-size: 13px;
+    }
+    details ul {
+        margin: 0;
+        padding: 2px 18px 14px 34px;
+        font-size: 14.5px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        color: var(--ink-soft);
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14.5px;
+    }
+    .tablewrap {
+        overflow-x: auto;
+        border: 1px solid var(--panel-edge);
+        border-radius: 8px;
+        background: var(--panel);
+    }
+    th,
+    td {
+        text-align: left;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--panel-edge);
+        vertical-align: top;
+    }
+    tr:last-child td {
+        border-bottom: none;
+    }
+    th {
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        font-weight: 600;
+    }
+    td:first-child {
+        white-space: nowrap;
+    }
+
+    footer {
+        grid-column: 1 / -1;
+        border-top: 1px solid var(--panel-edge);
+        margin-top: 8px;
+        padding-top: 18px;
+        font-size: 13px;
+        color: var(--ink-faint);
+        max-width: 76ch;
+    }
+</style>
+
+<div class="shell">
+    <header class="masthead">
+        <div class="eyebrow">@grepco/astro-pagemeta · working plan</div>
+        <h1>Road to v1</h1>
+        <p class="subtitle">
+            Snapshot of <code>planning/plan/</code> as of the M0 commit
+            (2026-07-03). The markdown files are the record; this page is for
+            review. Work top to bottom, one milestone at a time.
+        </p>
+        <div class="statusbar">
+            <div class="stat">
+                <span class="k">Current</span
+                ><span class="v">M1 · Ecosystem catch-up</span>
+            </div>
+            <div class="stat">
+                <span class="k">Tests</span
+                ><span class="v ok">269 / 269 · 15s</span>
+            </div>
+            <div class="stat">
+                <span class="k">Checks</span
+                ><span class="v ok">lint · fmt · knip · types ✓</span>
+            </div>
+            <div class="stat">
+                <span class="k">Astro peer</span
+                ><span class="v warn">^5.0.0 vs latest 7.0.6</span>
+            </div>
+            <div class="stat">
+                <span class="k">Decisions open</span
+                ><span class="v warn">5</span>
+            </div>
+        </div>
+    </header>
+
+    <nav
+        class="rail"
+        aria-label="Sections"
+    >
+        <div class="grp">Milestones</div>
+        <a href="#m0"><span class="dot done"></span>M0 Re-entry</a>
+        <a href="#m1"><span class="dot next"></span>M1 Ecosystem catch-up</a>
+        <a href="#m2"><span class="dot later"></span>M2 Publish pipeline</a>
+        <a href="#m3"><span class="dot later"></span>M3 Dogfood</a>
+        <a href="#m4"><span class="dot later"></span>M4 Docs &amp; v1</a>
+        <a href="#m5"><span class="dot later"></span>M5 OG images</a>
+        <div class="grp">Also</div>
+        <a href="#decisions"
+            ><span
+                class="dot"
+                style="background: var(--copper)"
+            ></span
+            >Decision queue</a
+        >
+        <a href="#backlog"><span class="dot later"></span>Backlog</a>
+        <a href="#map"><span class="dot later"></span>Doc map</a>
+    </nav>
+
+    <main>
+        <section
+            class="mile done"
+            id="m0"
+        >
+            <div class="mile-head">
+                <span class="mcode">M0</span>
+                <h2>Re-entry</h2>
+                <span class="badge done">Done 2026-07-03</span>
+            </div>
+            <p class="goal">
+                Momentum. All checks green, working docs consolidated and
+                committed.
+            </p>
+            <ul class="checks">
+                <li class="ticked">
+                    Prettier, knip, eslint config fixes (settings.local.json,
+                    bench entries, <code>image-gen-wip/</code> exclusions)
+                </li>
+                <li class="ticked">
+                    Consolidated <code>planning/</code> tree committed, with
+                    <code>image-gen-wip/</code> preserved as the M5 seed
+                </li>
+                <li class="ticked">
+                    Verified: lint · fmt · knip · typecheck · 269/269 tests —
+                    commit <code>e9aa9c5</code>
+                </li>
+            </ul>
+        </section>
+
+        <section
+            class="mile next"
+            id="m1"
+        >
+            <div class="mile-head">
+                <span class="mcode">M1</span>
+                <h2>Ecosystem catch-up</h2>
+                <span class="badge next">Up next · 2–5 sessions</span>
+            </div>
+            <p class="goal">
+                Astro shipped v6 (Node 22+, Vite 7, Environment-API dev server)
+                and v7 (Vite 8, Rust compiler default) during the pause. Retire
+                all upgrade risk before polishing anything. Highest uncertainty
+                → goes first. Prep reading:
+                <em>artifacts/astro-6-7-changes.md</em>,
+                <em>artifacts/testing-isolation.md</em>.
+            </p>
+            <ul class="checks">
+                <li>
+                    Bump <code>@inox-tools/astro-tests</code> → 1.0; read
+                    changelog before re-working around old harness quirks
+                </li>
+                <li>
+                    Catalog <code>astro</code> → <code>^7</code>; fix fallout —
+                    watch <code>server.moduleGraph</code> invalidation,
+                    doctype/partial detection under the Rust compiler, fixture
+                    HTML strictness
+                </li>
+                <li>
+                    Migrate off deprecated
+                    <code>astro-integration-kit</code> (small; four thin
+                    wrappers)
+                </li>
+                <li>Back-compat runs against Astro 6 and 5</li>
+                <li>
+                    Decide + record the version-support policy; set the peer
+                    range CI will prove
+                </li>
+                <li>Raise Node floor / tsdown target to match the decision</li>
+            </ul>
+            <div class="policy">
+                <h3>Proposed support policy</h3>
+                <ol>
+                    <li>
+                        First-class = every Astro major that Astro itself
+                        maintains (their policy: security fixes for one previous
+                        major → today 6 + 7). These run in CI.
+                    </li>
+                    <li>
+                        Older majors (5): kept only while free — same code, no
+                        forks, green CI leg. Dropped only in a pagemeta
+                        <em>major</em> release.
+                    </li>
+                    <li>
+                        Re-evaluate case-by-case on each Astro major. No
+                        standing promise beyond the current peer range.
+                    </li>
+                </ol>
+            </div>
+            <div class="exit">
+                <b>Exit:</b> suite green on newest supported Astro;
+                integration-kit gone; peer range + engines honest; policy in
+                MAINTENANCE docs.
+            </div>
+        </section>
+
+        <section
+            class="mile"
+            id="m2"
+        >
+            <div class="mile-head">
+                <span class="mcode">M2</span>
+                <h2>Publish pipeline + CI</h2>
+                <span class="badge later">2–3 sessions</span>
+            </div>
+            <p class="goal">
+                The psychological unlock: a real package on npm, released by a
+                pipeline you could rerun from memory.
+            </p>
+            <ul class="checks">
+                <li>GitHub Actions CI: lint · fmt · knip · typecheck · test</li>
+                <li>
+                    Astro × Node matrix — catalog-rewrite script (works locally
+                    too: <code>use-astro.mjs 6 &amp;&amp; pnpm test</code>);
+                    minimal legs, not the full cross-product
+                </li>
+                <li>
+                    Supply-chain baseline: SHA-pinned actions, audit step,
+                    Socket (pending decision)
+                </li>
+                <li>
+                    Changesets + release workflow; npm trusted publishing (OIDC)
+                    with provenance
+                </li>
+                <li>
+                    Publish <code>0.1.0</code>; verify scratch-project install,
+                    registry rendering, published <code>engines</code>
+                </li>
+            </ul>
+            <div class="exit">
+                <b>Exit:</b> one full release cycle executed end-to-end.
+            </div>
+        </section>
+
+        <section
+            class="mile"
+            id="m3"
+        >
+            <div class="mile-head">
+                <span class="mcode">M3</span>
+                <h2>Dogfood</h2>
+                <span class="badge later">1–2 sessions + soak</span>
+            </div>
+            <p class="goal">
+                pagemeta in production on your own site, installed from npm like
+                a stranger would.
+            </p>
+            <ul class="checks">
+                <li>Install into the portfolio; before/after page snapshots</li>
+                <li>Run + prune the playground manual checklist</li>
+                <li>
+                    Fix paper cuts; release again (second pipeline exercise)
+                </li>
+                <li>
+                    OG validators, Rich Results, <code>astro add</code> path,
+                    go-to-definition, JSDoc in IntelliSense
+                </li>
+            </ul>
+            <div class="exit">
+                <b>Exit:</b> live on a real site; second release shipped.
+            </div>
+        </section>
+
+        <section
+            class="mile"
+            id="m4"
+        >
+            <div class="mile-head">
+                <span class="mcode">M4</span>
+                <h2>Docs, routine &amp; v1</h2>
+                <span class="badge later"></span>
+            </div>
+            <p class="goal">
+                A stranger — or you after three months off — can orient from the
+                docs alone. Maintenance becomes a routine, not a research
+                project.
+            </p>
+            <ul class="checks">
+                <li>
+                    Fix doc drift: CLAUDE.md, root MAINTENANCE.md, playground
+                    README, maintenance/tsconfig.md
+                </li>
+                <li>
+                    README positioning from the competitive assessment + domain
+                    recipes (robots/noindex, "what this deliberately doesn't
+                    do")
+                </li>
+                <li>
+                    Consider: viewport <code>initial-scale=1</code>; JSON-LD
+                    <code>&lt;/script&gt;</code> escaping
+                </li>
+                <li>
+                    Dependency routine live (Renovate or cadence — pending
+                    decision); fix workspace-wide <code>deps</code> script
+                </li>
+                <li>
+                    Maintenance runbook: release, dep updates, Astro-major
+                    playbook
+                </li>
+                <li>Tag v1.0.0 · Discord showcase · integrations catalog</li>
+            </ul>
+        </section>
+
+        <section
+            class="mile"
+            id="m5"
+        >
+            <div class="mile-head">
+                <span class="mcode">M5</span>
+                <h2>OG image generation</h2>
+                <span class="badge later">Post-v1</span>
+            </div>
+            <p class="goal">
+                The original itch. A pluggable image-generator system hooking
+                into pagemeta; seed prototype preserved in
+                <code>image-gen-wip/</code>. Design starts only after v1 ships.
+            </p>
+        </section>
+
+        <section id="decisions">
+            <h2>⚖️ Decision queue</h2>
+            <p class="sect-sub">
+                Five calls to make in <em>plan/deps-security.md</em> — Zack's to
+                settle, recommendations attached. Answering these unblocks the
+                supply-chain setup in M1/M2. Measured floor: the package adds
+                ~62 packages to a consumer's tree (64 today), essentially all
+                from the wooorm/unified collective.
+            </p>
+            <div class="decision-grid">
+                <div class="decision">
+                    <p class="q">1 · Published deps: pins or ranges?</p>
+                    <p class="rec">
+                        <b>Rec: caret ranges.</b> Exact pins block consumers'
+                        dedupe + patching; the lockfile already pins dev/CI.
+                    </p>
+                </div>
+                <div class="decision">
+                    <p class="q">2 · minimumReleaseAge: 3d → 7d?</p>
+                    <p class="rec">
+                        <b>Rec: 7 days.</b> Best single defense against
+                        compromised releases; escape hatch exists.
+                    </p>
+                </div>
+                <div class="decision">
+                    <p class="q">3 · Renovate or manual cadence?</p>
+                    <p class="rec">
+                        <b>Rec: Renovate post-M2.</b> Auto-merge dev patches
+                        after CI green; discipline is what the 3-month gap
+                        broke.
+                    </p>
+                </div>
+                <div class="decision">
+                    <p class="q">4 · Scanners?</p>
+                    <p class="rec">
+                        <b>Rec: Socket + pnpm audit.</b> Behavioral analysis
+                        catches what CVE feeds can't; skip Snyk/Trivy for now.
+                    </p>
+                </div>
+                <div class="decision">
+                    <p class="q">5 · npm auth?</p>
+                    <p class="rec">
+                        <b>Rec: trusted publishing (OIDC).</b> No long-lived
+                        token; provenance included.
+                    </p>
+                </div>
+                <div
+                    class="decision"
+                    style="opacity: 0.65"
+                >
+                    <p class="q">6 · <s>Drop hast-util-select?</s></p>
+                    <p class="rec">
+                        <b>Withdrawn 2026-07-03.</b> rehype-meta depends on it
+                        anyway — zero packages saved. No decision needed.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section id="backlog">
+            <h2>Backlog</h2>
+            <p class="sect-sub">
+                Unsorted and guilt-free. Nothing here is owed; pull items into a
+                milestone only when they become the next thing that matters.
+            </p>
+            <details>
+                <summary>
+                    Brainstorms queued <span class="count">· 4</span>
+                </summary>
+                <ul>
+                    <li>Image-gen protocol + puppeteer generator (feeds M5)</li>
+                    <li>
+                        Virtual-fs test system — replace or improve astro-tests
+                        upstream?
+                    </li>
+                    <li>
+                        Rust-based rehype-meta replacement (can't back-support
+                        old Astro?)
+                    </li>
+                    <li>
+                        How does the benchmarking setup click together
+                        (playground + integration)?
+                    </li>
+                </ul>
+            </details>
+            <details>
+                <summary>
+                    Features / product <span class="count">· 5</span>
+                </summary>
+                <ul>
+                    <li>Dev toolbar metadata inspector</li>
+                    <li>
+                        Typed <code>robots</code> option (recipe first, promote
+                        on demand)
+                    </li>
+                    <li>i18n: hreflang + og:locale</li>
+                    <li>
+                        Streaming <code>includeExternalPages</code> story
+                        (document only)
+                    </li>
+                    <li>
+                        defaults-as-module-path vs Function.toString
+                        serialization
+                    </li>
+                </ul>
+            </details>
+            <details>
+                <summary>
+                    Engineering / tooling <span class="count">· 7</span>
+                </summary>
+                <ul>
+                    <li>
+                        eslint 10 / oxlint-oxfmt-tsgo ports · full Node matrix ·
+                        bundle impact assessment · tsconfig simplification ·
+                        OpenSSF Scorecard · verdaccio install testing ·
+                        fresh-clone sanity check
+                    </li>
+                </ul>
+            </details>
+            <details>
+                <summary>
+                    Upstream questions, learning, writing
+                    <span class="count">· 3 groups</span>
+                </summary>
+                <ul>
+                    <li>
+                        Astro: partials in routes metadata · @types/node control
+                        · doctype contract stability
+                    </li>
+                    <li>
+                        Learning list attaches to milestones as reference —
+                        never prerequisites
+                    </li>
+                    <li>
+                        Blog: virtual modules · testing strategy · publishing
+                        notes-to-self · astro-metadata race-condition proof
+                    </li>
+                </ul>
+            </details>
+        </section>
+
+        <section id="map">
+            <h2>Doc map</h2>
+            <p class="sect-sub">
+                Everything lives under <code>planning/</code> — intended to be
+                deleted from the repo post-v1, after keepers graduate to
+                <code>maintenance/</code> or <code>docs/</code>.
+            </p>
+            <div class="tablewrap">
+                <table>
+                    <tr>
+                        <th>Path</th>
+                        <th>What</th>
+                        <th>Who writes</th>
+                    </tr>
+                    <tr>
+                        <td><code>plan/</code></td>
+                        <td>
+                            Place of record — ROADMAP, BACKLOG, deps-security
+                            proposal
+                        </td>
+                        <td>Claude maintains, Zack directs</td>
+                    </tr>
+                    <tr>
+                        <td><code>audit/</code></td>
+                        <td>
+                            July 2026 health audit: prompt, scratch, full report
+                        </td>
+                        <td>Frozen</td>
+                    </tr>
+                    <tr>
+                        <td><code>artifacts/</code></td>
+                        <td>
+                            System-memory docs: testing-isolation
+                            reconstruction, Astro 6/7 changes
+                        </td>
+                        <td>Claude, on request</td>
+                    </tr>
+                    <tr>
+                        <td><code>scratch/</code></td>
+                        <td>Zack's own thinking, preserved as a record</td>
+                        <td><b>Zack only</b></td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        Session ritual: open ROADMAP.md → do the next unchecked box → check it →
+        commit → close. A session that checks one box is a success — the suite
+        answers "is it still fine?" in fifteen seconds.
+    </footer>
+</div>

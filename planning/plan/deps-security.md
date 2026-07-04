@@ -19,14 +19,28 @@ Note: `trustPolicyExclude: [vite@6.4.1, chokidar@4.0.3]` — revisit these excep
 
 ## Pillar 1 — Reduce the surface
 
-_(Corrected 2026-07-03: an earlier version claimed dropping `astro-integration-kit` cut the tree 314 → 27. Wrong — `pnpm ls` was counting **Astro itself**, resolved as aik's peer dependency, under aik. Consumers already have Astro; it's not surface we add.)_
+_(Twice-corrected, final numbers 2026-07-03. First error: `pnpm ls` counted **Astro itself** — resolved as aik's peer — as aik's subtree ("293 packages from aik": wrong). Second error: a `pnpm ls --json` walk undercounted shared subtrees due to output dedupe ("27 packages": also wrong). The numbers below come from real scratch-dir `npm install`s of exactly the published prod deps, which is dedupe- and peer-proof.)_
 
-Measured 2026-07-03, what `@grepco/astro-pagemeta` actually adds to a consumer's tree (excluding the `astro` peer):
+**Measurement method** (rerun anytime):
 
-- **~29 unique packages**: the unified/rehype ecosystem (27, via `rehype`, `rehype-meta`, `rehype-minify-whitespace`, `hast-util-select`) + `astro-integration-kit` + `pathe` + `schema-dts` (types-only, zero deps)
-- The M1 aik migration (happening anyway for deprecation reasons) sheds only `astro-integration-kit` + `pathe`
+```sh
+mkdir /tmp/treecheck && cd /tmp/treecheck && npm init -y
+# --legacy-peer-deps: don't auto-install the astro peer (consumers already have it)
+npm install --ignore-scripts --legacy-peer-deps \
+  astro-integration-kit@0.19.1 hast-util-select@6.0.4 rehype@13.0.2 \
+  rehype-meta@4.0.1 rehype-minify-whitespace@6.0.2 schema-dts@1.1.5
+npm ls --all --parseable | sort -u | grep -c node_modules
+```
 
-The bigger real cut: `hast-util-select` is a direct dep used for exactly one call — `select("head", tree)`. A hand-rolled ~10-line tree walk drops it and the subtree only it needs (`css-selector-parser`, `nth-check` — of historical-CVE fame, `bcp-47-match`, `direction`, `hast-util-has-property`, …), landing the added surface around **~20 packages**, essentially all from one maintainer group (wooorm/unified collective — high-reputation, single trust domain). That's a defensible, explainable floor. Going lower means vendoring rehype-meta; not worth it (was tried once and abandoned — see git history).
+Results (2026-07-03):
+
+- **Today: 64 packages** added to a consumer's tree (excluding the `astro` peer)
+- **After the M1 aik migration: 62** (sheds `astro-integration-kit` + `pathe`)
+- ~~Hand-rolling `select("head")` to drop `hast-util-select`~~ — **withdrawn: saves zero packages.** `rehype-meta` depends on `hast-util-select` itself, so the subtree (css-selector-parser, nth-check, …) ships regardless. Only worth doing as code simplification, never as a security measure.
+
+So the honest posture: the floor is **~62 packages, essentially all from one maintainer group** (wooorm/unified collective — high-reputation, single trust domain, mostly zero-install-script micro-packages). Meaningful reduction below that requires replacing rehype-meta itself (vendoring was tried and abandoned — see git history; the Rust-replacement idea lives in BACKLOG). Accept 62 as the v1 number and spend security effort on the gates (Pillars 2–5), not the count.
+
+Nuance worth knowing: on Astro ≤ 6, consumers already carry much of the unified/rehype ecosystem via Astro's own markdown pipeline, so our _marginal_ footprint there is smaller than 62. Astro 7's Sätteri removes unified from Astro's default path — going forward, this tree is genuinely ours.
 
 Dev-dep tree stays big (eslint ecosystem etc.). Accept it: dev deps don't ship to consumers, and the install-script block + release-age gate cover the on-your-machine risk. Don't spend reduction effort there.
 
@@ -75,4 +89,4 @@ Majors policy: never auto-taken. Astro majors get the ROADMAP §M1 case-by-case 
 3. Renovate (rec, post-M2) or manual monthly cadence?
 4. Socket + pnpm audit (rec) — or audit-only to start?
 5. npm trusted publishing via OIDC (rec) — any reason to prefer a granular token?
-6. Second reduction cut: hand-roll `select("head")` to drop `hast-util-select` (rec: yes, during M1 while tests are hot)?
+6. ~~Hand-roll `select("head")` to drop `hast-util-select`~~ — withdrawn 2026-07-03: rehype-meta pulls it in anyway, zero packages saved (see Pillar 1). No decision needed.

@@ -5,6 +5,7 @@
     "type": "module",
     "scripts": {
         "deps": "ncu -p pnpm -i --format group --cooldown 7d --workspaces --root",
+        "deps:all": "ncu -p pnpm --format group --workspaces --root",
         "fmt": "prettier --check .",
         "fmt:fix": "prettier --write .",
         "knip": "knip --production --strict",

@@ -61,3 +61,7 @@ Test everything across static/SSR and dev/build not because failures are expecte
 2. Is `maxWorkers: 3` still necessary under astro-tests 1.0?
 3. Can the socket-error-on-500 behavior be reproduced deliberately and reported upstream (Astro or astro-tests)?
 4. If (1) relaxes: how much file consolidation is worth doing vs. leaving the working structure alone?
+
+## Addendum 2026-07-03: harness will be vendored
+
+Decision during M1 kickoff: rather than tracking `@inox-tools/astro-tests` releases (1.0 peers on `astro ^6.0.8` only, gating our Astro upgrades), we vendor the used surface — `astroFixture.ts` (~500 lines, public Astro APIs only) + `test-adapter.ts` — into our own tests/ tree with attribution. The "check the astro-tests 1.0 changelog" items above become "diff upstream when curious"; open questions 1–3 get answered against our own code, where the undici agent and server lifecycle are finally inspectable.

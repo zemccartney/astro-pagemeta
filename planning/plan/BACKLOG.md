@@ -14,7 +14,7 @@
 ## Brainstorms queued (from Zack's scratch, 2026-07)
 
 - Image-gen protocol design + a puppeteer-based generator (→ feeds M5; seed code in `image-gen-wip/`)
-- Virtual-fs implementation for the test system — could it replace `@inox-tools/astro-tests`, or become a proposed improvement upstream?
+- Virtual-fs implementation for the test system — step one landed in M1 (harness vendored into our tree), which makes this a refactor of our own code rather than an upstream replacement
 - **Rust-based HTML processing** to replace the rehype pipeline — a significant standalone project, not a swap.
     - **Why:** the middleware sits unconditionally in the response critical path; the measured cost is almost entirely rehype's parse/serialize (13.5ms at p50, 110ms at p90 per BENCHMARKS.md). A native processor chases Sätteri-scale gains on the HTML side, and would drop the unified tree (~62 prod packages → near zero).
     - **Why Sätteri itself can't be shoehorned** (investigated 2026-07-03): Markdown engines don't parse raw HTML — CommonMark captures it as opaque "HTML block" tokens passed through verbatim, so any hast Sätteri exposes would contain the document as `raw` string nodes, not a traversable `<head>` element tree (that's why `rehype-raw`/parse5 exists in unified-land: HTML parsing is exactly the part markdown delegates). Worse, CommonMark's HTML-block rules actively mangle full documents — blank lines terminate HTML blocks, and 4-space-indented lines become code blocks. "Valid HTML is valid markdown" only means it survives pass-through, not that it gets parsed.

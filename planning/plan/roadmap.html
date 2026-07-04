@@ -567,7 +567,7 @@
             </div>
             <div class="stat">
                 <span class="k">Astro peer</span
-                ><span class="v warn">^5.0.0 vs latest 7.0.6</span>
+                ><span class="v ok">^6.0.0 · on 6.4.8 · 7 leg pending</span>
             </div>
             <div class="stat">
                 <span class="k">Decisions</span
@@ -682,13 +682,15 @@
                     tsconfck/zod-to-ts peer on TS ^5; don't stack a
                     peer-violating compiler on the riskiest step
                 </li>
-                <li>
-                    Catalog <code>astro</code> → <code>^6</code>; fix fallout —
-                    watch <code>server.moduleGraph</code> invalidation under the
-                    Environment-API dev server, routes:resolved behavior, 6.1
-                    i18n fallback routes. Then: peer <code>^6.0.0</code>,
-                    engines <code>>=22</code>, tsdown target node22,
-                    check-engines, README prerequisites, maintenance stance doc
+                <li class="ticked">
+                    <b>Astro 6.4.8</b> — one source change in the whole major
+                    (<code>compressHTML</code> widened to
+                    <code>boolean | "jsx"</code>). Vendored harness unmodified;
+                    doctype/partials hold; moduleGraph invalidation passes.
+                    Stance landed: peer <code>^6.0.0</code>, engines
+                    <code>>=22.12.0</code>, lib es2023, target node22, README
+                    prerequisites, <code>maintenance/support.md</code>. 269/269
+                    green; playground SSR builds
                 </li>
                 <li>
                     Catalog <code>astro</code> → <code>^7</code> (unblocked by

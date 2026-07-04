@@ -667,10 +667,20 @@
                     <code>astro/zod</code>, taking the zod 3→4 variable out of
                     the Astro 6 bump. 269/269 green
                 </li>
+                <li class="ticked">
+                    Non-Astro dep updates: eslint 10 family (astro 2, jsdoc 63,
+                    package-json 1.5; <code>@eslint/compat</code>
+                    dropped), vitest 4.1, schema-dts 2, tsdown 0.22,
+                    attw/publint patches. Node 24.12 → 24.18 via fnm
+                    (eslint-plugin-astro@2 engines). typescript-eslint held to
+                    mature 8.62.0 by our own 7-day gate — working as intended.
+                    269/269 green
+                </li>
                 <li>
-                    Non-Astro dep updates from the baseline (vitest 4.1,
-                    schema-dts 2, attw/publint patches; eslint-10 family, tsdown
-                    0.22 at root; TypeScript 6 in its own commit)
+                    TypeScript 6 — attempted, works,
+                    <b>deferred until after the Astro 6 bump</b>: Astro 5's
+                    tsconfck/zod-to-ts peer on TS ^5; don't stack a
+                    peer-violating compiler on the riskiest step
                 </li>
                 <li>
                     Catalog <code>astro</code> → <code>^6</code>; fix fallout —

@@ -6,6 +6,7 @@
     "scripts": {
         "deps": "ncu -p pnpm --format group --cooldown 7d --workspaces --root",
         "deps:all": "ncu -p pnpm --format group --workspaces --root",
+        "deps:pkg": "node scripts/deps-pkg.ts",
         "fmt": "prettier --check .",
         "fmt:fix": "prettier --write .",
         "knip": "knip --production --strict",
@@ -25,7 +26,6 @@
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-astro": "^2.1.1",
         "eslint-plugin-jsdoc": "^63.0.10",
-        "eslint-plugin-jsx-a11y": "^6.10.2",
         "eslint-plugin-package-json": "^1.5.0",
         "eslint-plugin-perfectionist": "^5.9.1",
         "eslint-plugin-unicorn": "^63.0.0",

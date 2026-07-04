@@ -114,7 +114,7 @@ export default defineConfig([
         }
     },
     {
-        extends: [astro.configs.recommended, astro.configs["jsx-a11y-strict"]],
+        extends: [astro.configs.recommended],
         files: ["**/*.astro"],
         rules: {
             "unicorn/filename-case": ["off"],

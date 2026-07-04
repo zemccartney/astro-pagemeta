@@ -4,7 +4,9 @@
     "ignoreWorkspaces": ["playground"],
     "tags": ["-lintignore"],
     "workspaces": {
-        ".": {},
+        ".": {
+            "entry": ["scripts/*.ts"]
+        },
         "packages/astro-fixture": {
             "entry": ["src/astroFixture.ts", "src/testAdapter.ts"]
         },

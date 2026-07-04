@@ -7,8 +7,19 @@
     "eslint.options": {
         "flags": ["unstable_native_nodejs_ts_config"]
     },
+    "eslint.probe": [
+        "javascript",
+        "javascriptreact",
+        "typescript",
+        "typescriptreact",
+        "html",
+        "markdown",
+        "json",
+        "jsonc",
+        "astro"
+    ],
     "search.exclude": {
         "**/node_modules": true,
-        "**/package-lock.json": true
+        "**/pnpm-lock.json": true
     }
 }

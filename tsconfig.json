@@ -3,5 +3,5 @@
         "types": ["node"]
     },
     "extends": "./tsconfig.base.json",
-    "files": ["eslint.config.ts"]
+    "files": ["eslint.config.ts", "scripts/deps-pkg.ts"]
 }

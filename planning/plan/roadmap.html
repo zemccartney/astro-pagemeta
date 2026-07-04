@@ -548,8 +548,8 @@
         <div class="eyebrow">@grepco/astro-pagemeta · working plan</div>
         <h1>Road to v1</h1>
         <p class="subtitle">
-            Snapshot of <code>planning/plan/</code> as of the M0 commit
-            (2026-07-03). The markdown files are the record; this page is for
+            Snapshot of <code>planning/plan/</code> as of 2026-07-04 (M1 in
+            progress). The markdown files are the record; this page is for
             review. Work top to bottom, one milestone at a time.
         </p>
         <div class="statusbar">
@@ -570,8 +570,8 @@
                 ><span class="v warn">^5.0.0 vs latest 7.0.6</span>
             </div>
             <div class="stat">
-                <span class="k">Decisions open</span
-                ><span class="v warn">5</span>
+                <span class="k">Decisions</span
+                ><span class="v ok">settled 2026-07-03</span>
             </div>
         </div>
     </header>
@@ -636,7 +636,7 @@
             <div class="mile-head">
                 <span class="mcode">M1</span>
                 <h2>Ecosystem catch-up</h2>
-                <span class="badge next">Up next · 2–5 sessions</span>
+                <span class="badge next">In progress · started 2026-07-03</span>
             </div>
             <p class="goal">
                 Astro shipped v6 (Node 22+, Vite 7, Environment-API dev server)
@@ -647,51 +647,72 @@
                 <em>artifacts/testing-isolation.md</em>.
             </p>
             <ul class="checks">
-                <li>
-                    Bump <code>@inox-tools/astro-tests</code> → 1.0; read
-                    changelog before re-working around old harness quirks
+                <li class="ticked">
+                    Deps baseline via <code>pnpm deps</code> dry-run; scripts
+                    hardened (7-day cooldown; interactive×workspaces ncu bug
+                    found → <code>deps</code> is now the workspace-wide report,
+                    interactive tidying runs per-package)
                 </li>
-                <li>
-                    Catalog <code>astro</code> → <code>^7</code>; fix fallout —
-                    watch <code>server.moduleGraph</code> invalidation,
-                    doctype/partial detection under the Rust compiler, fixture
-                    HTML strictness
+                <li class="ticked">
+                    <b>Vendor the test harness</b> — new private package
+                    <code>@grepco/astro-fixture</code> (from astro-tests@0.8.1,
+                    trimmed to the 7-method surface, only dep is undici).
+                    Removes the harness's astro peer gate from our upgrade path.
+                    269/269 green at Astro 5.18
                 </li>
-                <li>
+                <li class="ticked">
                     Migrate off deprecated
-                    <code>astro-integration-kit</code> (small; four thin
-                    wrappers)
+                    <code>astro-integration-kit</code> — plain factory +
+                    hand-rolled option validation; also removes
+                    <code>astro/zod</code>, taking the zod 3→4 variable out of
+                    the Astro 6 bump. 269/269 green
                 </li>
-                <li>Back-compat runs against Astro 6 and 5</li>
                 <li>
-                    Decide + record the version-support policy; set the peer
-                    range CI will prove
+                    Non-Astro dep updates from the baseline (vitest 4.1,
+                    schema-dts 2, attw/publint patches; eslint-10 family, tsdown
+                    0.22 at root; TypeScript 6 in its own commit)
                 </li>
-                <li>Raise Node floor / tsdown target to match the decision</li>
+                <li>
+                    Catalog <code>astro</code> → <code>^6</code>; fix fallout —
+                    watch <code>server.moduleGraph</code> invalidation under the
+                    Environment-API dev server, routes:resolved behavior, 6.1
+                    i18n fallback routes. Then: peer <code>^6.0.0</code>,
+                    engines <code>>=22</code>, tsdown target node22,
+                    check-engines, README prerequisites, maintenance stance doc
+                </li>
+                <li>
+                    Catalog <code>astro</code> → <code>^7</code> (unblocked by
+                    vendored harness) — Rust-compiler doctype/partial
+                    re-verification lives here; widen peer to
+                    <code>^6 || ^7</code> if green
+                </li>
             </ul>
             <div class="policy">
-                <h3>Proposed support policy</h3>
+                <h3>Support policy (decided 2026-07-03)</h3>
                 <ol>
                     <li>
-                        First-class = every Astro major that Astro itself
-                        maintains (their policy: security fixes for one previous
-                        major → today 6 + 7). These run in CI.
+                        Align with Astro's own support matrix, transitively: the
+                        Astro majors Astro maintains (today 6 + 7), on the Node
+                        versions Astro supports (latest Maintenance LTS +
+                        current Active LTS).
                     </li>
                     <li>
-                        Older majors (5): kept only while free — same code, no
-                        forks, green CI leg. Dropped only in a pagemeta
-                        <em>major</em> release.
+                        User statement: "This integration supports the Astro
+                        versions Astro supports, on the Node versions Astro
+                        supports."
                     </li>
                     <li>
-                        Re-evaluate case-by-case on each Astro major. No
-                        standing promise beyond the current peer range.
+                        <b>Astro v5 dropped</b>: outside Astro's matrix
+                        (unmaintained upstream; floors on EOL Node 18/20).
+                        Re-evaluate at each Astro major; drops land in pagemeta
+                        <em>major</em> releases.
                     </li>
                 </ol>
             </div>
             <div class="exit">
-                <b>Exit:</b> suite green on newest supported Astro;
-                integration-kit gone; peer range + engines honest; policy in
-                MAINTENANCE docs.
+                <b>Exit:</b> suite green on Astro 6 and 7 via the vendored
+                harness; integration-kit gone ✓; peer + engines honest; stance
+                in MAINTENANCE docs + README.
             </div>
         </section>
 
@@ -724,8 +745,18 @@
                     with provenance
                 </li>
                 <li>
+                    Rewrite <code>packages/astro-fixture/README.md</code> for
+                    public consumption (references planning/ context today)
+                </li>
+                <li>
                     Publish <code>0.1.0</code>; verify scratch-project install,
-                    registry rendering, published <code>engines</code>
+                    registry rendering, published <code>engines</code> — and the
+                    ⚠️ auto-mode middleware entrypoint from dist (<code
+                        >./middleware.js</code
+                    >
+                    vs emitted <code>middleware.mjs</code>; never exercised by
+                    tests, which import src, or the playground, which runs
+                    manual mode)
                 </li>
             </ul>
             <div class="exit">
@@ -819,13 +850,14 @@
         </section>
 
         <section id="decisions">
-            <h2>⚖️ Decision queue</h2>
+            <h2>⚖️ Decision queue — settled 2026-07-03</h2>
             <p class="sect-sub">
-                Five calls to make in <em>plan/deps-security.md</em> — Zack's to
-                settle, recommendations attached. Answering these unblocks the
-                supply-chain setup in M1/M2. Measured floor: the package adds
-                ~62 packages to a consumer's tree (64 today), essentially all
-                from the wooorm/unified collective.
+                All five decided by Zack (scratch/m1.md), matching the
+                recommendations below. Implemented so far: 7-day release age +
+                workspace deps scripts; Astro v5 dropped. Renovate, Socket, and
+                OIDC publishing land in M2/M4. Measured floor: the package adds
+                ~62 packages to a consumer's tree, essentially all from the
+                wooorm/unified collective.
             </p>
             <div class="decision-grid">
                 <div class="decision">

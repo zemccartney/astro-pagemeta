@@ -59,6 +59,7 @@ _Decisions from deps-security.md folded in first (2026-07-03, scratch/m1.md) as 
 - [ ] Supply-chain baseline in CI (decisions in [deps-security.md](./deps-security.md)): pin all GitHub Actions to commit SHAs; add audit step; Socket (or chosen alternative) on PRs
 - [ ] Changesets: install, wire release workflow, write first changeset
 - [ ] npm publish with provenance; keep publint + attw enforced in the build (attw: add explicit ignore/annotation for the `/Head` .astro export warning)
+- [ ] Rewrite `packages/astro-fixture/README.md` for public repo consumption (currently references `planning/` docs and pre-publish context that won't survive the planning-folder deletion)
 - [ ] Publish `0.1.0` (or `0.1.0-beta` under `next` tag) — verify `npm install` from a scratch project + registry page rendering; confirm `publishConfig.engines` actually lands in the published manifest (`npm view`)
 
 **Exit criteria:** one full release cycle executed end-to-end; you could run the next one from memory.

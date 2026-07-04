@@ -1,7 +1,8 @@
 /*
  * Vendored from @inox-tools/astro-tests@0.8.1 (MIT, © Luiz Ferraz)
  * https://github.com/Fryuni/inox-tools/blob/%40inox-tools/astro-tests%400.8.1/packages/astro-tests/src/astroFixture.ts
- * Upstream lineage: Astro core's internal test utils
+ * It appears closely based on Astro core's internal test utils (exact
+ * derivation direction unverified; the two resemble each other strongly):
  * https://github.com/withastro/astro/blob/main/packages/astro/test/test-utils.ts
  *
  * Vendored 2026-07-03 so the harness's astro peer range no longer gates this

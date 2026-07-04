@@ -10,7 +10,7 @@ The upstream package (`@inox-tools/astro-tests`) gates its Astro support through
 
 Vendored 2026-07-03 from **`@inox-tools/astro-tests@0.8.1`** (MIT, © Luiz Ferraz) — the exact version this workspace's suite was green on under Astro 5.
 
-That package is itself a port of **Astro core's internal test harness** (`packages/astro/test/test-utils.ts` and `test-adapter.js` in [withastro/astro](https://github.com/withastro/astro)) from monorepo-internal `../dist/...` imports onto Astro's public programmatic API (`astro`, `astro/config`, `astro/app`). We vendored the port because the public API is the only stable contract available outside Astro's repo; Astro's own file cannot run against an installed `astro` package.
+That package appears closely based on **Astro core's internal test harness** (`packages/astro/test/test-utils.ts` and `test-adapter.js` in [withastro/astro](https://github.com/withastro/astro)) — its `testAdapter` explicitly says it was copied from Astro's; for the fixture the derivation direction is unverified, but the resemblance is strong. Functionally it is that harness expressed against Astro's public programmatic API (`astro`, `astro/config`, `astro/app`) instead of Astro's monorepo-internal `../dist/...` imports. We vendored this form because the public API is the only stable contract available outside Astro's repo; Astro's own file cannot run against an installed `astro` package.
 
 ## Maintenance: the two-upstream diff
 

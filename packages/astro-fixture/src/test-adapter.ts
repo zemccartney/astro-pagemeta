@@ -1,7 +1,8 @@
 /*
  * Vendored from @inox-tools/astro-tests@0.8.1 (MIT, © Luiz Ferraz)
  * https://github.com/Fryuni/inox-tools/blob/%40inox-tools/astro-tests%400.8.1/packages/astro-tests/src/testAdapter.ts
- * which is itself copied from Astro core (the true upstream for this file):
+ * whose own header states it was copied (and TypeScript-ified) from Astro
+ * core's test adapter:
  * https://github.com/withastro/astro/blob/main/packages/astro/test/test-adapter.js
  *
  * Vendored 2026-07-03. Adaptations: debug logging via node:util debuglog;

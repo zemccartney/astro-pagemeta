@@ -1,10 +1,10 @@
-import {
-    addVirtualImports,
-    createResolver,
-    defineIntegration
-} from "astro-integration-kit";
+import type { AstroIntegration } from "astro";
 
-const { resolve } = createResolver(import.meta.url);
+import Path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const VIRTUAL_ID = "virtual:test-error-capture/config";
+const RESOLVED_ID = "\0" + VIRTUAL_ID;
 
 export function createErrorCapture() {
     const key = `__test_error_capture_${crypto.randomUUID()}__`;
@@ -15,29 +15,41 @@ export function createErrorCapture() {
             delete (globalThis as Record<string, unknown>)[key];
         },
 
-        integration() {
-            return defineIntegration({
-                name: "test:error-capture",
-                setup: ({ name }) => {
-                    return {
-                        hooks: {
-                            "astro:config:setup": (params) => {
-                                addVirtualImports(params, {
-                                    imports: {
-                                        "virtual:test-error-capture/config": `export const key = ${JSON.stringify(key)};`
-                                    },
-                                    name
-                                });
-
-                                params.addMiddleware({
-                                    entrypoint: resolve("./middleware.ts"),
-                                    order: "pre"
-                                });
+        integration(): AstroIntegration {
+            return {
+                hooks: {
+                    "astro:config:setup": (params) => {
+                        params.updateConfig({
+                            vite: {
+                                plugins: [
+                                    {
+                                        name: "test:error-capture:config",
+                                        resolveId(id: string) {
+                                            if (id === VIRTUAL_ID) {
+                                                return RESOLVED_ID;
+                                            }
+                                        },
+                                        // eslint-disable-next-line perfectionist/sort-objects -- align with order seen in vite/rollup docs
+                                        load(id: string) {
+                                            if (id !== RESOLVED_ID) return;
+                                            return `export const key = ${JSON.stringify(key)};`;
+                                        }
+                                    }
+                                ]
                             }
-                        }
-                    };
-                }
-            })();
+                        });
+
+                        params.addMiddleware({
+                            entrypoint: Path.resolve(
+                                Path.dirname(fileURLToPath(import.meta.url)),
+                                "./middleware.ts"
+                            ),
+                            order: "pre"
+                        });
+                    }
+                },
+                name: "test:error-capture"
+            };
         },
 
         lastError() {

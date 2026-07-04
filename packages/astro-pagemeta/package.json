@@ -45,7 +45,6 @@
         "typecheck": "tsdown && tsc -b"
     },
     "dependencies": {
-        "astro-integration-kit": "^0.19.1",
         "hast-util-select": "^6.0.4",
         "rehype": "^13.0.2",
         "rehype-meta": "^4.0.1",

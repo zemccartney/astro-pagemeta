@@ -16,8 +16,24 @@ That package appears closely based on **Astro core's internal test harness** (`p
 
 When upgrading Astro majors (or chasing harness bugs), consult both upstreams:
 
-1. **Astro core (source of truth for driving Astro):** diff `packages/astro/test/test-utils.ts` between the old and new **release tags** (not `main` — `main` tracks unreleased Astro). This reveals how the Astro team adapted their own harness to their changes.
-2. **inox-tools (packaging/harness fixes):** diff `packages/astro-tests/src/` between releases for fixes worth stealing (e.g. their 1.0 targets Astro 6).
+1. **Astro core (source of truth for driving Astro):** diff `packages/astro/test/test-utils.ts` between the git tags matching the Astro versions in play — not `main`, which tracks unreleased Astro. The file isn't published to npm, so repo tags are the only version-matched view. E.g.:
+
+    ```sh
+    git clone --filter=blob:none https://github.com/withastro/astro
+    git -C astro diff astro@5.18.0 astro@6.4.1 -- packages/astro/test/test-utils.ts packages/astro/test/test-adapter.js
+    ```
+
+    This reveals how the Astro team adapted their own harness to their changes.
+
+2. **inox-tools (nearest-shape reference; packaging/harness fixes):** its package _is_ published, so diff the published tarballs directly — no clone needed:
+
+    ```sh
+    npm diff --diff=@inox-tools/astro-tests@0.8.1 --diff=@inox-tools/astro-tests@1.0.0
+    ```
+
+    Because our file descends from theirs, these diffs apply to our code nearly line-for-line (e.g. their 1.0 targets Astro 6).
+
+Consult these at defined events — an Astro major bump, or a harness bug — not on a schedule.
 
 ## Deviations from upstream
 

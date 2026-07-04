@@ -14,6 +14,8 @@ That package appears closely based on **Astro core's internal test harness** (`p
 
 ## Maintenance: the two-upstream diff
 
+> **TLDR intuition: Astro tells you _what_ changed; inox shows you how that change looks _in your file's shape_.**
+
 When upgrading Astro majors (or chasing harness bugs), consult both upstreams:
 
 1. **Astro core (source of truth for driving Astro):** diff `packages/astro/test/test-utils.ts` between the git tags matching the Astro versions in play — not `main`, which tracks unreleased Astro. The file isn't published to npm, so repo tags are the only version-matched view. E.g.:

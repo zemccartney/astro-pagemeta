@@ -1,6 +1,6 @@
 # Astro 6 & 7 — What Shipped While the Project Was Paused
 
-_Written 2026-07-03 (Claude), from [Astro 6.0 announcement](https://astro.build/blog/astro-6/), [Astro 7.0 announcement](https://astro.build/blog/astro-7/), and the [v6](https://docs.astro.build/en/guides/upgrade-to/v6/)/[v7](https://docs.astro.build/en/guides/upgrade-to/v7/) upgrade guides. Two audiences: (1) what pagemeta must react to / test; (2) what's worth using on Zack's own sites later._
+_Written 2026-07-03 (Claude), from the [6.0](https://astro.build/blog/astro-6/) and [7.0](https://astro.build/blog/astro-7/) announcements, the 6.1–6.4 minor-release posts (linked below), and the [v6](https://docs.astro.build/en/guides/upgrade-to/v6/)/[v7](https://docs.astro.build/en/guides/upgrade-to/v7/) upgrade guides. Two audiences: (1) what pagemeta must react to / test; (2) what's worth using on Zack's own sites later._
 
 ## Astro 6.0 (March 2026) — highlights
 
@@ -12,6 +12,17 @@ _Written 2026-07-03 (Claude), from [Astro 6.0 announcement](https://astro.build/
 | **CSP API** (stable)                     | `security: { csp: true }` — automatic hashing of scripts/styles for static _and_ dynamic pages.                                                                                                                                           |
 | **Live Content Collections**             | `defineLiveCollection()` — request-time content through the content-layer APIs; coexists with build-time collections.                                                                                                                     |
 | Experimental                             | Rust compiler (opt-in via `@astrojs/compiler-rs`); queued rendering (~2x); route caching (`Astro.cache`).                                                                                                                                 |
+
+## The 6.x minors (March–June 2026)
+
+Four minors landed between the majors. Pattern worth internalizing: v7's headline features incubated here as experimental flags (JSON logging in 6.2, advanced routing in 6.3, Rust markdown in 6.4) before becoming 7.0 defaults — watching minor announcements is how you see the next major coming.
+
+| Release                                    | Date       | Headlines                                                                                                                                                     |
+| ------------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [6.1](https://astro.build/blog/astro-610/) | 2026-03-26 | Codec-specific Sharp image defaults; advanced SmartyPants configuration; i18n fallback routes for integrations                                                |
+| [6.2](https://astro.build/blog/astro-620/) | 2026-04-30 | Experimental custom logger with JSON output; SVG optimizer API; font file URL helper                                                                          |
+| [6.3](https://astro.build/blog/astro-630/) | 2026-05-07 | Experimental advanced routing with Hono support; image redirect handling; resilient island hydration                                                          |
+| [6.4](https://astro.build/blog/astro-640/) | 2026-05-28 | Pluggable Markdown processor API (the door Sätteri arrived through); Rust-based Markdown processor for faster builds; Cloudflare helpers for advanced routing |
 
 ## Astro 7.0 (June 2026) — highlights
 
@@ -37,7 +48,8 @@ Ordered by likelihood of actually biting:
 5. **New test/doc: route caching semantics.** If a response is cached via `Astro.cache`, pagemeta's middleware output is presumably what gets cached (middleware runs inside the pipeline) — confirm, and document the implication: function `defaults` computed per-request become frozen into cached responses.
 6. **New check: `src/fetch.ts` composition.** When users compose the pipeline via Hono, does integration-added middleware (`addMiddleware`, order "post") still run? At minimum a docs note; possibly a fixture.
 7. **Queued rendering** (default in 7): shouldn't matter — middleware still receives the complete response — but the streaming tests + `Head.astro` path are the guard. No new work unless something fails.
-8. **Non-goal clarified:** Sätteri replaces _Astro's markdown_ pipeline, not anything pagemeta does — pagemeta uses rehype directly on rendered HTML, which is orthogonal. (The old RESUMING.md idea "move from unified to the rust engine" conflates the two; a Rust-based HTML transform is a separate, real backlog idea.)
+8. **From the minors — i18n fallback routes for integrations (6.1):** new route surface that flows through `astro:routes:resolved`. Check how fallback routes present in the hook's metadata (`origin`? `type`?) and whether `isPageRoute()` should match them — a one-fixture question during M1.
+9. **Non-goal clarified:** Sätteri replaces _Astro's markdown_ pipeline, not anything pagemeta does — pagemeta uses rehype directly on rendered HTML, which is orthogonal. (The old RESUMING.md idea "move from unified to the rust engine" conflates the two; a Rust-based HTML transform is a separate, real backlog idea.)
 
 Also worth stealing for this repo's own DX: `astro dev --background` + `/_astro/status` + JSON logs are tailor-made for the AI-harness backlog items (agent-driven playground testing).
 
@@ -56,6 +68,10 @@ Also worth stealing for this repo's own DX: `astro dev --background` + `/_astro/
 Bare URLs for quick access:
 
 - Astro 6.0 announcement — https://astro.build/blog/astro-6/
+- Astro 6.1 (2026-03-26) — https://astro.build/blog/astro-610/
+- Astro 6.2 (2026-04-30) — https://astro.build/blog/astro-620/
+- Astro 6.3 (2026-05-07) — https://astro.build/blog/astro-630/
+- Astro 6.4 (2026-05-28) — https://astro.build/blog/astro-640/
 - Astro 7.0 announcement — https://astro.build/blog/astro-7/
 - Upgrade to Astro v6 — https://docs.astro.build/en/guides/upgrade-to/v6/
 - Upgrade to Astro v7 — https://docs.astro.build/en/guides/upgrade-to/v7/

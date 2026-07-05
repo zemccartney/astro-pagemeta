@@ -175,6 +175,12 @@ Some keys receive special handling to allow overriding any tag the integration m
 
 ## Behavior Notes
 
+### Content-Security-Policy is off-limits (by design)
+
+Attempting to set a CSP through `custom` (any key containing `content-security-policy`, case-insensitive) throws a hard error — at config time for static defaults, at request time otherwise. CSP delivered via meta tag has its own lifecycle: Astro's [built-in CSP support](https://docs.astro.build/en/guides/csp/) generates hashes for the page's inline scripts and styles, which a hand-authored policy would silently miss, breaking the page. Use `security: { csp: true }` in your Astro config instead.
+
+pagemeta is verified compatible with Astro's CSP (see `tests/integration/csp/`): the injected tags don't disturb the policy — static pages keep a valid `<meta http-equiv="content-security-policy">` whose hashes still match the final HTML (attribute quotes may be entity-encoded by re-serialization, which browsers decode before CSP parsing), on-demand pages keep the `content-security-policy` response header, and the injected JSON-LD needs no hash because non-executable data blocks are exempt from `script-src`.
+
 **When `metadata` is never called**: If defaults are configured, they still apply. If no defaults are set and `metadata` is never called, the middleware skips processing entirely — the response passes through unmodified.
 
 **Opting out of processing**: Pass `false` to `metadata` to skip all defaults and tag injection for the current request:

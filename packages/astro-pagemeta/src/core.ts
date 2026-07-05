@@ -40,6 +40,25 @@ const CANONICAL_KEY = "link:rel:canonical";
 
 const CHARSET_KEY = "meta:charSet";
 
+/**
+ * Reject attempts to set a Content-Security-Policy through pagemeta.
+ * CSP delivered via meta tag is a security-sensitive surface with its own
+ * lifecycle (hash generation for inline assets) that Astro owns natively —
+ * a pagemeta-authored CSP would silently miss Astro's script/style hashes
+ * and break the page. Hard error, pointing at the real feature.
+ * @param custom - Merged custom meta entries to screen
+ * @throws {Error} When any key (case-insensitively) targets CSP
+ */
+export const rejectCspKeys = (custom: Record<string, string>): void => {
+    for (const key of Object.keys(custom)) {
+        if (key.toLowerCase().includes("content-security-policy")) {
+            throw new Error(
+                `[pagemeta] Content-Security-Policy cannot be set via pagemeta (key: ${JSON.stringify(key)}). Use Astro's built-in CSP support instead: https://docs.astro.build/en/guides/csp/`
+            );
+        }
+    }
+};
+
 function rehypeCustomMeta(meta: Record<string, string>) {
     return (tree: Root) => {
         const head = select("head", tree);
@@ -355,6 +374,7 @@ export function createMetadataProcessor(
                     ...computedDefaults.custom,
                     ...pageMeta?.custom
                 };
+                rejectCspKeys(merged.custom);
             }
             return merged;
         }

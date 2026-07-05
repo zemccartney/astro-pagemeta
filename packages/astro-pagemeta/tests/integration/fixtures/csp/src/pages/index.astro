@@ -1,0 +1,25 @@
+---
+import { metadata } from "@grepco/astro-pagemeta/runtime";
+
+metadata(Astro, {
+    description: "Verifying pagemeta coexists with Astro's CSP",
+    jsonLd: { "@type": "WebPage", name: "CSP interplay" },
+    title: "CSP Page"
+});
+---
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Template Title</title>
+    </head>
+    <body>
+        <h1 class="hero">Hello CSP</h1>
+        <style>
+            .hero {
+                color: rebeccapurple;
+                letter-spacing: 0.05em;
+            }
+        </style>
+    </body>
+</html>

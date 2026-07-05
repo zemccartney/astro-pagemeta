@@ -72,7 +72,8 @@ export const middleware = (): MiddlewareHandler => {
         if (!isHtmlDocument(html)) {
             return new Response(html, {
                 headers: response.headers,
-                status: response.status
+                status: response.status,
+                statusText: response.statusText
             });
         }
 
@@ -81,9 +82,18 @@ export const middleware = (): MiddlewareHandler => {
         });
         const processed = await htmlProcessor.process(html);
 
+        // Astro sets Content-Length on non-streamed on-demand responses
+        // (runtime/server/render/page.js). Our injected tags change the body
+        // size, so a carried-over value would lie — strict clients truncate
+        // at the declared length. Drop it and let the server/adapter
+        // recompute from the actual body.
+        const headers = new Headers(response.headers);
+        headers.delete("content-length");
+
         return new Response(String(processed), {
-            headers: response.headers,
-            status: response.status
+            headers,
+            status: response.status,
+            statusText: response.statusText
         });
     });
 };

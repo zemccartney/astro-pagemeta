@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 
 import type { IntegrationOptions } from "./types.ts";
 
+import { rejectCspKeys } from "./core.ts";
+
 type ValidatedOptions = Required<
     Pick<
         IntegrationOptions,
@@ -59,6 +61,12 @@ function validateOptions(input: IntegrationOptions = {}): ValidatedOptions {
         throw new Error(
             `[pagemeta] defaults must be an object or a function, got ${typeof defaults}`
         );
+    }
+
+    // Fail fast at config time for static defaults; function defaults are
+    // screened per-request in resolveMetadata (they can't run until then)
+    if (typeof defaults === "object" && defaults.custom) {
+        rejectCspKeys(defaults.custom);
     }
 
     if (typeof includeExternalPages !== "boolean") {

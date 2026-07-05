@@ -79,6 +79,22 @@ Measurements (M3, 8 cores, 16 GB, maxWorkers as noted):
 | Astro 6, maxWorkers=3                    | ~37s  | 92.3s                |
 | Astro 6, maxWorkers=5                    | 36.8s | 148.9s               |
 
-Solo timings under Astro 6 are fast (instrumented probe: loadFixture 22ms, dev-server start 550ms, first fetch 101ms, build 1.1s; heaviest file solo 4.5s vs 8.2s in-suite). Conclusion: not our code, not `.test-tmp` junk (17 dirs / 68K), not unit Astro cost — **Astro 6 operations parallelize worse** (heavier internal concurrency per op, likely the Environment-API dev server + Vite 7), so concurrent workers contend hard: wall time is pinned ~37-40s at any worker count while cumulative CPU scales with workers. A small part is legitimate growth (+2 CSP test files ≈ +3 Astro ops).
+Solo timings under Astro 6 are fast (instrumented probe: loadFixture 22ms, dev-server start 550ms, first fetch 101ms, build 1.1s; heaviest file solo 4.5s vs 8.2s in-suite). Conclusion: not our code, not `.test-tmp` junk (17 dirs / 68K) — **Astro 6 operations parallelize worse**, so concurrent workers contend hard: wall time is pinned ~33-40s at any worker count while cumulative CPU scales with workers. A small part is legitimate growth (+2 CSP test files ≈ +3 Astro ops).
+
+_Root-cause follow-up 2026-07-05 (Zack asked how the "Environment-API dev server" attribution was reached — it was inference, not measurement; these discriminating runs replace it):_
+
+| Run (`/usr/bin/time -l`, CPU = user+sys incl. children) | Wall  | CPU    | Effective cores |
+| ------------------------------------------------------- | ----- | ------ | --------------- |
+| Full suite, maxWorkers=3                                | 33.5s | 138.5s | 4.1             |
+| Dev-server tests only (`-t "dev server"`, 110 tests)    | 16.5s | 62.7s  | 3.8             |
+| Build tests only (`-t "/ build"`, 67 tests)             | 15.2s | 60.7s  | 4.0             |
+| Full suite, serialized (maxWorkers=1)                   | 63.0s | 108.7s | 1.7             |
+| Full suite, maxWorkers=3, GOMAXPROCS=3                  | 35.4s | 140.8s | 4.0             |
+
+- **Environment-API dev server attribution: refuted.** Build tests (no dev server) contend identically to dev-server tests. The shared resource is in the astro+vite core pipeline both paths use.
+- **Not machine CPU/memory saturation:** 4.1 of 8 cores average, max RSS <800MB/process — which is why more workers never helped.
+- **Mechanism (best supported):** ops are internally parallel and _bursty_ — a lone chain averages 1.7 cores (single-threaded stretches, incl. ~11s cumulative per-file world re-import under vitest isolate mode, punctuated by multi-threaded bursts). Concurrent ops collide during bursts while cores idle in the stretches: per-op cumulative inflates 49.5s → 81.2s → 148.9s at 1 → 3 → 5 workers, wall stays pinned.
+- **Burst source not pinned:** esbuild ruled out (GOMAXPROCS cap a no-op). Untested suspects: Rollup 4 native parser threads, Vite 7 worker threads, libuv threadpool (`UV_THREADPOOL_SIZE`), kernel/fs (sys = 15-20% of CPU).
+- **Open caveat:** no Astro 5 _serialized_ baseline exists, so "unit cost didn't grow" is only established in absolute terms; some genuine per-op 5→6 growth is likely mixed in. Splitting it needs a pre-bump-commit maxWorkers=1 run.
 
 Disposition: keep `maxWorkers: 3` (least-bad; documented in vitest.config.ts). The cost is per-`dev()`/`build()` **pipeline instantiation** (full astro+vite machinery per fixture, in-process in the workers — there are no separate server processes), so the only lever that attacks contention is **fewer instantiations per run**: sharing fixtures/servers across test files, or consolidating dev-server files — both against the matrix/isolation philosophy, so not now. The BACKLOG harness ideas don't help here: in-process request dispatch removes the TCP/undici layer (socket-error class, ~100ms/first-fetch), and virtual-fs removes fixture disk copies (measured negligible: 68K) — neither touches instantiation cost. Re-measure at the Astro 7 leg (Rolldown + queued rendering may shift this again).

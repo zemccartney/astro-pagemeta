@@ -65,3 +65,20 @@ Test everything across static/SSR and dev/build not because failures are expecte
 ## Addendum 2026-07-03: harness will be vendored
 
 Decision during M1 kickoff: rather than tracking `@inox-tools/astro-tests` releases (1.0 peers on `astro ^6.0.8` only, gating our Astro upgrades), we vendor the used surface — `astroFixture.ts` (~500 lines, public Astro APIs only) + `test-adapter.ts` — into our own tests/ tree with attribution. The "check the astro-tests 1.0 changelog" items above become "diff upstream when curious"; open questions 1–3 get answered against our own code, where the undici agent and server lifecycle are finally inspectable.
+
+## Addendum 2026-07-05: suite slowdown under Astro 6 — measured, contention-bound
+
+Symptom (Zack): full-suite wall time roughly doubled after the Astro 6 bump (~15s → consistently 30-40s).
+
+Measurements (M3, 8 cores, 16 GB, maxWorkers as noted):
+
+| Config                                   | Wall  | Cumulative test time |
+| ---------------------------------------- | ----- | -------------------- |
+| Astro 5 baseline (2026-07-03, 269 tests) | 15.4s | 29.8s                |
+| Astro 6, maxWorkers=2 (278 tests)        | 40.3s | 65.6s                |
+| Astro 6, maxWorkers=3                    | ~37s  | 92.3s                |
+| Astro 6, maxWorkers=5                    | 36.8s | 148.9s               |
+
+Solo timings under Astro 6 are fast (instrumented probe: loadFixture 22ms, dev-server start 550ms, first fetch 101ms, build 1.1s; heaviest file solo 4.5s vs 8.2s in-suite). Conclusion: not our code, not `.test-tmp` junk (17 dirs / 68K), not unit Astro cost — **Astro 6 operations parallelize worse** (heavier internal concurrency per op, likely the Environment-API dev server + Vite 7), so concurrent workers contend hard: wall time is pinned ~37-40s at any worker count while cumulative CPU scales with workers. A small part is legitimate growth (+2 CSP test files ≈ +3 Astro ops).
+
+Disposition: keep `maxWorkers: 3` (least-bad; documented in vitest.config.ts). Real reductions would come from fewer Astro ops per run (consolidating dev-server files — against the matrix philosophy, not now) or the virtual-fs/in-process harness idea in BACKLOG. Re-measure at the Astro 7 leg (Rolldown + queued rendering may shift this again).

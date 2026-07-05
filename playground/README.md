@@ -56,3 +56,4 @@ Verifies in a real browser that pagemeta's rewriting doesn't weaken Astro's CSP 
 - [ ] Add a page that loads an asset from a should-be-blocked origin (e.g. an off-origin `<img>` or inline `<script>` not hashed by Astro) alongside `metadata()` usage
 - [ ] Build + preview, open the page: the page's own styles/scripts work (hashes valid), the console shows a CSP violation for the blocked asset, and pagemeta's tags are present
 - [ ] Repeat with `compressHTML: false` for the pretty-printed path
+- [ ] `curl -v http://localhost:4321/ 2>&1 | grep -iE "content-length|transfer-encoding"` against the preview server: expect `Transfer-Encoding: chunked` (or a `Content-Length` matching the actual byte count — compare with `curl -s ... | wc -c`), and a complete, untruncated document

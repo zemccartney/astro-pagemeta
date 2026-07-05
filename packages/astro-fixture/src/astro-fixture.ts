@@ -56,8 +56,12 @@ export interface Fixture {
     ) => Promise<Response>;
     /**
      * Load an app built using the test adapter.
+     *
+     * Vendored deviation: accepts the adapter's streaming flag (upstream
+     * always used the default). Pass false to force non-streamed renders,
+     * where Astro sets Content-Length on the response.
      */
-    loadTestAdapterApp: () => Promise<TestApp>;
+    loadTestAdapterApp: (streaming?: boolean) => Promise<TestApp>;
     /**
      * Read a file (as a string) from the build output. Do NOT use this for
      * binary files (e.g. images).
@@ -248,7 +252,7 @@ export async function loadFixture({
                 throw error;
             }
         },
-        loadTestAdapterApp: async () => {
+        loadTestAdapterApp: async (streaming) => {
             const entryUrl = new URL(
                 `server/entry.mjs?id=${fixtureId}`,
                 config.outDir
@@ -263,7 +267,7 @@ export async function loadFixture({
                 manifest: unknown;
             };
             debug("Instantiating test adapter app");
-            const app = mod.createApp();
+            const app = mod.createApp(streaming);
             debug("Manifest:", mod.manifest);
             (app as unknown as { manifest?: unknown }).manifest = mod.manifest;
             return {

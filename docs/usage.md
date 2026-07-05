@@ -120,7 +120,7 @@ The `custom` property of [`MetadataOptions`](./API.md#metadataoptions-1) is a ge
 
 The mental model: `rehype-meta` options describe _inputs_ to a tag-generation process. `custom` describes the _outputs_ you want, overriding whatever that process produced.
 
-In the integration's pipeline, `custom` is processed _after_ `rehype-meta` has done its work, which means it can override anything in the final `<head>` output — not just add tags that `rehype-meta` doesn't know about, but also replace tags it already set. This matters because rehype-meta has a dependent-keys design: many output tags are derived from combinations of input properties. `og: true` gates all OG tags. The `<title>` element is computed from `title + separator + name`. The canonical `<link>` is derived from `origin + pathname`. If you want fine-grained control — e.g., override just `og:image:alt` without touching `og:image`, or set an exact `<title>` without it being concatenated with a site name — `rehype-meta` doesn't offer that. `custom` does.
+In the integration's pipeline, `custom` is processed _after_ `rehype-meta` has done its work, which means it can override anything in the final `<head>` output — not just add tags that `rehype-meta` doesn't know about, but also replace tags it already set. This matters because `rehype-meta` has a dependent-keys design: many output tags are derived from combinations of input properties. `og: true` gates all OG tags. The `<title>` element is computed from `title + separator + name`. The canonical `<link>` is derived from `origin + pathname`. If you want fine-grained control — e.g., override just `og:image:alt` without touching `og:image`, or set an exact `<title>` without it being concatenated with a site name — `rehype-meta` doesn't offer that. `custom` does.
 
 For example:
 
@@ -175,11 +175,9 @@ Some keys receive special handling to allow overriding any tag the integration m
 
 ## Behavior Notes
 
-### Content-Security-Policy is off-limits (by design)
+**Content-Security-Policy keys are rejected**: Browsers only honor a meta-delivered CSP via the `http-equiv` attribute, which `custom` does not emit — a key like `content-security-policy` would produce an inert `<meta name="...">` that looks like a security control but does nothing. Rather than allow that silent no-op, pagemeta throws a hard error (config time for static defaults, request time otherwise) pointing to Astro's [built-in CSP support](https://docs.astro.build/en/guides/csp/), which also generates the script/style hashes a real policy needs.
 
-Attempting to set a CSP through `custom` (any key containing `content-security-policy`, case-insensitive) throws a hard error — at config time for static defaults, at request time otherwise. CSP delivered via meta tag has its own lifecycle: Astro's [built-in CSP support](https://docs.astro.build/en/guides/csp/) generates hashes for the page's inline scripts and styles, which a hand-authored policy would silently miss, breaking the page. Use `security: { csp: true }` in your Astro config instead.
-
-pagemeta is verified compatible with Astro's CSP (see `tests/integration/csp/`): the injected tags don't disturb the policy — static pages keep a valid `<meta http-equiv="content-security-policy">` whose hashes still match the final HTML (attribute quotes may be entity-encoded by re-serialization, which browsers decode before CSP parsing), on-demand pages keep the `content-security-policy` response header, and the injected JSON-LD needs no hash because non-executable data blocks are exempt from `script-src`.
+**Compatibility with Astro's CSP**: Verified by `tests/integration/csp/` — pagemeta's injected tags don't disturb the policy. Static pages keep a valid `<meta http-equiv="content-security-policy">` whose hashes still match the final HTML (attribute quotes may be entity-encoded by re-serialization, which browsers decode before CSP parsing), on-demand pages keep the `content-security-policy` response header, and injected JSON-LD needs no hash because non-executable data blocks are exempt from `script-src`.
 
 **When `metadata` is never called**: If defaults are configured, they still apply. If no defaults are set and `metadata` is never called, the middleware skips processing entirely — the response passes through unmodified.
 

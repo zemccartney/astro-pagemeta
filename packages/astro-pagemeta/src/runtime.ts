@@ -82,11 +82,12 @@ export const middleware = (): MiddlewareHandler => {
         });
         const processed = await htmlProcessor.process(html);
 
-        // Astro sets Content-Length on non-streamed on-demand responses
-        // (runtime/server/render/page.js). Our injected tags change the body
-        // size, so a carried-over value would lie — strict clients truncate
-        // at the declared length. Drop it and let the server/adapter
-        // recompute from the actual body.
+        // Defensive: if any upstream (Astro render path, other middleware)
+        // set a Content-Length, it describes the ORIGINAL body — ours is
+        // longer, and a stale value makes strict clients truncate. No
+        // Astro 6.4.8 path has been observed to actually set it here
+        // (probed streaming and non-streaming test-adapter renders), so
+        // this guards a class of bug, not a reproduced one.
         const headers = new Headers(response.headers);
         headers.delete("content-length");
 

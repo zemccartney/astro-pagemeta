@@ -47,3 +47,12 @@ Verifies that adding or removing page files during dev correctly updates the rou
 - [ ] Load `/test-invalidation` — meta tags should be injected (title "Invalidation Test") without restarting the server
 - [ ] Delete the file
 - [ ] Verify `/test-invalidation` returns 404
+
+### CSP Interplay (browser ground truth)
+
+Verifies in a real browser that pagemeta's rewriting doesn't weaken Astro's CSP — including that entity-encoded quotes in the CSP meta (`&#x27;` from re-serialization) still enforce correctly.
+
+- [ ] Enable `security: { csp: true }` in `astro.config.ts`
+- [ ] Add a page that loads an asset from a should-be-blocked origin (e.g. an off-origin `<img>` or inline `<script>` not hashed by Astro) alongside `metadata()` usage
+- [ ] Build + preview, open the page: the page's own styles/scripts work (hashes valid), the console shows a CSP violation for the blocked asset, and pagemeta's tags are present
+- [ ] Repeat with `compressHTML: false` for the pretty-printed path

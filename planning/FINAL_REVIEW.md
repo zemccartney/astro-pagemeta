@@ -1,0 +1,3 @@
+- Test content-length dropping (ensure recreated by deployed astro server)?
+    - or on cloudflare?
+- Review all docs, make sure up to date, fix any robot funk

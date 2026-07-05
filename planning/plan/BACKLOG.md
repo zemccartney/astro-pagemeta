@@ -5,6 +5,8 @@
 
 ## Features / product
 
+- `http-equiv` pragma support via the existing magic-key DSL (`custom: { "meta:httpEquiv:refresh": ... }` — precedent: `meta:charSet`), allowlisted to real pragmas, hard-error outside the list, reject `content-type` (conflicts with `meta:charSet`). Decided 2026-07-05: **not until a live use case** (only plausible one: programmatic `refresh` for generated redirect stubs); templates already pass pragmas through untouched
+
 - Dev toolbar app integration for inspecting metadata (or verify compatibility with an existing one)
 - First-class `robots` option (typed) — recipe via `custom` ships in M4 first; promote if demand
 - i18n: `hreflang` alternates + `og:locale` (design against Astro's i18n APIs)

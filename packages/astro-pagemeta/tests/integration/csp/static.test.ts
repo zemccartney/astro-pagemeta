@@ -53,8 +53,6 @@ describe("csp / static / build", () => {
     test("pagemeta metadata and JSON-LD injected alongside CSP", async () => {
         const html = await fixture.readFile("/index.html");
 
-        console.log(html);
-
         const meta = extractMeta(html ?? "");
 
         expect(meta).toContainEqual({

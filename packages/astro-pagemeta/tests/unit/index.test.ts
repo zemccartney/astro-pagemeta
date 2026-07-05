@@ -3,18 +3,6 @@ import { describe, expect, test } from "vitest";
 import pagemeta from "../../src/index.ts";
 
 describe("integration option validation", () => {
-    test("rejects CSP custom keys in static defaults at config time", () => {
-        expect(() =>
-            pagemeta({
-                defaults: {
-                    custom: {
-                        "Content-Security-Policy": "default-src 'self'"
-                    }
-                }
-            })
-        ).toThrow(/Content-Security-Policy cannot be set via pagemeta/);
-    });
-
     test("rejects non-boolean addRequiredGlobalMeta", () => {
         expect(() =>
             // @ts-expect-error -- simulating untyped JS caller

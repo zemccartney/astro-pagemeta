@@ -175,10 +175,6 @@ Some keys receive special handling to allow overriding any tag the integration m
 
 ## Behavior Notes
 
-**Content-Security-Policy keys are rejected**: Browsers only honor a meta-delivered CSP via the `http-equiv` attribute, which `custom` does not emit — a key like `content-security-policy` would produce an inert `<meta name="...">` that looks like a security control but does nothing. Rather than allow that silent no-op, pagemeta throws a hard error (config time for static defaults, request time otherwise) pointing to Astro's [built-in CSP support](https://docs.astro.build/en/guides/csp/), which also generates the script/style hashes a real policy needs.
-
-**Compatibility with Astro's CSP**: Verified by `tests/integration/csp/` — pagemeta's injected tags don't disturb the policy. Static pages keep a valid `<meta http-equiv="content-security-policy">` whose hashes still match the final HTML (attribute quotes may be entity-encoded by re-serialization, which browsers decode before CSP parsing), on-demand pages keep the `content-security-policy` response header, and injected JSON-LD needs no hash because non-executable data blocks are exempt from `script-src`.
-
 **When `metadata` is never called**: If defaults are configured, they still apply. If no defaults are set and `metadata` is never called, the middleware skips processing entirely — the response passes through unmodified.
 
 **Opting out of processing**: Pass `false` to `metadata` to skip all defaults and tag injection for the current request:
@@ -190,3 +186,7 @@ metadata(Astro, false);
 **`compressHTML` integration**: The integration respects Astro's [`compressHTML`](https://docs.astro.build/en/reference/configuration-reference/#compresshtml) config option. When enabled, injected whitespace is stripped and JSON-LD output is minified. When disabled (the default), JSON-LD is pretty-printed with 2-space indentation.
 
 **`Head` component passthrough**: When no metadata is resolved (no defaults, no `metadata` call), the `Head` component renders its slot children as-is without running them through the rehype pipeline — zero processing overhead.
+
+**`http-equiv` is not supported:** `custom` keys emit `name` (or `property`, for Open Graph prefixes) attributes only — never `http-equiv`, so pragma directives (`content-security-policy`, `refresh`, `default-style`, `content-type`) cannot be expressed through the integration. This is deliberate: pragmas are a closed, page-static set that already has better homes — write them directly in your template's `<head>` (the integration passes them through untouched), or use the platform feature that owns them: charset via the `meta:charSet` custom key, CSP via Astro's `security.csp`. A `custom` key named after a pragma (e.g. `refresh`) produces an inert `<meta name="refresh">`, not a working directive.
+
+**Compatibility with Astro's CSP**: The integration never conflicts with any CSP policy generated with Astro's [built-in CSP support](https://docs.astro.build/en/guides/csp/), specifically the `<meta http-equiv="content-security-policy">` produced for static pages. Because the integration doesn't support `http-equiv` metadata, overriding Astro's tag is not possible. Further, the integration should never mangle or otherwise change the CSP that Astro produces. Injected JSON-LD needs no hash because non-executable data blocks are exempt from `script-src`.

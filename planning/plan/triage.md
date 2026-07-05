@@ -1,4 +1,0 @@
-- test case for astro 6 / feature add: ensure compatibility with astro's csp, which injects to meta (server API and static config)
-    - verify our meta work doesn't mangle
-    - hard disallow setting csp from this tool i.e. hard error, direct to use astro's csp feature
-- formulate a skill for checking for updates needed to our vendoring, encoding as many scripts vs. relying on improvising / remembering (alogorith or heuristic) as much as possible; I know a hard limit to this, judging what parts of the upstreams to vendor in will be heuristical in nature, to some extent, but I figure how to fetch what code changes to review doesn't need to be? at any rate, documenting the capability by which we do this / a future agent does this would be really useful

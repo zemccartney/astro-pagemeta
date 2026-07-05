@@ -60,6 +60,7 @@
 
 ## AI harness (meta-work on how you build here)
 
+- **Vendoring-update skill** (Zack, 2026-07-05): encode the astro-fixture upstream-check as scripts wherever possible — fetching/diffing the two upstreams is mechanical (commands already in `packages/astro-fixture/README.md`); judging what to absorb stays heuristic. Deliverable: a documented, agent-runnable capability, not memory
 - Guided-tour skill for the codebase; stronger process guardrails (always-run checks, QA pass)
 - Test the harness by building a second image generator (satori?)
 - Analyze test transcripts to document the dev-server/socket issue properly

@@ -692,10 +692,24 @@
                     prerequisites, <code>maintenance/support.md</code>. 269/269
                     green; playground SSR builds
                 </li>
+                <li class="ticked">
+                    <b>CSP compatibility</b> (Zack's triage; sequenced before 7
+                    as a compiler-swap sentry): hard error on CSP-via-<code
+                        >custom</code
+                    >
+                    → points to Astro's <code>security.csp</code>; tests
+                    recompute sha256 hashes from final HTML and assert they
+                    match the policy (static → meta, on-demand → header, dev →
+                    none, JSON-LD exempt). <b>Bonus bug fixed:</b> stale
+                    <code>Content-Length</code>
+                    carried onto rewritten SSR bodies — strict clients would
+                    truncate. 284/284
+                </li>
                 <li>
                     Catalog <code>astro</code> → <code>^7</code> (unblocked by
                     vendored harness) — Rust-compiler doctype/partial
-                    re-verification lives here; widen peer to
+                    re-verification lives here; TypeScript 6 rides along (its
+                    blockers left astro's tree in 7); widen peer to
                     <code>^6 || ^7</code> if green
                 </li>
             </ul>

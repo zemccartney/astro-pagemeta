@@ -95,6 +95,25 @@ _Root-cause follow-up 2026-07-05 (Zack asked how the "Environment-API dev server
 - **Not machine CPU/memory saturation:** 4.1 of 8 cores average, max RSS <800MB/process — which is why more workers never helped.
 - **Mechanism (best supported):** ops are internally parallel and _bursty_ — a lone chain averages 1.7 cores (single-threaded stretches, incl. ~11s cumulative per-file world re-import under vitest isolate mode, punctuated by multi-threaded bursts). Concurrent ops collide during bursts while cores idle in the stretches: per-op cumulative inflates 49.5s → 81.2s → 148.9s at 1 → 3 → 5 workers, wall stays pinned.
 - **Burst source not pinned:** esbuild ruled out (GOMAXPROCS cap a no-op). Untested suspects: Rollup 4 native parser threads, Vite 7 worker threads, libuv threadpool (`UV_THREADPOOL_SIZE`), kernel/fs (sys = 15-20% of CPU).
-- **Open caveat:** no Astro 5 _serialized_ baseline exists, so "unit cost didn't grow" is only established in absolute terms; some genuine per-op 5→6 growth is likely mixed in. Splitting it needs a pre-bump-commit maxWorkers=1 run.
+- **Open caveat:** no Astro 5 _serialized_ baseline exists, so "unit cost didn't grow" is only established in absolute terms; some genuine per-op 5→6 growth is likely mixed in. Splitting it needs a pre-bump-commit maxWorkers=1 run. _(Resolved by the 2026-07-06 bisection below: unit cost roughly doubled.)_
+
+_Bisection 2026-07-06 (Zack asked which M1 changes contributed): each M1 leg checked out into a scratch worktree, `pnpm install` + `pnpm build`, suite run twice under that commit's own config (maxWorkers=3, forks, isolate:true; 269 tests on all legs). Second/steadier run shown:_
+
+| Leg (commit)                               | Wall  | Tests cumulative |
+| ------------------------------------------ | ----- | ---------------- |
+| Baseline: Astro 5 + inox harness (723889b) | 14.4s | 26.7s            |
+| + harness vendored (162725a)               | 16.4s | 33.2s            |
+| + aik removed (38e8862)                    | 18.0s | 36.7s            |
+| + deps updated, vitest 4.0→4.1 (d35ae9e)   | 17.4s | 36.1s            |
+| + Astro 6 (fb29acd)                        | 26.2s | 59.2s            |
+
+Serialized (maxWorkers=1): Astro 5 baseline **32.5s wall / 20.1s tests-cum** vs Astro 6 **52.5s / 40.7s**.
+
+- **Astro 6 is the dominant factor** (+9s wall, +25s cumulative), and — **correcting the 07-05 "not unit Astro cost" conclusion** — the serialized comparison shows **per-op cost roughly doubled** from Astro 5 to 6. The contention inflation (mw3-vs-serial cumulative) only worsened modestly: 1.33× → 1.55×. Yesterday's "solo ops are fast" was absolute, not comparative — 550ms/1.1s is fast, but the A5 equivalents were ~half that.
+- **Harness vendoring cost ~2s** — mostly because the vendored harness is TS compiled in-worker by vitest (transform bucket 0.3s → 3.4s cumulative), where inox shipped prebuilt JS. Fixable by building astro-fixture with tsdown if ever worth it.
+- **aik removal and dep updates: noise-level** (±1.5s run-to-run variance).
+- Incidental find: package exports resolve `./runtime` from `dist/`, and only the `pretest` hook (`tsdown`) keeps it fresh — direct `vitest` invocations (IDE/watch) can run against a stale build. Flagged for the M2 dist-mismatch item.
 
 Disposition: keep `maxWorkers: 3` (least-bad; documented in vitest.config.ts). The cost is per-`dev()`/`build()` **pipeline instantiation** (full astro+vite machinery per fixture, in-process in the workers — there are no separate server processes), so the only lever that attacks contention is **fewer instantiations per run**: sharing fixtures/servers across test files, or consolidating dev-server files — both against the matrix/isolation philosophy, so not now. The BACKLOG harness ideas don't help here: in-process request dispatch removes the TCP/undici layer (socket-error class, ~100ms/first-fetch), and virtual-fs removes fixture disk copies (measured negligible: 68K) — neither touches instantiation cost. Re-measure at the Astro 7 leg (Rolldown + queued rendering may shift this again).
+
+_Config update 2026-07-06 (Zack): `isolate: false` (33.5s → ~25s — kills the per-file world re-import) and `pool: "threads"` (→ ~21s — cheaper workers than forked processes). Kept after green runs; watch for cross-file module-state leaks (harness mutates `process.env.NODE_ENV` per op; `nextDefaultPort` is module-level) and native-addon quirks under worker threads._

@@ -4,23 +4,33 @@ export default defineConfig({
     test: {
         include: ["tests/**/*.test.ts"],
         /**
-         * Tests have been prone to intermittent server failures, manifesting as
-         * Error: connect ECONNREFUSED ::1:29887 and SocketError: other side closed type errors
+         * Perf/stability settings, measured 2026-07-05/06 under Astro 6.4.8
+         * (M3, 8 cores, 16 GB — full data + bisection in
+         * planning/artifacts/testing-isolation.md addenda):
          *
-         * This setting seems to help? And anecdotally makes the tests run a tic faster.
-         * Maybe starting fewer servers at once means less resource competition means
-         * all tests start up and run faster? Not sure
+         * - maxWorkers 3: historically adopted against intermittent
+         *   dev-server socket errors (ECONNREFUSED / "other side closed")
+         *   under high parallelism; measurement confirmed it's also the
+         *   perf sweet spot — wall time is contention-pinned (~same at 2,
+         *   3, or 5 workers) while cumulative CPU scales with workers, so
+         *   raising it only burns CPU. Root cause of the Astro 5→6
+         *   slowdown is per-op cost (~2x) plus modest contention growth.
          *
-         * Measured 2026-07-05 under Astro 6.4.8 (M3, 8 cores, 16 GB — see
-         * planning/artifacts/testing-isolation.md addendum): wall time is
-         * contention-pinned at ~37-40s regardless of workers (2 → 40s wall /
-         * 66s cumulative; 3 → 37s / 92s; 5 → 37s / 149s), while solo runs
-         * are fast (dev server 550ms, build 1.1s). Astro 6 ops parallelize
-         * worse than Astro 5's (which ran the same suite shape at ~15s wall /
-         * 30s cumulative). 3 remains the least-bad setting; raising it only
-         * burns CPU.
+         * - isolate false (33.5s → ~25s): workers keep one module cache
+         *   for their lifetime instead of re-importing astro/vite per test
+         *   file. Cross-file leaks to watch: the harness flips
+         *   process.env.NODE_ENV per op and its port counter is
+         *   module-level — both benign while files run sequentially
+         *   per worker.
+         *
+         * - pool threads (→ ~21s): worker_threads instead of forked
+         *   processes — separate V8 isolates (own globals/modules) in one
+         *   process, so spawn/IPC overhead disappears. Revisit if a native
+         *   addon ever misbehaves under multiple isolates.
          */
+        isolate: false,
         maxWorkers: 3,
+        pool: "threads",
         reporters: "tree"
     }
 });

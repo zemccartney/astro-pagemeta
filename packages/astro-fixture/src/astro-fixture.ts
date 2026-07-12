@@ -288,19 +288,41 @@ export async function loadFixture({
         resolveUrl,
         startDevServer: async (extraInlineConfig) => {
             process.env["NODE_ENV"] = "development";
-            debug(`Starting dev server for fixture ${inlineConfig.root}`);
-            const devServer = await dev(
-                mergeConfig(inlineConfig, {
-                    ...extraInlineConfig,
-                    force: true
-                })
-            );
-            serverState.host = parseAddressToHost(devServer.address.address);
-            serverState.port = devServer.address.port;
-            debug(
-                `Dev server for ${inlineConfig.root} running at ${resolveUrl("/")}`
-            );
-            return devServer;
+            /*
+             * Vendored deviation (required since Astro 7): astro's
+             * vite-plugin-astro-server bails out of configureServer when
+             * process.env.VITEST is set (a guard for getViteConfig-style
+             * component tests running inside vitest's own Vite server),
+             * which leaves a booted dev server with no request handler —
+             * every fetch 404s ("Cannot GET /"). We boot real dev servers
+             * from within vitest workers, so hide the variable during
+             * startup. Safe under both worker pools: process.env is
+             * per-worker (copied for threads, per-process for forks) and
+             * test files run sequentially within a worker.
+             */
+            const vitestEnv = process.env["VITEST"];
+            delete process.env["VITEST"];
+            try {
+                debug(`Starting dev server for fixture ${inlineConfig.root}`);
+                const devServer = await dev(
+                    mergeConfig(inlineConfig, {
+                        ...extraInlineConfig,
+                        force: true
+                    })
+                );
+                serverState.host = parseAddressToHost(
+                    devServer.address.address
+                );
+                serverState.port = devServer.address.port;
+                debug(
+                    `Dev server for ${inlineConfig.root} running at ${resolveUrl("/")}`
+                );
+                return devServer;
+            } finally {
+                if (vitestEnv !== undefined) {
+                    process.env["VITEST"] = vitestEnv;
+                }
+            }
         }
     };
 }

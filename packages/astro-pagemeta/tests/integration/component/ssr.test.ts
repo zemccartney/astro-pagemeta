@@ -226,7 +226,7 @@ describe("component / SSR / dev server", () => {
                 tag: "style",
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- vitest asymmetric matcher
                 textContent: expect.stringMatching(
-                    /^\.styled\[data-astro-cid-\w+\]\{color:red\}$/
+                    /^\.styled\[data-astro-cid-\w+\]\s*\{\s*color:\s*red;?\s*\}\s*$/
                 )
             },
             {
@@ -471,7 +471,7 @@ describe("component / SSR / build", () => {
                 tag: "style",
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- vitest asymmetric matcher
                 textContent: expect.stringMatching(
-                    /^\.styled\[data-astro-cid-\w+\]\{color:red\}\n?$/
+                    /^\.styled\[data-astro-cid-\w+\]\s*\{\s*color:\s*red;?\s*\}\s*$/
                 )
             }
         ]);

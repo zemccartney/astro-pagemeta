@@ -42,10 +42,17 @@ if (metadata) {
     const processor = Processor.getHtmlProcessor({ fragment: true, metadata });
     processedHeadContents = await processor.process(templateMeta);
 }
+
+// Template note: the contents are injected via a child <Fragment set:html>
+// rather than set:html on <head> itself — Astro 7's Rust compiler
+// special-cases <head> and silently drops set:html applied to the element
+// (empty head at runtime). The Fragment form works on both compilers.
 ---
 
-<head
-    set:html={processedHeadContents ?
-        String(processedHeadContents)
-    :   templateMeta}
-/>
+<head>
+    <Fragment
+        set:html={processedHeadContents ?
+            String(processedHeadContents)
+        :   templateMeta}
+    />
+</head>

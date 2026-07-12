@@ -12,13 +12,13 @@
 3. **Older majors are dropped** when they leave Astro's window — in a pagemeta **major** release, noted in the changelog. Rationale example: Astro 5 was dropped because it's unmaintained upstream and floors on EOL Node 18/20; supporting it would endorse unpatched foundations.
 4. **Re-evaluate at every Astro major and Node EOL date.** No standing promises beyond the current peer range.
 
-## Current state (2026-07-04)
+## Current state (2026-07-12)
 
-| Surface                | Value                                          |
-| ---------------------- | ---------------------------------------------- |
-| Astro peer range       | `^6.0.0` (7 leg pending — see ROADMAP M1)      |
-| Published Node engines | `>=22.12.0` (mirrors astro@6)                  |
-| Dev toolchain Node     | 24 (`engines` in workspace package.json files) |
+| Surface                | Value                                                        |
+| ---------------------- | ------------------------------------------------------------ |
+| Astro peer range       | `^6.0.0 \|\| ^7.0.0` (suite verified green on 6.4.8 + 7.0.6) |
+| Published Node engines | `>=22.12.0` (identical floor for astro@6 and astro@7)        |
+| Dev toolchain Node     | 24 (`engines` in workspace package.json files)               |
 
 ## Upgrade playbook (per Astro major)
 

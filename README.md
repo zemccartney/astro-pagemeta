@@ -29,8 +29,8 @@ The HTML streaming caveat is the most significant tradeoff of this integration. 
 
 This integration supports [the Astro versions Astro supports, on the Node versions Astro supports](https://docs.astro.build/en/upgrade-astro/#nodejs-support-and-upgrade-policies). Concretely, today:
 
-- **Astro** `^6.0.0`
-- **Node** `>=22.12.0` (Astro 6's own floor)
+- **Astro** `^6.0.0 || ^7.0.0`
+- **Node** `>=22.12.0` (the shared floor of Astro 6 and 7)
 
 ## Installation
 

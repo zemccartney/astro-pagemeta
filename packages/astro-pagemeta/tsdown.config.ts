@@ -1,7 +1,14 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-    attw: { profile: "esm-only" },
+    attw: {
+        // ./Head maps to src/Head.astro — a compiler-provided module attw
+        // cannot resolve (its types come from Astro's tooling, not a .d.ts).
+        // Excluded so the known-inert "No resolution" warning can't fail CI
+        // (failOnWarn: "ci-only"); all JS entrypoints remain checked.
+        excludeEntrypoints: ["Head"],
+        profile: "esm-only"
+    },
     deps: {
         neverBundle: ["virtual:pagemeta/config", /^@grepco\/astro-pagemeta/],
         skipNodeModulesBundle: true

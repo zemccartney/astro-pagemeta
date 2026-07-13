@@ -57,14 +57,14 @@ _Decisions from deps-security.md folded in first (2026-07-03, scratch/m1.md) as 
 
 ## M2 — Publish pipeline + CI foundation _(2–3 sessions; goal: a real package on npm)_
 
-- [ ] GitHub Actions CI: lint, fmt, knip, typecheck, test
-- [ ] **Astro × Node test matrix** (see [deps-security.md](./deps-security.md) §CI for the local-testing story):
-    - Matrix legs: newest Astro major × newest Node LTS (the default), plus one leg per additional supported Astro major, plus supported-Node floor × newest Astro
-    - Mechanism: small script that rewrites the `astro` catalog entry in `pnpm-workspace.yaml` + `pnpm install --no-frozen-lockfile`; same script works locally (`node scripts/use-astro.mjs 6 && pnpm test`, then `git restore pnpm-workspace.yaml pnpm-lock.yaml`)
+- [ ] GitHub Actions CI: lint, fmt, knip, typecheck, test — _workflow authored 2026-07-13 (`.github/workflows/ci.yml`: audit + static checks job, actions SHA-pinned); **first green run on GitHub pending a push of `dev`**_
+- [ ] **Astro × Node test matrix** — _mechanism landed 2026-07-13; leg proof pending the same first CI run_:
+    - Matrix legs (in the workflow): astro 7 × node 24 (default), astro 6 × node 24, astro 7 × node 22.12 (published floor)
+    - Mechanism: `scripts/use-astro.ts` (`pnpm use-astro 6`) — rewrites the `astro` catalog entry **and** the playground's coupled `@astrojs/node` range, then `pnpm install --no-frozen-lockfile`; restore with `git restore pnpm-workspace.yaml playground/package.json pnpm-lock.yaml && pnpm install`. Verified locally round-trip 7→6→7 with a smoke test on 6.
     - Node versions: `actions/setup-node` matrix in CI; `mise`/`nvm` locally
 - [ ] Supply-chain baseline in CI (decisions in [deps-security.md](./deps-security.md)): pin all GitHub Actions to commit SHAs; add audit step; Socket (or chosen alternative) on PRs
 - [ ] Changesets: install, wire release workflow, write first changeset
-- [ ] npm publish with provenance; keep publint + attw enforced in the build (attw: add explicit ignore/annotation for the `/Head` .astro export warning)
+- [ ] npm publish with provenance; keep publint + attw enforced in the build _(attw `/Head` annotation done 2026-07-13: `excludeEntrypoints: ["Head"]` in tsdown.config.ts with rationale comment — the .astro entrypoint's types come from Astro tooling, not a .d.ts, and the inert warning would have failed CI under `failOnWarn: "ci-only"`)_
 - [ ] Rewrite `packages/astro-fixture/README.md` for public repo consumption (currently references `planning/` docs and pre-publish context that won't survive the planning-folder deletion)
 - [ ] Publish `0.1.0` (or `0.1.0-beta` under `next` tag) — verify `npm install` from a scratch project + registry page rendering; confirm `publishConfig.engines` actually lands in the published manifest (`npm view`)
 

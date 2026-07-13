@@ -548,18 +548,18 @@
         <div class="eyebrow">@grepco/astro-pagemeta · working plan</div>
         <h1>Road to v1</h1>
         <p class="subtitle">
-            Snapshot of <code>planning/plan/</code> as of 2026-07-04 (M1 in
-            progress). The markdown files are the record; this page is for
+            Snapshot of <code>planning/plan/</code> as of 2026-07-12 (M1
+            complete). The markdown files are the record; this page is for
             review. Work top to bottom, one milestone at a time.
         </p>
         <div class="statusbar">
             <div class="stat">
                 <span class="k">Current</span
-                ><span class="v">M1 · Ecosystem catch-up</span>
+                ><span class="v">M2 · Publish pipeline + CI</span>
             </div>
             <div class="stat">
                 <span class="k">Tests</span
-                ><span class="v ok">269 / 269 · 15s</span>
+                ><span class="v ok">278 / 278 · on astro 6 + 7 · ~14s</span>
             </div>
             <div class="stat">
                 <span class="k">Checks</span
@@ -567,7 +567,7 @@
             </div>
             <div class="stat">
                 <span class="k">Astro peer</span
-                ><span class="v ok">^6.0.0 · on 6.4.8 · 7 leg pending</span>
+                ><span class="v ok">^6.0.0 || ^7.0.0 · TS 6 · Node ≥22.12</span>
             </div>
             <div class="stat">
                 <span class="k">Decisions</span
@@ -582,8 +582,8 @@
     >
         <div class="grp">Milestones</div>
         <a href="#m0"><span class="dot done"></span>M0 Re-entry</a>
-        <a href="#m1"><span class="dot next"></span>M1 Ecosystem catch-up</a>
-        <a href="#m2"><span class="dot later"></span>M2 Publish pipeline</a>
+        <a href="#m1"><span class="dot done"></span>M1 Ecosystem catch-up</a>
+        <a href="#m2"><span class="dot next"></span>M2 Publish pipeline</a>
         <a href="#m3"><span class="dot later"></span>M3 Dogfood</a>
         <a href="#m4"><span class="dot later"></span>M4 Docs &amp; v1</a>
         <a href="#m5"><span class="dot later"></span>M5 OG images</a>
@@ -630,13 +630,13 @@
         </section>
 
         <section
-            class="mile next"
+            class="mile done"
             id="m1"
         >
             <div class="mile-head">
                 <span class="mcode">M1</span>
                 <h2>Ecosystem catch-up</h2>
-                <span class="badge next">In progress · started 2026-07-03</span>
+                <span class="badge done">Done 2026-07-12</span>
             </div>
             <p class="goal">
                 Astro shipped v6 (Node 22+, Vite 7, Environment-API dev server)
@@ -676,11 +676,12 @@
                     mature 8.62.0 by our own 7-day gate — working as intended.
                     269/269 green
                 </li>
-                <li>
-                    TypeScript 6 — attempted, works,
-                    <b>deferred until after the Astro 6 bump</b>: Astro 5's
-                    tsconfck/zod-to-ts peer on TS ^5; don't stack a
-                    peer-violating compiler on the riskiest step
+                <li class="ticked">
+                    TypeScript 6.0.3 — landed on the Astro 7 leg as planned (its
+                    TS≤5-peered blockers left astro's tree in 7). Only fallout
+                    was a vite 7/8 <em>type</em> mismatch (our types-only
+                    <code>vite</code> dep lagged astro's Vite 8 → aligned to
+                    <code>^8</code>)
                 </li>
                 <li class="ticked">
                     <b>Astro 6.4.8</b> — one source change in the whole major
@@ -694,23 +695,31 @@
                 </li>
                 <li class="ticked">
                     <b>CSP compatibility</b> (Zack's triage; sequenced before 7
-                    as a compiler-swap sentry): hard error on CSP-via-<code
-                        >custom</code
-                    >
-                    → points to Astro's <code>security.csp</code>; tests
-                    recompute sha256 hashes from final HTML and assert they
-                    match the policy (static → meta, on-demand → header, dev →
-                    none, JSON-LD exempt). <b>Bonus bug fixed:</b> stale
-                    <code>Content-Length</code>
-                    carried onto rewritten SSR bodies — strict clients would
-                    truncate. 284/284
+                    as a compiler-swap sentry): tests recompute sha256 hashes
+                    from final post-middleware HTML and assert they match
+                    Astro's delivered policy (static → meta, on-demand → header,
+                    dev → none, JSON-LD exempt). Revised after review: the CSP
+                    hard error was <em>removed</em> — <code>custom</code> can't
+                    emit <code>http-equiv</code>, so a CSP key was always inert
+                    (docs-only stance now); the Content-Length concern was never
+                    reproduced — header-drop kept as defensive hygiene with an
+                    explicit canary test
                 </li>
-                <li>
-                    Catalog <code>astro</code> → <code>^7</code> (unblocked by
-                    vendored harness) — Rust-compiler doctype/partial
-                    re-verification lives here; TypeScript 6 rides along (its
-                    blockers left astro's tree in 7); widen peer to
-                    <code>^6 || ^7</code> if green
+                <li class="ticked">
+                    <b>Astro 7.0.6</b> — three fallout fixes: harness now hides
+                    <code>process.env.VITEST</code> during
+                    <code>dev()</code> startup (astro 7's dev-server plugin
+                    otherwise skips attaching its request handler → every fetch
+                    404s); <code>Head.astro</code> injects via a child
+                    <code>&lt;Fragment set:html&gt;</code> (Rust compiler
+                    silently drops <code>set:html</code> on
+                    <code>&lt;head&gt;</code> itself); style-survival regexes
+                    whitespace-tolerant (dev styles now pretty-printed).
+                    Doctype/partial contract re-verified under the Rust
+                    compiler; CSP sentries pass. TypeScript 6 rode along. Peer
+                    widened to <code>^6.0.0 || ^7.0.0</code> after verifying
+                    HEAD 278/278 on <em>both</em> majors. Suite ~14s under 7 vs
+                    ~21s under 6 (Rolldown)
                 </li>
             </ul>
             <div class="policy">
@@ -736,20 +745,22 @@
                 </ol>
             </div>
             <div class="exit">
-                <b>Exit:</b> suite green on Astro 6 and 7 via the vendored
-                harness; integration-kit gone ✓; peer + engines honest; stance
-                in MAINTENANCE docs + README.
+                <b>Exit: met 2026-07-12.</b> Suite green on Astro 6.4.8 and
+                7.0.6 via the vendored harness ✓; integration-kit gone ✓; peer
+                <code>^6.0.0 || ^7.0.0</code> + engines
+                <code>&gt;=22.12.0</code> ✓; stance in
+                <code>maintenance/astro-node-support.md</code> + README ✓.
             </div>
         </section>
 
         <section
-            class="mile"
+            class="mile next"
             id="m2"
         >
             <div class="mile-head">
                 <span class="mcode">M2</span>
                 <h2>Publish pipeline + CI</h2>
-                <span class="badge later">2–3 sessions</span>
+                <span class="badge next">Next · 2–3 sessions</span>
             </div>
             <p class="goal">
                 The psychological unlock: a real package on npm, released by a

@@ -126,10 +126,7 @@ export default defineConfig([
 
     /** rules for publishables */
     {
-        extends: [
-            pkgJson.configs["recommended-publishable"],
-            pkgJson.configs.stylistic
-        ],
+        extends: [pkgJson.configs.recommended, pkgJson.configs.stylistic],
         files: ["packages/**/package.json"]
     },
     {

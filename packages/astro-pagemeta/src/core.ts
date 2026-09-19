@@ -76,7 +76,7 @@ function rehypeCustomMeta(meta: Record<string, string>) {
                         "charSet" in node.properties
                 );
                 if (existing) {
-                    existing.properties["charSet"] = value;
+                    existing.properties.charSet = value;
                 } else {
                     head.children.push(
                         {
@@ -97,14 +97,11 @@ function rehypeCustomMeta(meta: Record<string, string>) {
                 const existing = head.children.find((node): node is Element => {
                     if (node.type !== "element" || node.tagName !== "link")
                         return false;
-                    const rel = node.properties["rel"];
-                    return (
-                        (Array.isArray(rel) && rel.includes("canonical")) ||
-                        rel === "canonical"
-                    );
+                    // @types/hast 3.0.5 types `rel` as a token array
+                    return node.properties.rel?.includes("canonical") ?? false;
                 });
                 if (existing) {
-                    existing.properties["href"] = value;
+                    existing.properties.href = value;
                 } else {
                     head.children.push(
                         {
@@ -129,7 +126,7 @@ function rehypeCustomMeta(meta: Record<string, string>) {
             );
 
             if (existing) {
-                existing.properties["content"] = value;
+                existing.properties.content = value;
             } else {
                 head.children.push(
                     {

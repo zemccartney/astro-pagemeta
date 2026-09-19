@@ -614,7 +614,7 @@ describe("createMetadataProcessor", () => {
                     (m) =>
                         m.tag === "meta" &&
                         "name" in m.properties &&
-                        m.properties["name"] === "robots"
+                        m.properties.name === "robots"
                 );
                 expect(robotsTags).toHaveLength(1);
                 expect(robotsTags[0]).toEqual({
@@ -665,8 +665,8 @@ describe("createMetadataProcessor", () => {
                 const canonicals = meta.filter(
                     (m) =>
                         m.tag === "link" &&
-                        Array.isArray(m.properties["rel"]) &&
-                        (m.properties["rel"] as string[]).includes("canonical")
+                        Array.isArray(m.properties.rel) &&
+                        m.properties.rel.includes("canonical")
                 );
                 expect(canonicals).toHaveLength(1);
                 expect(canonicals[0]).toEqual({
@@ -701,12 +701,12 @@ describe("createMetadataProcessor", () => {
                     (m) =>
                         m.tag === "meta" &&
                         "property" in m.properties &&
-                        m.properties["property"] === "og:title"
+                        m.properties.property === "og:title"
                 );
                 // custom runs after rehype-meta, so it should replace
                 expect(ogTitles).toHaveLength(1);
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- length asserted above
-                expect(ogTitles[0]!.properties["content"]).toBe("Override");
+                expect(ogTitles[0]!.properties.content).toBe("Override");
             });
         });
 
@@ -867,7 +867,7 @@ describe("createMetadataProcessor", () => {
                     (m) =>
                         m.tag === "meta" &&
                         "name" in m.properties &&
-                        m.properties["name"] === "viewport"
+                        m.properties.name === "viewport"
                 );
                 expect(viewportTags).toHaveLength(1);
             });
@@ -951,7 +951,7 @@ describe("createMetadataProcessor", () => {
                         (m) =>
                             m.tag === "meta" &&
                             "name" in m.properties &&
-                            m.properties["name"] === "viewport"
+                            m.properties.name === "viewport"
                     )
                 ).toBe(false);
             });

@@ -55,8 +55,7 @@ export function createErrorCapture() {
         lastError() {
             const errors =
                 ((globalThis as Record<string, unknown>)[key] as
-                    | Error[]
-                    | undefined) ?? [];
+                    Error[] | undefined) ?? [];
             return errors.at(-1);
         }
     };

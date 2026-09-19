@@ -232,7 +232,7 @@ describe("SSR / dev server", () => {
         // But no copyright meta is generated — rehype-meta doesn't see
         // the template's author value, so copyright: true is a no-op
         const copyrightMeta = headMeta.filter(
-            (m) => m.tag === "meta" && m.properties["name"] === "copyright"
+            (m) => m.tag === "meta" && m.properties.name === "copyright"
         );
         expect(copyrightMeta).toHaveLength(0);
     });
@@ -494,7 +494,7 @@ describe("SSR / build", () => {
         });
 
         const copyrightMeta = headMeta.filter(
-            (m) => m.tag === "meta" && m.properties["name"] === "copyright"
+            (m) => m.tag === "meta" && m.properties.name === "copyright"
         );
         expect(copyrightMeta).toHaveLength(0);
     });

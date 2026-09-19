@@ -11,8 +11,8 @@
         "typecheck": "astro check"
     },
     "dependencies": {
-        "@astrojs/check": "^0.9.9",
-        "@astrojs/node": "^11.0.0",
+        "@astrojs/check": "^0.9.10",
+        "@astrojs/node": "^11.1.5",
         "@grepco/astro-pagemeta": "workspace:*",
         "astro": "catalog:",
         "typescript": "catalog:"

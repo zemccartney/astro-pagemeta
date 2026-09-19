@@ -52,18 +52,18 @@
         "schema-dts": "^2.0.0"
     },
     "devDependencies": {
-        "@arethetypeswrong/core": "^0.18.4",
+        "@arethetypeswrong/core": "^0.18.5",
         "@grepco/astro-fixture": "workspace:*",
-        "@types/hast": "^3.0.4",
+        "@types/hast": "^3.0.5",
         "@types/node": "catalog:",
         "astro": "catalog:",
-        "publint": "^0.3.21",
+        "publint": "^0.3.24",
         "rehype-parse": "^9.0.1",
         "tsdown": "catalog:",
         "typescript": "catalog:",
         "unified": "^11.0.5",
-        "vite": "^8.0.0",
-        "vitest": "^4.1.9"
+        "vite": "^8.3.0",
+        "vitest": "^4.1.11"
     },
     "peerDependencies": {
         "astro": "^6.0.0 || ^7.0.0"

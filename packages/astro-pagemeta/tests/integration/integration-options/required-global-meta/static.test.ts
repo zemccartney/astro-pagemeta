@@ -38,7 +38,7 @@ describe("addRequiredGlobalMeta enabled / static", async () => {
                 (m) => m.tag === "meta" && "charSet" in m.properties
             );
             const viewports = headMeta.filter(
-                (m) => m.tag === "meta" && m.properties["name"] === "viewport"
+                (m) => m.tag === "meta" && m.properties.name === "viewport"
             );
             expect(charsets).toHaveLength(1);
             expect(viewports).toHaveLength(1);
@@ -77,7 +77,7 @@ describe("addRequiredGlobalMeta enabled / static", async () => {
                 (m) => m.tag === "meta" && "charSet" in m.properties
             );
             const viewports = headMeta.filter(
-                (m) => m.tag === "meta" && m.properties["name"] === "viewport"
+                (m) => m.tag === "meta" && m.properties.name === "viewport"
             );
             expect(charsets).toHaveLength(1);
             expect(viewports).toHaveLength(1);

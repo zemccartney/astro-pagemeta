@@ -28,8 +28,7 @@ if (!astroEngines) {
 }
 
 const publishConfig = pkg["publishConfig"] as
-    | Record<string, Record<string, string>>
-    | undefined;
+    Record<string, Record<string, string>> | undefined;
 const publishedEngines = publishConfig?.["engines"]?.["node"];
 
 if (publishedEngines !== astroEngines) {

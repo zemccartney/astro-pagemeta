@@ -133,12 +133,12 @@ export const extractServerIslandUrl = (html: string): string => {
         tree
     );
 
-    if (!link || typeof link.properties["href"] !== "string") {
+    if (!link || typeof link.properties.href !== "string") {
         throw new Error(
             "No server island preload URL found in HTML. " +
                 "Does the page contain a component with server:defer?"
         );
     }
 
-    return link.properties["href"];
+    return link.properties.href;
 };

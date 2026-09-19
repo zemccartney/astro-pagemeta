@@ -4,9 +4,7 @@ declare module "virtual:pagemeta/config" {
 
     export const routePatterns: RegExp[];
     export const defaults:
-        | ((ctx: APIContext) => MetadataOptions)
-        | MetadataOptions
-        | undefined;
+        ((ctx: APIContext) => MetadataOptions) | MetadataOptions | undefined;
     export const compressHTML: boolean;
     export const addRequiredGlobalMeta: boolean;
 }

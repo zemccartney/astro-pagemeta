@@ -44,8 +44,6 @@ export interface MetadataProcessorConfig {
     addRequiredGlobalMeta: boolean;
     compressHTML: boolean;
     defaults?:
-        | ((ctx: APIContext) => MetadataOptions)
-        | MetadataOptions
-        | undefined;
+        ((ctx: APIContext) => MetadataOptions) | MetadataOptions | undefined;
     routePatterns: RegExp[];
 }

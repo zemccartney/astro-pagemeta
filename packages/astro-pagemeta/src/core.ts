@@ -17,7 +17,14 @@ import type {
 // Stripped by rehype-minify-whitespace when compressHTML is enabled.
 const newline = (): Text => ({ type: "text", value: "\n" });
 
-const LOCALS_KEY = Symbol("pagemeta");
+// Registry symbol, not a private one: `metadata()` runs in page modules and
+// `resolveMetadata()` in the middleware, and in dev those can be different
+// evaluations of this module. Astro 7.3's `astro/middleware` entry imports
+// the ambient manifest, so every request's manifest invalidation propagates
+// to modules importing it and Vite re-evaluates the runtime for the next
+// page that loads it. A private `Symbol()` diverges per evaluation and
+// silently drops page metadata; `Symbol.for()` is shared process-wide.
+const LOCALS_KEY = Symbol.for("@grepco/astro-pagemeta");
 
 // OGP-defined prefixes (https://ogp.me/) that use the `property` attribute
 // on meta tags instead of `name`. Includes `fb:` which is widely used in

@@ -1,6 +1,6 @@
 import type { APIContext } from "astro";
 
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 import {
     createMetadataProcessor,
@@ -1043,6 +1043,36 @@ describe("createMetadataProcessor", () => {
                 },
                 tag: "meta"
             });
+        });
+    });
+});
+
+describe("locals key across module instances", () => {
+    /**
+     * Regression: Astro 7.3 dev invalidates every module importing
+     * `astro/middleware` on each request (its middleware entry now imports
+     * the ambient manifest, so it sits in the manifest's invalidation cone).
+     * Pages then evaluate a fresh copy of the runtime while the middleware
+     * keeps its original one — two module instances must still agree on
+     * the `Astro.locals` key, or page metadata is silently dropped.
+     */
+    test("metadata() from one instance is visible to resolveMetadata() of another", async () => {
+        vi.resetModules();
+        const a = await import("../../src/core.ts");
+        vi.resetModules();
+        const b = await import("../../src/core.ts");
+        expect(a.metadata).not.toBe(b.metadata); // genuinely separate instances
+
+        const ctx = mockContext();
+        a.metadata(ctx, { title: "From instance A" });
+
+        const processor = b.createMetadataProcessor({
+            addRequiredGlobalMeta: false,
+            compressHTML: false,
+            routePatterns: [/^\/$/]
+        });
+        expect(processor.resolveMetadata(ctx)).toEqual({
+            title: "From instance A"
         });
     });
 });

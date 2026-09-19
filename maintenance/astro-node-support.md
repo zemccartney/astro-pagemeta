@@ -20,6 +20,8 @@
 | Published Node engines | `>=22.12.0` (identical floor for astro@6 and astro@7)        |
 | Dev toolchain Node     | 24 (`engines` in workspace package.json files)               |
 
+The dev toolchain floor and the published floor are different claims. Several dev dependencies (eslint 10, tsdown) require Node above 22.12, so `engines` in the workspace manifests stays at 24 and `.npmrc` keeps `engine-strict`. `publishConfig.engines` carries the published floor precisely because the two differ. CI reflects this: every matrix leg installs on Node 24, and the floor leg switches Node only to run the suite (`.github/workflows/ci.yml`).
+
 ## Upgrade playbook (per Astro major)
 
 1. Read the release announcement + upgrade guide

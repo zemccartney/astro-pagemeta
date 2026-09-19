@@ -69,3 +69,10 @@
 - Guided-tour skill for the codebase; stronger process guardrails (always-run checks, QA pass)
 - Test the harness by building a second image generator (satori?)
 - Analyze test transcripts to document the dev-server/socket issue properly
+
+## Follow-ups from the 2026-09-19 re-entry tranche
+
+- **Upstream report candidate — Astro 7.3 `astro/middleware` sits in the dev manifest invalidation cone.** `core/middleware/index.js` gained `import { tryGetAmbientManifest } from "../manifest/ambient.js"` in 7.3.0 (#17818 logger work); `ambient.js` imports `#astro-internal/ambient-manifest`. In dev, every request's `virtual:astro:server-island-manifest` transform invalidates `virtual:astro:manifest`, and Vite propagates that through importers to `astro/middleware` and to anything importing it — our runtime bundle was re-evaluated 14 times across four requests (traced 2026-09-19). Any integration keeping module-level state next to a `defineMiddleware` import breaks silently. We hardened ourselves with `Symbol.for`; Zack decides whether to file (a minimal repro is the `locals key across module instances` unit test plus the trace in the ROADMAP entry).
+- **Drop the runtime import of `astro/middleware`.** `defineMiddleware` is an identity function used for typing; `MiddlewareHandler` from `astro` (type-only) gives the same typing with no runtime edge into Astro's graph. Removes us from the invalidation cone entirely (today the runtime and its rehype processor are rebuilt per dev request under 7.3). Own commit, verify with the module-graph probe pattern from 2026-09-19.
+- **Deferred majors from the deps sweep:** `typescript` 6 → 7 (the native port; expect a full leg like TS 6 was), `undici` 7 → 8 (harness only), `tsdown` 0.22 → 0.23 (read the changelog; attw/publint gates will catch export drift). Run `pnpm deps` to see them.
+- **Doc drift confirmed today (fold into M4):** CLAUDE.md said exports map to `src/` — they map to `dist/`, and `pretest` builds. Corrected the three lines that misled the session; the rest of the M4 list stands.

@@ -2,6 +2,8 @@
 
 > **CRITICAL**: For all work, verify that changed files pass linting, typechecking, and formatting before considering work complete. Assess only files you changed.
 
+> **PROCESS**: [`maintenance/dev-process.md`](maintenance/dev-process.md) is the canonical development loop for this repo. Read it before starting any tranche, and ask Zack for the "what right looks like" note it calls for if one does not exist.
+
 ## What This Is
 
 An Astro integration (`@grepco/astro-pagemeta`) that simplifies setting page metadata (title, description, OG tags). Users call `metadata(Astro, {...})` in page frontmatter, and the integration automatically injects the corresponding meta tags into the rendered HTML via post-render middleware.
@@ -11,7 +13,7 @@ An Astro integration (`@grepco/astro-pagemeta`) that simplifies setting page met
 Four source files:
 
 1. **`src/index.ts`** — Integration entry point. Creates a Vite plugin that generates the `virtual:pagemeta/config` module, registers middleware with `order: "post"`, collects route patterns from `astro:routes:resolved`, and invalidates the virtual module during dev when routes change.
-2. **`src/runtime.ts`** — Exports `metadata()` and `middleware()`. Imported at runtime as `@grepco/astro-pagemeta/runtime` (via `package.json` exports mapping to this file directly — no stub). Uses a private `Symbol("pagemeta")` key for `Astro.locals` storage.
+2. **`src/runtime.ts`** — Exports `metadata()` and `middleware()`. Imported at runtime as `@grepco/astro-pagemeta/runtime`. `package.json` exports map to the **built** `dist/runtime.mjs` (tsdown), which is why `pretest` runs `tsdown` — tests exercise the built bundle, not `src/`. Uses the registry symbol `Symbol.for("@grepco/astro-pagemeta")` as the `Astro.locals` key (see `src/core.ts`).
 3. **`src/middleware.ts`** — Post-render middleware. Filters non-page routes via `isPageRoute()`, skips HTML fragments (no doctype), resolves metadata via `resolveMetadata()`, and processes HTML with `rehype` + `rehype-meta` + optional `rehype-minify-whitespace`.
 4. **`src/types.ts`** — TypeScript types (`MetadataOptions`, `MetadataProcessorConfig`).
 
@@ -180,9 +182,9 @@ describe("SSR / build", () => {
 
 ## Important Patterns
 
-1. **Runtime import path**: `@grepco/astro-pagemeta/runtime` — maps directly to `src/runtime.ts` via package.json exports
+1. **Runtime import path**: `@grepco/astro-pagemeta/runtime` — maps to `dist/runtime.mjs` via package.json exports; run `pnpm build` (or `pnpm test`, whose `pretest` builds) after editing `src/` or the change is invisible to tests
 2. **Middleware typing**: Use `defineMiddleware` from `astro/middleware` (not `astro:middleware` — that's for user-land code)
-3. **Symbol-based locals**: `Symbol("pagemeta")` is defined in `core.ts`, never exported, shared between `metadata` and `resolveMetadata`
+3. **Symbol-based locals**: `Symbol.for("@grepco/astro-pagemeta")` is defined in `core.ts`, never exported, shared between `metadata` and `resolveMetadata`. It must be a registry symbol: in Astro 7.3+ dev the runtime module is re-evaluated per request (its `astro/middleware` import sits in the manifest invalidation cone), so pages and middleware can hold different module instances
 4. **HTML document detection**: Middleware checks `/^<!doctype\s/i` to distinguish full documents from fragments (server islands, partials)
 5. **Route filtering**: Only project page routes get processed. API routes, endpoints, server islands, and config redirects are skipped via `isPageRoute()` which matches against patterns from `astro:routes:resolved`. `includeExternalPages: true` opts in integration-injected pages.
 6. **Dev route invalidation**: When Astro re-fires `astro:routes:resolved` on page file add/remove during dev, the integration updates route patterns and invalidates the virtual module via `server.moduleGraph.invalidateModule()` — no server restart needed.

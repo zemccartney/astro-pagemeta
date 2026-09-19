@@ -2,7 +2,7 @@
 
 > **This is the only load-bearing planning file.** Work top to bottom, one milestone at a time.
 > Anything not here lives in [BACKLOG.md](./BACKLOG.md) and carries zero obligation.
-> Session ritual: open this file → do the next unchecked box → check it → commit → close.
+> Session ritual: open this file → do the next unchecked box → check it → commit → close. Full loop, including the pre-work "what right looks like" note and the review step: [maintenance/dev-process.md](../../maintenance/dev-process.md).
 > Full context for these decisions: [the audit report](../audit/report.md). Folder map: [planning/README.md](../README.md).
 > (`../scratch/` is Zack's personal scratchpad — agents read it, never write to it.)
 

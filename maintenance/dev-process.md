@@ -20,7 +20,7 @@ git log -p --reverse <base>..HEAD      # step 6: read the tranche in order
 
 ## The checks
 
-Run from the repo root. On a fresh clone run `typecheck` before `lint`: lint's typed rules need the playground's generated `.astro` types, which typecheck produces.
+Run from the repo root, in this order. `typecheck` runs the package build (`tsdown && tsc -b`), and `lint` depends on it: the package's own exports resolve to `dist/*.d.mts`, so on a clean checkout lint fails with "Unsafe call of a type that could not be resolved" until a build exists. CI runs them in the same order for the same reason.
 
 ```sh
 pnpm install --frozen-lockfile

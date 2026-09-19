@@ -37,10 +37,13 @@ jobs:
                   cache: pnpm
             - run: pnpm install --frozen-lockfile
             - run: pnpm audit --prod
+            # typecheck builds the package (tsdown && tsc -b); lint's typed
+            # rules resolve @grepco/astro-pagemeta/* through package exports
+            # to dist/*.d.mts, so it must run after the build exists
+            - run: pnpm typecheck
             - run: pnpm lint
             - run: pnpm fmt
             - run: pnpm knip
-            - run: pnpm typecheck
             - run: pnpm --filter @grepco/astro-pagemeta check:engines
 
     test:
@@ -73,10 +76,16 @@ jobs:
             # runs pnpm install --no-frozen-lockfile itself
             - if: matrix.astro != '7'
               run: node scripts/use-astro.ts ${{ matrix.astro }}
+            # Build on the toolchain Node (this is what `pretest` does)
+            - run: pnpm --filter @grepco/astro-pagemeta build
             # Floor leg: switch to the published Node floor for the run only
             - if: matrix.node != '24'
               uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
               with:
                   node-version: ${{ matrix.node }}
             - run: node --version
-            - run: pnpm --filter @grepco/astro-pagemeta test
+            # Invoke vitest's bin directly: pnpm enforces workspace `engines`
+            # on `pnpm run` as well as install, so `pnpm test` cannot run on
+            # the floor Node. Same command as `pnpm test` minus pretest.
+            - run: ./node_modules/.bin/vitest --run
+              working-directory: packages/astro-pagemeta

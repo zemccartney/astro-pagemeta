@@ -10,8 +10,14 @@ export default defineConfig({
         profile: "esm-only"
     },
     deps: {
-        neverBundle: ["virtual:pagemeta/config", /^@grepco\/astro-pagemeta/],
-        skipNodeModulesBundle: true
+        // Bundle only our own relative source files; everything else
+        // (npm packages, node: builtins, the virtual config module, the
+        // middleware -> runtime self-import) stays an external import as
+        // written. `neverBundle: true` is the documented replacement for the
+        // removed skipNodeModulesBundle, but it tries to resolve
+        // virtual:pagemeta/config and warns (UNRESOLVED_IMPORT), which
+        // failOnWarn turns into a CI failure — hence the predicate.
+        neverBundle: (id: string) => !id.startsWith(".") && !id.startsWith("/")
     },
     dts: { sourcemap: true },
     entry: ["src/index.ts", "src/runtime.ts", "src/middleware.ts"],

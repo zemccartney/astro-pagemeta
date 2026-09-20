@@ -1,7 +1,7 @@
 # API Reference
 
 - [Default export](#default-export)
-    - [pagemeta(options?)](#pagemetaoptions)
+    - [ephemeris(options?)](#ephemerisoptions)
 - [Runtime](#runtime)
     - [metadata(ctx, options)](#metadatactx-options)
     - [middleware()](#middleware)
@@ -12,10 +12,10 @@
 ## Default export
 
 ```ts
-import pagemeta from "@grepco/ephemeris";
+import ephemeris from "@grepco/ephemeris";
 ```
 
-### pagemeta(options?)
+### ephemeris(options?)
 
 The integration itself
 
@@ -43,7 +43,7 @@ Returns an [Astro integration](https://docs.astro.build/en/reference/integration
 - Type: One of `"auto"` or `"manual"`
 - Default: `"auto"`
 
-Controls how `astro-pagemeta` injects your metadata into the HTML that Astro generates
+Controls how `ephemeris` injects your metadata into the HTML that Astro generates
 
 - `"auto"` adds a middleware that consumes eligible response streams — eligible meaning full pages only; partials, API endpoints, and server islands are not processed — , injects meta tags based on your input into the `<head />`, then responds with a complete document
 - `"manual"` really just turns off everything that `"auto"` does; no middleware is added, no processing happens by default, response streams untouched. To still have your metadata set, you have two options for the manual setup required:
@@ -115,7 +115,7 @@ Doesn't return anything
 - Required/Optional: required
 - Type: `MetadataOptions | false`
 
-An object describing the metadata you want to set for the current request. See the [`MetadataOptions`](#pagemetaoptions-1) reference for supported tags.
+An object describing the metadata you want to set for the current request. See the [`MetadataOptions`](#ephemerisoptions-1) reference for supported tags.
 
 Passing `false` is a hard opt-out: it skips all defaults and tag injection for the current request.
 
@@ -127,10 +127,10 @@ A function that returns the same middleware the integration automatically inject
 
 Use when in `"manual"` mode and you want to control this middleware's order relative to others in your project, modeled after [Astro's manual i18n routing](https://docs.astro.build/en/guides/internationalization/#manual).
 
-For example, if your auth middleware redirects unauthenticated users, you'd want it to run before pagemeta so redirected responses aren't needlessly processed:
+For example, if your auth middleware redirects unauthenticated users, you'd want it to run before ephemeris so redirected responses aren't needlessly processed:
 
 ```ts
-import { middleware as pagemetaMiddleware } from "@grepco/ephemeris/runtime";
+import { middleware as ephemerisMiddleware } from "@grepco/ephemeris/runtime";
 import { defineMiddleware, sequence } from "astro:middleware";
 
 const auth = defineMiddleware(async (ctx, next) => {
@@ -138,7 +138,7 @@ const auth = defineMiddleware(async (ctx, next) => {
     return next();
 });
 
-export const onRequest = sequence(auth, pagemetaMiddleware());
+export const onRequest = sequence(auth, ephemerisMiddleware());
 ```
 
 ## Head

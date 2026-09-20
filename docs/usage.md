@@ -24,11 +24,11 @@ So, given
 // astro.config.ts
 
 import { defineConfig } from "astro/config";
-import pagemeta from "@grepco/ephemeris";
+import ephemeris from "@grepco/ephemeris";
 
 export default defineConfig({
     integrations: [
-        pagemeta({
+        ephemeris({
             defaults: {
                 description: "Description — Default",
                 author: "Author — Default"

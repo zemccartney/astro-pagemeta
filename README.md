@@ -1,4 +1,4 @@
-# astro-pagemeta
+# ephemeris
 
 An Astro integration for setting your pages' meta tags
 
@@ -56,11 +56,11 @@ Then add the integration to your `astro.config.*`
 
 ```diff
 import { defineConfig } from 'astro/config';
-+import pagemeta from '@grepco/ephemeris';
++import ephemeris from '@grepco/ephemeris';
 
 export default defineConfig({
   integrations: [
-+    pagemeta()
++    ephemeris()
   ],
 })
 ```
@@ -75,12 +75,12 @@ generates. It takes care to only work with pages i.e. complete documents: partia
 
 ```ts
 import { defineConfig } from "astro/config";
-import pagemeta from "@grepco/ephemeris";
+import ephemeris from "@grepco/ephemeris";
 
 export default defineConfig({
     site: "https://www.example.com",
     integrations: [
-        pagemeta({
+        ephemeris({
             defaults: {
                 origin: "https://www.example.com",
                 name: "ACME",

@@ -4,12 +4,12 @@ title: Integration Runtime Architecture
 flowchart TD
     subgraph BuildTime["Build Time (astro:config:setup + astro:routes:resolved)"]
         INT[src/index.ts<br/>defineIntegration]
-        INT -->|registers| VP[Vite Plugin<br/>pagemeta:config]
+        INT -->|registers| VP[Vite Plugin<br/>ephemeris:config]
         INT -->|registers| MW_REG[addMiddleware<br/>order: post]
         INT -->|collects routes| RP[Route Patterns<br/>project page RegExps]
         RP -->|injected into| VP
         OPTS[User Options<br/>defaults: object or fn] -->|serialized into| VP
-        VP -->|serves| VMOD["virtual:pagemeta/config<br/>routePatterns + defaults"]
+        VP -->|serves| VMOD["virtual:ephemeris/config<br/>routePatterns + defaults"]
     end
 
     subgraph RequestTime["Request Time"]

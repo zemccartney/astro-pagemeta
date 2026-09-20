@@ -22,7 +22,7 @@ Verifies that metadata injection works correctly with Astro's HTML streaming, wh
 
 - [ ] Start dev server with `mode: "manual"` (current default in `astro.config.ts`)
 - [ ] Load `/streaming` — colored stripes should appear progressively (500ms, 2s, 4s delays)
-- [ ] View source: `<head>` should contain the meta tags from `metadata()` (title "Dunganugs", og tags) AND the tags from the `<Pagemeta>` component in the layout
+- [ ] View source: `<head>` should contain the meta tags from `metadata()` (title "Dunganugs", og tags) AND the tags from the `<Ephemeris>` component in the layout
 - [ ] Switch `astro.config.ts` to `mode: "auto"` (remove `mode: "manual"`)
 - [ ] Load `/streaming` again — page should still render, but streaming behavior may differ (auto mode uses post-render middleware which buffers the full response)
 - [ ] Verify meta tags are present in both modes
@@ -50,10 +50,10 @@ Verifies that adding or removing page files during dev correctly updates the rou
 
 ### CSP Interplay (browser ground truth)
 
-Verifies in a real browser that pagemeta's rewriting doesn't weaken Astro's CSP — including that entity-encoded quotes in the CSP meta (`&#x27;` from re-serialization) still enforce correctly.
+Verifies in a real browser that ephemeris's rewriting doesn't weaken Astro's CSP — including that entity-encoded quotes in the CSP meta (`&#x27;` from re-serialization) still enforce correctly.
 
 - [ ] Enable `security: { csp: true }` in `astro.config.ts`
 - [ ] Add a page that loads an asset from a should-be-blocked origin (e.g. an off-origin `<img>` or inline `<script>` not hashed by Astro) alongside `metadata()` usage
-- [ ] Build + preview, open the page: the page's own styles/scripts work (hashes valid), the console shows a CSP violation for the blocked asset, and pagemeta's tags are present
+- [ ] Build + preview, open the page: the page's own styles/scripts work (hashes valid), the console shows a CSP violation for the blocked asset, and ephemeris's tags are present
 - [ ] Repeat with `compressHTML: false` for the pretty-printed path
 - [ ] `curl -v http://localhost:4321/ 2>&1 | grep -iE "content-length|transfer-encoding"` against the preview server: expect `Transfer-Encoding: chunked` (or a `Content-Length` matching the actual byte count — compare with `curl -s ... | wc -c`), and a complete, untruncated document

@@ -9,7 +9,7 @@
     - `publishConfig.engines.node` must equal the installed Astro's `engines.node`
     - `src/tsconfig.json` `lib` must match the lowest supported Node major's ES year
     - `tsdown.config.ts` `target` must match the lowest supported Node major
-3. **Older majors are dropped** when they leave Astro's window — in a pagemeta **major** release, noted in the changelog. Rationale example: Astro 5 was dropped because it's unmaintained upstream and floors on EOL Node 18/20; supporting it would endorse unpatched foundations.
+3. **Older majors are dropped** when they leave Astro's window — in an ephemeris **major** release, noted in the changelog. Rationale example: Astro 5 was dropped because it's unmaintained upstream and floors on EOL Node 18/20; supporting it would endorse unpatched foundations.
 4. **Re-evaluate at every Astro major and Node EOL date.** No standing promises beyond the current peer range.
 
 ## Current state (2026-07-12)

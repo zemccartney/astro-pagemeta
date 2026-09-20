@@ -12,7 +12,7 @@ An Astro integration (`@grepco/ephemeris`) that simplifies setting page metadata
 
 Four source files:
 
-1. **`src/index.ts`** — Integration entry point. Creates a Vite plugin that generates the `virtual:pagemeta/config` module, registers middleware with `order: "post"`, collects route patterns from `astro:routes:resolved`, and invalidates the virtual module during dev when routes change.
+1. **`src/index.ts`** — Integration entry point. Creates a Vite plugin that generates the `virtual:ephemeris/config` module, registers middleware with `order: "post"`, collects route patterns from `astro:routes:resolved`, and invalidates the virtual module during dev when routes change.
 2. **`src/runtime.ts`** — Exports `metadata()` and `middleware()`. Imported at runtime as `@grepco/ephemeris/runtime`. `package.json` exports map to the **built** `dist/runtime.mjs` (tsdown), which is why `pretest` runs `tsdown` — tests exercise the built bundle, not `src/`. Uses the registry symbol `Symbol.for("@grepco/ephemeris")` as the `Astro.locals` key (see `src/core.ts`).
 3. **`src/middleware.ts`** — Post-render middleware. Filters non-page routes via `isPageRoute()`, skips HTML fragments (no doctype), resolves metadata via `resolveMetadata()`, and processes HTML with `rehype` + `rehype-meta` + optional `rehype-minify-whitespace`.
 4. **`src/types.ts`** — TypeScript types (`MetadataOptions`, `MetadataProcessorConfig`).
@@ -21,7 +21,7 @@ Type declarations for both the public module and the internal virtual module liv
 
 ### Virtual Module System
 
-The integration creates a custom Vite plugin (not `addVirtualImports`) that serves `virtual:pagemeta/config`. This module is generated at load time and contains:
+The integration creates a custom Vite plugin (not `addVirtualImports`) that serves `virtual:ephemeris/config`. This module is generated at load time and contains:
 
 - **`routePatterns`**: Array of `RegExp` objects derived from project page routes (collected in `astro:routes:resolved`)
 - **`defaults`**: The user's defaults — either a serialized function (via `Function.toString()`), a JSON object, or `undefined`
@@ -35,7 +35,7 @@ Function serialization means **closures don't work** — any function default mu
 ```
 Page frontmatter: metadata(Astro, { title: "My Page" })
     ↓
-Stores in Astro.locals[Symbol("pagemeta")] — merges with prior calls
+Stores in Astro.locals[Symbol.for("@grepco/ephemeris")] — merges with prior calls
     ↓
 Page renders HTML
     ↓
@@ -104,7 +104,7 @@ tests/
 
 ### Critical Testing Rules
 
-**Integration config goes in test files, not fixture configs.** Fixture `astro.config.ts` files must NOT include the pagemeta integration — it's passed only via inline config to `startDevServer()` / `build()`.
+**Integration config goes in test files, not fixture configs.** Fixture `astro.config.ts` files must NOT include the ephemeris integration — it's passed only via inline config to `startDevServer()` / `build()`.
 
 **Test parallelism causes flaky dev server failures.** Vitest runs test files in parallel by default. Each file spins up Astro dev servers and builds, and running too many concurrently causes resource exhaustion (`SocketError: other side closed`, missing content in responses). Tests that fail in the full suite but pass in isolation are almost certainly this issue.
 
@@ -128,7 +128,7 @@ const { cleanup, fixture } = await isolatedFixture("basic", {
     output: "server"          // SSR tests only
 });
 
-const config = { integrations: [pagemeta()] };
+const config = { integrations: [ephemeris()] };
 afterAll(() => cleanup());
 
 describe("SSR / dev server", () => {
@@ -170,7 +170,7 @@ describe("SSR / build", () => {
 - `src/runtime.ts` — `metadata()`, `middleware()`
 - `src/middleware.ts` — Post-render middleware using `defineMiddleware` from `astro/middleware`
 - `src/types.ts` — Public type exports (`MetadataOptions`, `MetadataProcessorConfig`)
-- `src/virtual.d.ts` — Module declarations for `@grepco/ephemeris/runtime` and `virtual:pagemeta/config`
+- `src/virtual.d.ts` — Module declarations for `@grepco/ephemeris/runtime` and `virtual:ephemeris/config`
 - `MAINTENANCE.md` — Detailed test organization guide, known quirks, and architecture decisions
 
 ## Commands

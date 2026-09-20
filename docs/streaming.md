@@ -50,7 +50,7 @@ The first step is, in `astro.config.*`, setting the `mode` option to `"manual"`
 
 ```ts
 export default defineConfig({
-    integrations: [pagemeta({ mode: "manual" })]
+    integrations: [ephemeris({ mode: "manual" })]
 });
 ```
 

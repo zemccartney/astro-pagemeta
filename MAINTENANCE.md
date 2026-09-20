@@ -64,7 +64,7 @@ Each output mode (static vs SSR) gets its own fixture directory. This ensures:
 
 **In the test file's inline config (passed to `build()`/`startDevServer()`):**
 
-- `integrations: [pagemeta(...)]` - always passed here, never in fixture config
+- `integrations: [ephemeris(...)]` - always passed here, never in fixture config
 - `site` and other per-test configuration
 
 ## Why Integration Config Lives in Test Files
@@ -75,13 +75,13 @@ Each output mode (static vs SSR) gets its own fixture directory. This ensures:
 
 This happens when:
 
-1. A fixture's `astro.config.ts` includes the pagemeta integration
+1. A fixture's `astro.config.ts` includes the ephemeris integration
 2. The test file then calls `build()` or `startDevServer()` with the same integration
 3. Both calls trigger `astro:config:setup`, registering the module twice
 
 ### The Solution
 
-**Fixture configs must NOT include the pagemeta integration.** The integration is passed only via the inline config:
+**Fixture configs must NOT include the ephemeris integration.** The integration is passed only via the inline config:
 
 ```typescript
 // Fixture astro.config.ts - output mode only, NO integrations
@@ -97,7 +97,7 @@ const fixture = await loadFixture({
 });
 
 const config = {
-    integrations: [pagemeta()], // Integration ONLY here
+    integrations: [ephemeris()], // Integration ONLY here
     site: "https://example.com"
 } satisfies AstroInlineConfig;
 
@@ -158,8 +158,12 @@ Build tests (`fixture.build()`) **must** have only one integration configuration
 
 ```typescript
 // ❌ WRONG - second build throws "Module already defined"
-await fixture.build({ integrations: [pagemeta({ defaults: { title: "A" } })] });
-await fixture.build({ integrations: [pagemeta({ defaults: { title: "B" } })] });
+await fixture.build({
+    integrations: [ephemeris({ defaults: { title: "A" } })]
+});
+await fixture.build({
+    integrations: [ephemeris({ defaults: { title: "B" } })]
+});
 ```
 
 This is why we have separate files like `static/build.test.ts` and `ssr/build.test.ts`.
@@ -175,7 +179,7 @@ Dev tests (`fixture.startDevServer()`) can test multiple configurations in one f
 // ✅ OK - sequential with proper cleanup
 test("config A", async () => {
     const dev = await fixture.startDevServer({
-        integrations: [pagemeta(configA)]
+        integrations: [ephemeris(configA)]
     });
     try {
         // assertions
@@ -186,7 +190,7 @@ test("config A", async () => {
 
 test("config B", async () => {
     const dev = await fixture.startDevServer({
-        integrations: [pagemeta(configB)]
+        integrations: [ephemeris(configB)]
     });
     // ...
 });

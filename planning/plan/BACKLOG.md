@@ -81,3 +81,10 @@
 
 - ~~**Repo rename (Zack):** rename `zemccartney/astro-pagemeta` → `zemccartney/ephemeris` on GitHub, then update `homepage`/`bugs`/`repository` in `packages/ephemeris/package.json` and `git remote set-url origin`.~~ _(done 2026-09-20: repo and local folder renamed by Zack; manifest URLs and remote updated in the follow-up commit)_
 - **README tagline:** the title is now just "ephemeris"; the first line under it should say what the name means in one sentence, since the word no longer describes the job the way "pagemeta" did. Fold into the M4 README work.
+
+## Zack's wishlist from the 2026-09-19 re-entry (ordering proposed in chat, not yet decided)
+
+- **mise + hk** for scripts, env vars and system deps (replacing the pnpm-scripts + lefthook + `.npmrc` engine-strict arrangement). Proposed slot: M4 maintenance routine, after publish; nothing blocks on it now and it would widen any earlier tranche. Note the interaction with `engines`/`check:engines`: mise would own the Node version locally, CI keeps `setup-node`.
+- **Supply-chain understanding before automation** (already noted on the M2 Socket line): a written explainer on provenance, OIDC trusted publishing, Socket, lockfile trust and `minimumReleaseAge`, then the config.
+- **Dependency majors sweep** (TS 7, undici 8, tsdown 0.23): see "Deferred majors" above; own leg after M2.
+- ~~**Rename**~~ done 2026-09-20.

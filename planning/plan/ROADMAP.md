@@ -87,7 +87,7 @@ _2026-09-20 rename tranche (4 commits, 1d2f5c7..f8884d9):_ **the package is `@gr
 ## M4 — Docs, maintenance routine & v1
 
 - [ ] Fix doc drift: `CLAUDE.md` (6 source files, current test layout, `mode`/`Head`), root `MAINTENANCE.md` (describes removed runtime-stub/aik-mod system), `playground/README.md` (path + `<Pagemeta>` → `Head`), `maintenance/tsconfig.md` (stale eslint-globals note; revise post-M1 simplifications)
-- [ ] README: lift positioning from `competition-assessment.md` (incl. "who should NOT use this"); add domain recipes — `robots`/noindex via `custom`, "what this deliberately doesn't do" (sitemap → `@astrojs/sitemap`, robots.txt, favicons, hreflang)
+- [ ] README: lift positioning from `planning/plan/competition-assessment.md` (moved out of the root 2026-09-20 so the public repo states its own value instead of comparing; keep it private with the rest of `planning/`) (incl. "who should NOT use this"); add domain recipes — `robots`/noindex via `custom`, "what this deliberately doesn't do" (sitemap → `@astrojs/sitemap`, robots.txt, favicons, hreflang)
 - [ ] Consider: viewport default → `width=device-width, initial-scale=1`; escape `<` in JSON-LD output (`</script>` breakout hardening)
 - [ ] Dependency routine live (per [deps-security.md](./deps-security.md)): Renovate (or scheduled ncu) with cooldown, auto-merge rules, CVE alerting; fix root `deps` script to cover all workspace packages
 - [ ] Write the maintenance runbook: how to release, how to update deps, how to test an Astro major bump — the "how do I run things myself" doc

@@ -7,13 +7,13 @@
         "astro-integration",
         "seo"
     ],
-    "homepage": "https://github.com/zemccartney/astro-pagemeta",
+    "homepage": "https://github.com/zemccartney/ephemeris",
     "bugs": {
-        "url": "https://github.com/zemccartney/astro-pagemeta/issues"
+        "url": "https://github.com/zemccartney/ephemeris/issues"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/zemccartney/astro-pagemeta.git"
+        "url": "git+https://github.com/zemccartney/ephemeris.git"
     },
     "license": "MIT",
     "author": "Zack McCartney <zack@grepco.net>",

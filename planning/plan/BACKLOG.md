@@ -79,5 +79,5 @@
 
 ## Follow-ups from the 2026-09-20 rename
 
-- **Repo rename (Zack):** rename `zemccartney/astro-pagemeta` → `zemccartney/ephemeris` on GitHub, then update `homepage`/`bugs`/`repository` in `packages/ephemeris/package.json` and `git remote set-url origin`. GitHub redirects the old URLs, so this is not urgent, but do it before the first publish so the registry page links land on the new name.
+- ~~**Repo rename (Zack):** rename `zemccartney/astro-pagemeta` → `zemccartney/ephemeris` on GitHub, then update `homepage`/`bugs`/`repository` in `packages/ephemeris/package.json` and `git remote set-url origin`.~~ _(done 2026-09-20: repo and local folder renamed by Zack; manifest URLs and remote updated in the follow-up commit)_
 - **README tagline:** the title is now just "ephemeris"; the first line under it should say what the name means in one sentence, since the word no longer describes the job the way "pagemeta" did. Fold into the M4 README work.

@@ -6,7 +6,7 @@
 > Full context for these decisions: [the audit report](../audit/report.md). Folder map: [planning/README.md](../README.md).
 > (`../scratch/` is Zack's personal scratchpad — agents read it, never write to it.)
 
-**Destination:** `@grepco/astro-pagemeta` published to npm, maintained with confidence and low anxiety.
+**Destination:** `@grepco/ephemeris` (renamed from `@grepco/astro-pagemeta` on 2026-09-20) published to npm, maintained with confidence and low anxiety.
 
 ---
 
@@ -70,6 +70,8 @@ _2026-09-19 re-entry tranche (5 commits, b6c55f9..047be93):_ **deps refresh** (`
 - [ ] npm publish with provenance; keep publint + attw enforced in the build _(attw `/Head` annotation done 2026-07-13: `excludeEntrypoints: ["Head"]` in tsdown.config.ts with rationale comment — the .astro entrypoint's types come from Astro tooling, not a .d.ts, and the inert warning would have failed CI under `failOnWarn: "ci-only"`)_
 - [ ] Rewrite `packages/astro-fixture/README.md` for public repo consumption (currently references `planning/` docs and pre-publish context that won't survive the planning-folder deletion)
 - [ ] Publish `0.1.0` (or `0.1.0-beta` under `next` tag) — verify `npm install` from a scratch project + registry page rendering; confirm `publishConfig.engines` actually lands in the published manifest (`npm view`)
+
+_2026-09-20 rename tranche (4 commits, 1d2f5c7..f8884d9):_ **the package is `@grepco/ephemeris`.** Zack picked the name (an ephemeris is the published table of where the bodies will be; pages declare their metadata, the table lands in the rendered `<head>`). Done as four mechanical commits so each is a single greppable substitution: directory move (`packages/ephemeris`), package name + every import specifier (also moves the locals key to `Symbol.for("@grepco/ephemeris")`), identifiers (`ephemeris()` integration, `virtual:ephemeris/config`, `[ephemeris]` error prefix, `<Ephemeris>` playground alias), then docs. `planning/`, `competition-assessment.md` and `image-gen-wip/` deliberately keep the old name as history. **Verified:** all static checks green per commit; 279/279 on Astro 7.3.2 after the docs commit; Astro 6 leg left to CI. **Left for Zack:** rename the GitHub repo and then the three `github.com/zemccartney/astro-pagemeta` URLs in `packages/ephemeris/package.json`; the local checkout directory; the M4 doc-drift item still applies.
 
 **Exit criteria:** one full release cycle executed end-to-end; you could run the next one from memory.
 

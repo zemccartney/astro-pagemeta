@@ -76,3 +76,8 @@
 - **Drop the runtime import of `astro/middleware`.** `defineMiddleware` is an identity function used for typing; `MiddlewareHandler` from `astro` (type-only) gives the same typing with no runtime edge into Astro's graph. Removes us from the invalidation cone entirely (today the runtime and its rehype processor are rebuilt per dev request under 7.3). Own commit, verify with the module-graph probe pattern from 2026-09-19.
 - **Deferred majors from the deps sweep:** `typescript` 6 → 7 (the native port; expect a full leg like TS 6 was), `undici` 7 → 8 (harness only), `tsdown` 0.22 → 0.23 (read the changelog; attw/publint gates will catch export drift). Run `pnpm deps` to see them.
 - **Doc drift confirmed today (fold into M4):** CLAUDE.md said exports map to `src/` — they map to `dist/`, and `pretest` builds. Corrected the three lines that misled the session; the rest of the M4 list stands.
+
+## Follow-ups from the 2026-09-20 rename
+
+- **Repo rename (Zack):** rename `zemccartney/astro-pagemeta` → `zemccartney/ephemeris` on GitHub, then update `homepage`/`bugs`/`repository` in `packages/ephemeris/package.json` and `git remote set-url origin`. GitHub redirects the old URLs, so this is not urgent, but do it before the first publish so the registry page links land on the new name.
+- **README tagline:** the title is now just "ephemeris"; the first line under it should say what the name means in one sentence, since the word no longer describes the job the way "pagemeta" did. Fold into the M4 README work.

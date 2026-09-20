@@ -12,7 +12,7 @@
 ## Default export
 
 ```ts
-import pagemeta from "@grepco/astro-pagemeta";
+import pagemeta from "@grepco/ephemeris";
 ```
 
 ### pagemeta(options?)
@@ -95,7 +95,7 @@ This option is a no-op when using the [`Head` component](#head) instead of middl
 ## Runtime
 
 ```ts
-import { middleware, metadata } from "@grepco/astro-pagemeta/runtime";
+import { middleware, metadata } from "@grepco/ephemeris/runtime";
 ```
 
 Warning: usable only within an astro project (internally relies on a virtual module, a product of Vite's pipeline)
@@ -130,7 +130,7 @@ Use when in `"manual"` mode and you want to control this middleware's order rela
 For example, if your auth middleware redirects unauthenticated users, you'd want it to run before pagemeta so redirected responses aren't needlessly processed:
 
 ```ts
-import { middleware as pagemetaMiddleware } from "@grepco/astro-pagemeta/runtime";
+import { middleware as pagemetaMiddleware } from "@grepco/ephemeris/runtime";
 import { defineMiddleware, sequence } from "astro:middleware";
 
 const auth = defineMiddleware(async (ctx, next) => {
@@ -145,7 +145,7 @@ export const onRequest = sequence(auth, pagemetaMiddleware());
 
 ```astro
 ---
-import Head from "@grepco/astro-pagemeta/Head";
+import Head from "@grepco/ephemeris/Head";
 ---
 
 <html>

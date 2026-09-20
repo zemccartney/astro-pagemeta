@@ -1,4 +1,4 @@
-import { middleware } from "@grepco/astro-pagemeta/runtime";
+import { middleware } from "@grepco/ephemeris/runtime";
 import { defineMiddleware, sequence } from "astro:middleware";
 
 const custom = defineMiddleware(async (context, next) => {

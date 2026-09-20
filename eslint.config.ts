@@ -24,7 +24,7 @@ export default defineConfig([
     },
     workspaces.configs.recommended,
     {
-        // fixtures import @grepco/astro-pagemeta instead of writing a relative import
+        // fixtures import @grepco/ephemeris instead of writing a relative import
         // from within the isolated fixtures directory, which wouldn't correspond
         // to the correct source files from where the fixture files actually are on disk
         files: [

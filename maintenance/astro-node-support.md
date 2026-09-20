@@ -5,7 +5,7 @@
 ## The rules
 
 1. **Astro majors:** support the majors Astro itself maintains — the current major plus the previous one (which receives security fixes only, per Astro's policy). Peer range = CI proves green.
-2. **Node:** adopt Astro's Node policy as ours (latest _Maintenance_ LTS + current _Active_ LTS, with their rules for when floors move). Enforcement points, all mechanically checked by `pnpm --filter @grepco/astro-pagemeta check:engines`:
+2. **Node:** adopt Astro's Node policy as ours (latest _Maintenance_ LTS + current _Active_ LTS, with their rules for when floors move). Enforcement points, all mechanically checked by `pnpm --filter @grepco/ephemeris check:engines`:
     - `publishConfig.engines.node` must equal the installed Astro's `engines.node`
     - `src/tsconfig.json` `lib` must match the lowest supported Node major's ES year
     - `tsdown.config.ts` `target` must match the lowest supported Node major

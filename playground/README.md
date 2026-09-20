@@ -1,6 +1,6 @@
 # Playground
 
-Sample Astro app for manual testing of `@grepco/astro-pagemeta`. Exercises behaviors that are hard to verify in automated tests.
+Sample Astro app for manual testing of `@grepco/ephemeris`. Exercises behaviors that are hard to verify in automated tests.
 
 ## Setup
 
@@ -37,7 +37,7 @@ Verifies that adding or removing page files during dev correctly updates the rou
 
     ```astro
     ---
-    import { metadata } from "@grepco/astro-pagemeta/runtime";
+    import { metadata } from "@grepco/ephemeris/runtime";
     metadata(Astro, { title: "Invalidation Test" });
     ---
 

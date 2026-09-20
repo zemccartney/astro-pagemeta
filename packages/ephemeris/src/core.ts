@@ -24,7 +24,7 @@ const newline = (): Text => ({ type: "text", value: "\n" });
 // to modules importing it and Vite re-evaluates the runtime for the next
 // page that loads it. A private `Symbol()` diverges per evaluation and
 // silently drops page metadata; `Symbol.for()` is shared process-wide.
-const LOCALS_KEY = Symbol.for("@grepco/astro-pagemeta");
+const LOCALS_KEY = Symbol.for("@grepco/ephemeris");
 
 // OGP-defined prefixes (https://ogp.me/) that use the `property` attribute
 // on meta tags instead of `name`. Includes `fb:` which is widely used in
@@ -230,7 +230,7 @@ export const isHtmlDocument = (html: string): boolean =>
  * @example
  * ```astro
  * ---
- * import { metadata } from "@grepco/astro-pagemeta/runtime";
+ * import { metadata } from "@grepco/ephemeris/runtime";
  * metadata(Astro, { title: "My Page", description: "A description" });
  * ---
  * ```

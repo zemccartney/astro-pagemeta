@@ -38,25 +38,25 @@ This integration supports [the Astro versions Astro supports, on the Node versio
 
 ```sh
 # npm
-npx astro add @grepco/astro-pagemeta
+npx astro add @grepco/ephemeris
 # pnpm
-pnpm astro add @grepco/astro-pagemeta
+pnpm astro add @grepco/ephemeris
 ```
 
 ### Manual
 
 ```sh
 ## npm
-npm install @grepco/astro-pagemeta
+npm install @grepco/ephemeris
 ## pnpm
-pnpm add @grepco/astro-pagemeta
+pnpm add @grepco/ephemeris
 ```
 
 Then add the integration to your `astro.config.*`
 
 ```diff
 import { defineConfig } from 'astro/config';
-+import pagemeta from '@grepco/astro-pagemeta';
++import pagemeta from '@grepco/ephemeris';
 
 export default defineConfig({
   integrations: [
@@ -75,7 +75,7 @@ generates. It takes care to only work with pages i.e. complete documents: partia
 
 ```ts
 import { defineConfig } from "astro/config";
-import pagemeta from "@grepco/astro-pagemeta";
+import pagemeta from "@grepco/ephemeris";
 
 export default defineConfig({
     site: "https://www.example.com",
@@ -98,7 +98,7 @@ Defaults can also be a function that receives [Astro's render context](https://d
 ```astro
 ---
 // index.astro
-import { metadata } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/ephemeris/runtime";
 import Layout from "../layouts/Layout.astro";
 
 metadata(Astro, {
@@ -115,7 +115,7 @@ metadata(Astro, {
 ```astro
 ---
 // about.astro
-import { metadata } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/ephemeris/runtime";
 import Layout from "../layouts/Layout.astro";
 
 metadata(Astro, {

@@ -1,5 +1,5 @@
 import node from "@astrojs/node";
-import pagemeta from "@grepco/astro-pagemeta";
+import pagemeta from "@grepco/ephemeris";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({

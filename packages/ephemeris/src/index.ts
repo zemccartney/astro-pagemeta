@@ -156,14 +156,14 @@ function createConfigPlugin({
  *   if not already present.
  * @param options.mode - `"auto"` (default) registers middleware automatically.
  *   `"manual"` requires you to add the middleware yourself via the `middleware()`
- *   export from `@grepco/astro-pagemeta/runtime`.
+ *   export from `@grepco/ephemeris/runtime`.
  * @param options.includeExternalPages - When `true`, also processes pages
  *   injected by other integrations (not just project pages).
  * @returns The configured Astro integration
  * @example
  * ```ts
  * // astro.config.ts
- * import pagemeta from "@grepco/astro-pagemeta";
+ * import pagemeta from "@grepco/ephemeris";
  *
  * export default defineConfig({
  *   integrations: [pagemeta({ defaults: { title: "My Site" } })],
@@ -246,7 +246,7 @@ const pagemeta = (options?: IntegrationOptions): AstroIntegration => {
                 viteServer = server;
             }
         },
-        name: "@grepco/astro-pagemeta"
+        name: "@grepco/ephemeris"
     };
 };
 

@@ -29,14 +29,14 @@ pnpm typecheck
 pnpm lint
 pnpm fmt
 pnpm knip
-pnpm --filter @grepco/astro-pagemeta check:engines
-pnpm --filter @grepco/astro-pagemeta test
+pnpm --filter @grepco/ephemeris check:engines
+pnpm --filter @grepco/ephemeris test
 ```
 
 To prove a change on the other supported Astro major:
 
 ```sh
-pnpm use-astro 6 && pnpm --filter @grepco/astro-pagemeta test
+pnpm use-astro 6 && pnpm --filter @grepco/ephemeris test
 git restore pnpm-workspace.yaml playground/package.json pnpm-lock.yaml && pnpm install
 ```
 

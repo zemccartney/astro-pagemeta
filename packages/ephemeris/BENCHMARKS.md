@@ -54,7 +54,7 @@ All times in milliseconds (median of 200 iterations after 20 warmup).
 
 ```bash
 # Quick check (vitest bench, interactive output)
-pnpm --filter @grepco/astro-pagemeta bench
+pnpm --filter @grepco/ephemeris bench
 
 # Generate this report
 node packages/ephemeris/scripts/bench-report.ts

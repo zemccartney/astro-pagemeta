@@ -38,13 +38,13 @@ jobs:
             - run: pnpm install --frozen-lockfile
             - run: pnpm audit --prod
             # typecheck builds the package (tsdown && tsc -b); lint's typed
-            # rules resolve @grepco/astro-pagemeta/* through package exports
+            # rules resolve @grepco/ephemeris/* through package exports
             # to dist/*.d.mts, so it must run after the build exists
             - run: pnpm typecheck
             - run: pnpm lint
             - run: pnpm fmt
             - run: pnpm knip
-            - run: pnpm --filter @grepco/astro-pagemeta check:engines
+            - run: pnpm --filter @grepco/ephemeris check:engines
 
     test:
         name: Test (astro ${{ matrix.astro }} · node ${{ matrix.node }})
@@ -77,7 +77,7 @@ jobs:
             - if: matrix.astro != '7'
               run: node scripts/use-astro.ts ${{ matrix.astro }}
             # Build on the toolchain Node (this is what `pretest` does)
-            - run: pnpm --filter @grepco/astro-pagemeta build
+            - run: pnpm --filter @grepco/ephemeris build
             # Floor leg: switch to the published Node floor for the run only
             - if: matrix.node != '24'
               uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0

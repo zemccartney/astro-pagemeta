@@ -265,7 +265,7 @@ ${DISPLAY_ORDER.map((name) => {
 
 \`\`\`bash
 # Quick check (vitest bench, interactive output)
-pnpm --filter @grepco/astro-pagemeta bench
+pnpm --filter @grepco/ephemeris bench
 
 # Generate this report
 node packages/ephemeris/scripts/bench-report.ts

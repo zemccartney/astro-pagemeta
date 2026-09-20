@@ -31,7 +31,7 @@
 // would load src/runtime.ts separately from dist/runtime.mjs, creating two
 // Symbol("pagemeta") instances and breaking metadata sharing.
 // eslint-disable-next-line workspaces/no-absolute-imports -- must resolve through package exports to share Symbol instance with dist/runtime.mjs
-import Processor from "@grepco/astro-pagemeta/runtime";
+import Processor from "@grepco/ephemeris/runtime";
 
 const metadata = Processor.resolveMetadata(Astro);
 const templateMeta =

@@ -1,4 +1,4 @@
-import { metadata } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/ephemeris/runtime";
 import { defineMiddleware } from "astro:middleware";
 
 export const onRequest = defineMiddleware(async (context, next) => {

@@ -31,7 +31,7 @@ export default processor;
  * @example
  * ```ts
  * // src/middleware.ts
- * import { middleware as pagemeta } from "@grepco/astro-pagemeta/runtime";
+ * import { middleware as pagemeta } from "@grepco/ephemeris/runtime";
  * import { sequence } from "astro:middleware";
  *
  * export const onRequest = sequence(myMiddleware, pagemeta());

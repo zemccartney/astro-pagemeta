@@ -61,7 +61,7 @@ component in place of `<head />`
 ---
 // layouts/Layout.astro
 
-import Head from "@grepco/astro-pagemeta/Head";
+import Head from "@grepco/ephemeris/Head";
 ---
 
 <html>
@@ -78,7 +78,7 @@ import Head from "@grepco/astro-pagemeta/Head";
 ---
 // pages/contact.astro
 
-import { metadata } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/ephemeris/runtime";
 
 metadata(Astro, {
     title: "Contact Us!"

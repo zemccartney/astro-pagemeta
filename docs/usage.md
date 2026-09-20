@@ -24,7 +24,7 @@ So, given
 // astro.config.ts
 
 import { defineConfig } from "astro/config";
-import pagemeta from "@grepco/astro-pagemeta";
+import pagemeta from "@grepco/ephemeris";
 
 export default defineConfig({
     integrations: [
@@ -40,7 +40,7 @@ export default defineConfig({
 
 ```astro
 ---
-import { metadata } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/ephemeris/runtime";
 
 metadata(Astro, {
     author: "Author — Explicit"
@@ -126,7 +126,7 @@ For example:
 
 ```astro
 ---
-import { metadata } from "@grepco/astro-pagemeta/runtime";
+import { metadata } from "@grepco/ephemeris/runtime";
 
 metadata(Astro, {
     og: true

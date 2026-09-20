@@ -1,4 +1,4 @@
-declare module "virtual:pagemeta/config" {
+declare module "virtual:ephemeris/config" {
     import type { APIContext } from "astro";
     type MetadataOptions = import("./types.ts").MetadataOptions;
 

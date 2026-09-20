@@ -1,6 +1,6 @@
 /**
- * Auto mode: full document processing through the complete pagemeta pipeline.
- * This is the primary "what does pagemeta cost?" benchmark — it measures
+ * Auto mode: full document processing through the complete ephemeris pipeline.
+ * This is the primary "what does ephemeris cost?" benchmark — it measures
  * the same code path as the post-render middleware in auto mode.
  */
 import { bench, describe } from "vitest";

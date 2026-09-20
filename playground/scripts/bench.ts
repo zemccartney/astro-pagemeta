@@ -1,7 +1,7 @@
 import autocannon from "autocannon";
 /**
  * Integration benchmark: measures real request latency in an Astro SSR app
- * with pagemeta installed.
+ * with ephemeris installed.
  *
  * Usage: pnpm bench
  *   1. Builds the playground (astro build)

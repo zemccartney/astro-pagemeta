@@ -252,7 +252,7 @@ export const metadata = (
     ) {
         throw new Error(
             // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- handling type-indifferent runtime possibility
-            `[pagemeta] metadata data must be an object or false, got ${data === null ? "null" : typeof data}`
+            `[ephemeris] metadata data must be an object or false, got ${data === null ? "null" : typeof data}`
         );
     }
 
@@ -324,7 +324,7 @@ export function createMetadataProcessor(
                 if (typeof result !== "object" || result === null) {
                     throw new Error(
                         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- handling type-indifferent runtime possibility
-                        `[pagemeta] defaults function must return an object, got ${result === null ? "null" : typeof result}`
+                        `[ephemeris] defaults function must return an object, got ${result === null ? "null" : typeof result}`
                     );
                 }
                 computedDefaults = result;

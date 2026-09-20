@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../../src/index.ts";
+import ephemeris from "../../../src/index.ts";
 import {
     extractCspContent,
     extractInlineStyles,
@@ -12,18 +12,18 @@ import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 /**
  * Astro 6's `security.csp` injects a
  * `<meta http-equiv="content-security-policy">` whose script-src/style-src
- * directives carry hashes of the page's inline assets. Because pagemeta
+ * directives carry hashes of the page's inline assets. Because ephemeris
  * re-parses and re-serializes the whole document, these tests recompute the
  * hashes from the FINAL html — if the pipeline alters one byte of hashed
  * content (e.g. via compressHTML minification, on by default), the hash
- * comparison fails. pagemeta's injected JSON-LD is a non-executable data
+ * comparison fails. ephemeris's injected JSON-LD is a non-executable data
  * block, exempt from script-src by spec, so it needs no hash.
  */
 const { cleanup, fixture } = await isolatedFixture("csp");
 
 const config = {
     build: { inlineStylesheets: "always" as const },
-    integrations: [pagemeta()],
+    integrations: [ephemeris()],
     security: { csp: true },
     site: "https://example.com"
 };
@@ -50,7 +50,7 @@ describe("csp / static / build", () => {
         }
     });
 
-    test("pagemeta metadata and JSON-LD injected alongside CSP", async () => {
+    test("ephemeris metadata and JSON-LD injected alongside CSP", async () => {
         const html = await fixture.readFile("/index.html");
 
         const meta = extractMeta(html ?? "");
@@ -61,7 +61,7 @@ describe("csp / static / build", () => {
         });
         expect(meta).toContainEqual({
             properties: {
-                content: "Verifying pagemeta coexists with Astro's CSP",
+                content: "Verifying ephemeris coexists with Astro's CSP",
                 name: "description"
             },
             tag: "meta"

@@ -1,5 +1,5 @@
 import node from "@astrojs/node";
-import pagemeta from "@grepco/ephemeris";
+import ephemeris from "@grepco/ephemeris";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
@@ -8,7 +8,7 @@ export default defineConfig({
     }),
     compressHTML: false,
     integrations: [
-        pagemeta({
+        ephemeris({
             addRequiredGlobalMeta: true,
             mode: "manual"
         })

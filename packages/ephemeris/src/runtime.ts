@@ -6,7 +6,7 @@ import {
     compressHTML,
     defaults,
     routePatterns
-} from "virtual:pagemeta/config";
+} from "virtual:ephemeris/config";
 
 import type { MetadataProcessor } from "./types.ts";
 
@@ -24,17 +24,17 @@ const processor: MetadataProcessor = createMetadataProcessor({
 export default processor;
 
 /**
- * Create the pagemeta middleware. Only needed when using `mode: "manual"` —
+ * Create the ephemeris middleware. Only needed when using `mode: "manual"` —
  * in the default `"auto"` mode, the integration registers middleware itself.
  * @returns An Astro middleware that intercepts page responses and injects
  *   metadata tags into the HTML `<head>`.
  * @example
  * ```ts
  * // src/middleware.ts
- * import { middleware as pagemeta } from "@grepco/ephemeris/runtime";
+ * import { middleware as ephemeris } from "@grepco/ephemeris/runtime";
  * import { sequence } from "astro:middleware";
  *
- * export const onRequest = sequence(myMiddleware, pagemeta());
+ * export const onRequest = sequence(myMiddleware, ephemeris());
  * ```
  */
 export const middleware = (): MiddlewareHandler => {

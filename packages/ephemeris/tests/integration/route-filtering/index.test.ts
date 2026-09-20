@@ -4,7 +4,7 @@ import type { AstroIntegration } from "astro";
 import testAdapter from "@grepco/astro-fixture/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../../src/index.ts";
+import ephemeris from "../../../src/index.ts";
 import {
     extractMeta,
     extractServerIslandUrl,
@@ -19,7 +19,7 @@ describe("route-filtering", async () => {
     });
 
     const config = {
-        integrations: [pagemeta({ defaults: { title: "Default Title" } })],
+        integrations: [ephemeris({ defaults: { title: "Default Title" } })],
         redirects: { "/old-page": "/" }
     };
 
@@ -311,7 +311,7 @@ describe("route-filtering / integration-injected pages", () => {
 
         const config = {
             integrations: [
-                pagemeta({ defaults: { title: "Default Title" } }),
+                ephemeris({ defaults: { title: "Default Title" } }),
                 injectPageIntegration()
             ]
         };
@@ -372,7 +372,7 @@ describe("route-filtering / integration-injected pages", () => {
 
         const config = {
             integrations: [
-                pagemeta({
+                ephemeris({
                     defaults: { title: "Default Title" },
                     includeExternalPages: true
                 }),

@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../../src/index.ts";
+import ephemeris from "../../../src/index.ts";
 import { extractMeta } from "../../utils/html-parse.ts";
 import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 
@@ -8,7 +8,7 @@ describe("custom-meta / static", async () => {
     const { cleanup, fixture } = await isolatedFixture("custom-meta");
 
     const config = {
-        integrations: [pagemeta()]
+        integrations: [ephemeris()]
     };
 
     afterAll(() => cleanup());
@@ -449,7 +449,7 @@ describe("custom-meta with defaults / static", async () => {
 
     const config = {
         integrations: [
-            pagemeta({
+            ephemeris({
                 defaults: {
                     custom: {
                         generator: "Default Generator",

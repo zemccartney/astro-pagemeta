@@ -3,7 +3,7 @@ import type { TestApp } from "@grepco/astro-fixture/astroFixture";
 import testAdapter from "@grepco/astro-fixture/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../../src/index.ts";
+import ephemeris from "../../../src/index.ts";
 import {
     extractCspContent,
     extractInlineStyles,
@@ -24,7 +24,7 @@ const { cleanup, fixture } = await isolatedFixture("csp", {
 });
 
 const config = {
-    integrations: [pagemeta()],
+    integrations: [ephemeris()],
     security: { csp: true },
     site: "https://example.com"
 };
@@ -42,7 +42,7 @@ describe("csp / ssr / dev server", () => {
         await devServer.stop();
     });
 
-    test("pagemeta works normally; astro emits no CSP in dev", async () => {
+    test("ephemeris works normally; astro emits no CSP in dev", async () => {
         const response = await fixture.fetch("/");
         const html = await response.text();
 
@@ -50,7 +50,7 @@ describe("csp / ssr / dev server", () => {
         // nor the meta tag (dev serves unbundled modules — nothing to
         // hash). CSP is a build-output surface; the build tests below and
         // in static.test.ts carry the real assertions. Here we prove
-        // enabling security.csp doesn't disturb pagemeta in dev.
+        // enabling security.csp doesn't disturb ephemeris in dev.
         expect(response.headers.get("content-security-policy")).toBeNull();
         expect(extractCspContent(html)).toBeUndefined();
         expect(html).toContain("<title>CSP Page</title>");
@@ -90,7 +90,7 @@ describe("csp / ssr / build", () => {
         const html = await response.text();
 
         // Astro sets Content-Length on non-streamed on-demand responses;
-        // pagemeta grows the body, so carrying the original value over
+        // ephemeris grows the body, so carrying the original value over
         // would make strict clients truncate the document. The middleware
         // must drop it (or it must match the actual byte length).
         const contentLength = response.headers.get("content-length");

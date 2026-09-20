@@ -230,7 +230,7 @@ The integration's per-request overhead comes from parsing HTML into an AST (via 
 - **Manual mode** (\`<Head>\` component) processes only the **\`<head>\` content**, not the full document. Cost depends on \`<head>\` size, which is typically small relative to the body.
 - **Rehype baseline** is rehype with zero plugins — the irreducible cost of parse + serialize that no configuration can eliminate.
 
-All pagemeta plugins only operate on \`<head>\` elements. The cost difference between auto mode and the rehype baseline is pagemeta's actual overhead — typically under 1ms.
+All ephemeris plugins only operate on \`<head>\` elements. The cost difference between auto mode and the rehype baseline is ephemeris's actual overhead — typically under 1ms.
 
 ### About Fixture Sizes
 
@@ -248,7 +248,7 @@ ${DISPLAY_ORDER.map((name) => `| ${name} | ${fmt(get(autoMode, name).median)} | 
 
 ### Key Observations
 
-- **Pagemeta plugin overhead is ~${fmt(medianAuto.median - medianBaseline.median)}ms** on a median-sized (p50) page. Nearly all cost is rehype's HTML parse/serialize.
+- **Ephemeris plugin overhead is ~${fmt(medianAuto.median - medianBaseline.median)}ms** on a median-sized (p50) page. Nearly all cost is rehype's HTML parse/serialize.
 - **Manual mode is ~${fmt(manualMode.median)}ms** in this benchmark, processing a ~250-byte head fixture. In practice, cost scales with your \`<head>\` size, but \`<head>\` is typically small relative to the body.
 - **\`compressHTML\` adds ~${fmt(medianCompress.median - medianAuto.median)}ms** on a median-sized page because \`rehype-minify-whitespace\` walks the entire tree, unlike the other plugins.
 

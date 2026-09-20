@@ -15,7 +15,7 @@ export default defineConfig({
         // middleware -> runtime self-import) stays an external import as
         // written. `neverBundle: true` is the documented replacement for the
         // removed skipNodeModulesBundle, but it tries to resolve
-        // virtual:pagemeta/config and warns (UNRESOLVED_IMPORT), which
+        // virtual:ephemeris/config and warns (UNRESOLVED_IMPORT), which
         // failOnWarn turns into a CI failure — hence the predicate.
         neverBundle: (id: string) => !id.startsWith(".") && !id.startsWith("/")
     },

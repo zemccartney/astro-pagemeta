@@ -29,7 +29,7 @@
 // Uses the package specifier (not a relative import) so this resolves to the
 // same runtime module instance as metadata() calls in pages. A relative import
 // would load src/runtime.ts separately from dist/runtime.mjs, creating two
-// Symbol("pagemeta") instances and breaking metadata sharing.
+// module instances; even with Symbol.for() the registry lookup must run in one module graph.
 // eslint-disable-next-line workspaces/no-absolute-imports -- must resolve through package exports to share Symbol instance with dist/runtime.mjs
 import Processor from "@grepco/ephemeris/runtime";
 

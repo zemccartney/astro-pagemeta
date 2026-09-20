@@ -23,7 +23,7 @@ type ValidatedOptions = Required<
  * `optionsSchema` — checks the same shapes and applies the same defaults.
  * @param input - Raw options as passed by the user (possibly absent)
  * @returns Options with defaults applied
- * @throws {Error} With a `[pagemeta]`-prefixed message when an option has
+ * @throws {Error} With a `[ephemeris]`-prefixed message when an option has
  *   the wrong type
  */
 function validateOptions(input: IntegrationOptions = {}): ValidatedOptions {
@@ -33,7 +33,7 @@ function validateOptions(input: IntegrationOptions = {}): ValidatedOptions {
         input === null
     ) {
         throw new Error(
-            `[pagemeta] options must be an object, got ${typeof input}`
+            `[ephemeris] options must be an object, got ${typeof input}`
         );
     }
 
@@ -46,7 +46,7 @@ function validateOptions(input: IntegrationOptions = {}): ValidatedOptions {
 
     if (typeof addRequiredGlobalMeta !== "boolean") {
         throw new TypeError(
-            `[pagemeta] addRequiredGlobalMeta must be a boolean, got ${typeof addRequiredGlobalMeta}`
+            `[ephemeris] addRequiredGlobalMeta must be a boolean, got ${typeof addRequiredGlobalMeta}`
         );
     }
 
@@ -57,27 +57,27 @@ function validateOptions(input: IntegrationOptions = {}): ValidatedOptions {
         (typeof defaults !== "object" || defaults === null)
     ) {
         throw new Error(
-            `[pagemeta] defaults must be an object or a function, got ${typeof defaults}`
+            `[ephemeris] defaults must be an object or a function, got ${typeof defaults}`
         );
     }
 
     if (typeof includeExternalPages !== "boolean") {
         throw new TypeError(
-            `[pagemeta] includeExternalPages must be a boolean, got ${typeof includeExternalPages}`
+            `[ephemeris] includeExternalPages must be a boolean, got ${typeof includeExternalPages}`
         );
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- handling type-indifferent runtime possibility
     if (mode !== "auto" && mode !== "manual") {
         throw new Error(
-            `[pagemeta] mode must be "auto" or "manual", got ${JSON.stringify(mode)}`
+            `[ephemeris] mode must be "auto" or "manual", got ${JSON.stringify(mode)}`
         );
     }
 
     return { addRequiredGlobalMeta, defaults, includeExternalPages, mode };
 }
 
-const VIRTUAL_CONFIG_ID = "virtual:pagemeta/config";
+const VIRTUAL_CONFIG_ID = "virtual:ephemeris/config";
 const RESOLVED_CONFIG_ID = "\0" + VIRTUAL_CONFIG_ID;
 
 /**
@@ -99,7 +99,7 @@ function createConfigPlugin({
 
     return {
         plugin: {
-            name: "pagemeta:config",
+            name: "ephemeris:config",
             resolveId(id: string) {
                 if (id === VIRTUAL_CONFIG_ID) {
                     return RESOLVED_CONFIG_ID;
@@ -163,14 +163,14 @@ function createConfigPlugin({
  * @example
  * ```ts
  * // astro.config.ts
- * import pagemeta from "@grepco/ephemeris";
+ * import ephemeris from "@grepco/ephemeris";
  *
  * export default defineConfig({
- *   integrations: [pagemeta({ defaults: { title: "My Site" } })],
+ *   integrations: [ephemeris({ defaults: { title: "My Site" } })],
  * });
  * ```
  */
-const pagemeta = (options?: IntegrationOptions): AstroIntegration => {
+const ephemeris = (options?: IntegrationOptions): AstroIntegration => {
     const validated = validateOptions(options);
 
     const configPlugin = createConfigPlugin({
@@ -250,4 +250,4 @@ const pagemeta = (options?: IntegrationOptions): AstroIntegration => {
     };
 };
 
-export default pagemeta;
+export default ephemeris;

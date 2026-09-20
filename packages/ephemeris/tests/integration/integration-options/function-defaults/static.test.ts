@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../../../src/index.ts";
+import ephemeris from "../../../../src/index.ts";
 import { extractMeta } from "../../../utils/html-parse.ts";
 import { isolatedFixture } from "../../../utils/isolated-fixture.ts";
 
@@ -13,7 +13,7 @@ await inject(
 
 const config = {
     integrations: [
-        pagemeta({
+        ephemeris({
             defaults: (ctx) => ({
                 author: "Function Author",
                 description: `Page at ${ctx.url.pathname}`,

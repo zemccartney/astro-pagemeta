@@ -3,7 +3,7 @@ import type { TestApp } from "@grepco/astro-fixture/astroFixture";
 import testAdapter from "@grepco/astro-fixture/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../../../src/index.ts";
+import ephemeris from "../../../../src/index.ts";
 import { extractMeta } from "../../../utils/html-parse.ts";
 import { isolatedFixture } from "../../../utils/isolated-fixture.ts";
 
@@ -16,7 +16,7 @@ describe("addRequiredGlobalMeta enabled", async () => {
 
     const config = {
         integrations: [
-            pagemeta({
+            ephemeris({
                 addRequiredGlobalMeta: true,
                 defaults: { title: "Default" }
             })
@@ -224,7 +224,7 @@ describe("addRequiredGlobalMeta enabled, no defaults", async () => {
     });
 
     const config = {
-        integrations: [pagemeta({ addRequiredGlobalMeta: true })]
+        integrations: [ephemeris({ addRequiredGlobalMeta: true })]
     };
 
     afterAll(() => cleanup());
@@ -297,7 +297,7 @@ describe("addRequiredGlobalMeta disabled (default)", async () => {
     });
 
     const config = {
-        integrations: [pagemeta({ defaults: { title: "Default" } })]
+        integrations: [ephemeris({ defaults: { title: "Default" } })]
     };
 
     afterAll(() => cleanup());

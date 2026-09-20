@@ -3,7 +3,7 @@ import type { TestApp } from "@grepco/astro-fixture/astroFixture";
 import testAdapter from "@grepco/astro-fixture/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../../src/index.ts";
+import ephemeris from "../../../src/index.ts";
 import { extractJsonLd } from "../../utils/html-parse.ts";
 import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 
@@ -13,7 +13,7 @@ const { cleanup, fixture } = await isolatedFixture("json-ld", {
 });
 
 const config = {
-    integrations: [pagemeta()]
+    integrations: [ephemeris()]
 };
 
 afterAll(() => cleanup());

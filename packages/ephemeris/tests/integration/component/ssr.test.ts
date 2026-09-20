@@ -3,7 +3,7 @@ import type { TestApp } from "@grepco/astro-fixture/astroFixture";
 import testAdapter from "@grepco/astro-fixture/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../../src/index.ts";
+import ephemeris from "../../../src/index.ts";
 import {
     extractHeadElements,
     extractMeta,
@@ -18,7 +18,7 @@ const { cleanup, fixture } = await isolatedFixture("component", {
 
 const config = {
     integrations: [
-        pagemeta({
+        ephemeris({
             defaults: { author: "Default Author" },
             mode: "manual"
         })

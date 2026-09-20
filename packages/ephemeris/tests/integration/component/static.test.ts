@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../../src/index.ts";
+import ephemeris from "../../../src/index.ts";
 import { extractMeta } from "../../utils/html-parse.ts";
 import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 
@@ -11,7 +11,7 @@ const { cleanup, fixture } = await isolatedFixture("component");
 
 const config = {
     integrations: [
-        pagemeta({
+        ephemeris({
             defaults: { author: "Default Author" },
             mode: "manual"
         })

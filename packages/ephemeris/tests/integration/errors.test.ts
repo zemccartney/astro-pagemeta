@@ -22,7 +22,7 @@
 
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../src/index.ts";
+import ephemeris from "../../src/index.ts";
 import { createErrorCapture } from "../utils/error-capture/index.ts";
 import { extractMeta } from "../utils/html-parse.ts";
 import { isolatedFixture } from "../utils/isolated-fixture.ts";
@@ -37,7 +37,7 @@ describe("non-object return → 500 error", async () => {
         devServer = await fixture.startDevServer({
             integrations: [
                 errorCapture.integration(),
-                pagemeta({
+                ephemeris({
                     // @ts-expect-error -- testing invalid return type
                     // eslint-disable-next-line unicorn/no-null -- simulating random user input
                     defaults: () => null
@@ -75,7 +75,7 @@ describe("serialization limitation → 500 error", async () => {
         devServer = await fixture.startDevServer({
             integrations: [
                 errorCapture.integration(),
-                pagemeta({
+                ephemeris({
                     defaults: () => ({ title: siteTitle })
                 })
             ]
@@ -105,7 +105,7 @@ describe("valid function defaults → pass through", async () => {
     beforeAll(async () => {
         devServer = await fixture.startDevServer({
             integrations: [
-                pagemeta({
+                ephemeris({
                     defaults: () => ({})
                 })
             ]

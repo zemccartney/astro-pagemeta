@@ -3,7 +3,7 @@ import type { TestApp } from "@grepco/astro-fixture/astroFixture";
 import testAdapter from "@grepco/astro-fixture/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../../../src/index.ts";
+import ephemeris from "../../../../src/index.ts";
 import { extractMeta } from "../../../utils/html-parse.ts";
 import { isolatedFixture } from "../../../utils/isolated-fixture.ts";
 
@@ -16,7 +16,7 @@ await inject("pages/[slug].astro", new URL("slug.ssr.astro", import.meta.url));
 
 const config = {
     integrations: [
-        pagemeta({
+        ephemeris({
             defaults: (ctx) => ({
                 author: "Function Author",
                 description: `Page at ${ctx.url.pathname}`,

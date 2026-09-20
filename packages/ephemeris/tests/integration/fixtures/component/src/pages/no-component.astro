@@ -1,7 +1,7 @@
 ---
 import { metadata } from "@grepco/ephemeris/runtime";
 
-// metadata is called, but no <Pagemeta> component is used.
+// metadata is called, but no <Ephemeris> component is used.
 // In manual mode, nothing should be injected without the component or middleware.
 metadata(Astro, {
     description: "This should not appear",
@@ -15,6 +15,6 @@ metadata(Astro, {
         <meta charset="utf-8" />
     </head>
     <body>
-        <p>Page without Pagemeta component</p>
+        <p>Page without Ephemeris component</p>
     </body>
 </html>

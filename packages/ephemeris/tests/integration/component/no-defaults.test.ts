@@ -3,7 +3,7 @@ import type { TestApp } from "@grepco/astro-fixture/astroFixture";
 import testAdapter from "@grepco/astro-fixture/testAdapter";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 
-import pagemeta from "../../../src/index.ts";
+import ephemeris from "../../../src/index.ts";
 import { extractMeta } from "../../utils/html-parse.ts";
 import { isolatedFixture } from "../../utils/isolated-fixture.ts";
 
@@ -17,7 +17,7 @@ const { cleanup, fixture } = await isolatedFixture("component", {
 });
 
 const config = {
-    integrations: [pagemeta({ mode: "manual" })]
+    integrations: [ephemeris({ mode: "manual" })]
 };
 
 afterAll(() => cleanup());
@@ -49,7 +49,7 @@ describe("component / no defaults / dev server", () => {
         const html = await response.text();
         const headMeta = extractMeta(html);
 
-        // Self-closing <Pagemeta /> with no metadata outputs nothing —
+        // Self-closing <Ephemeris /> with no metadata outputs nothing —
         // only the hardcoded charset outside the component survives
         expect(headMeta).toEqual([
             { properties: { charSet: "utf-8" }, tag: "meta" }

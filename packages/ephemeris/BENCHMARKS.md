@@ -57,7 +57,7 @@ All times in milliseconds (median of 200 iterations after 20 warmup).
 pnpm --filter @grepco/astro-pagemeta bench
 
 # Generate this report
-node packages/astro-pagemeta/scripts/bench-report.ts
+node packages/ephemeris/scripts/bench-report.ts
 ```
 
-The benchmark fixtures are programmatically generated HTML documents with realistic structure (headings, paragraphs, code blocks, lists, tables). Source: [`bench/fixtures/generate.ts`](packages/astro-pagemeta/bench/fixtures/generate.ts).
+The benchmark fixtures are programmatically generated HTML documents with realistic structure (headings, paragraphs, code blocks, lists, tables). Source: [`bench/fixtures/generate.ts`](packages/ephemeris/bench/fixtures/generate.ts).

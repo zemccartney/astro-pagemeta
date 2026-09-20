@@ -10,7 +10,7 @@
         "packages/astro-fixture": {
             "entry": ["src/astroFixture.ts", "src/testAdapter.ts"]
         },
-        "packages/astro-pagemeta": {
+        "packages/ephemeris": {
             "entry": ["bench/*.bench.ts", "bench/fixtures/generate.ts"],
             "ignore": ["scripts/**", "tests/**", "src/virtual.d.ts"],
             "ignoreDependencies": ["schema-dts"]

@@ -88,4 +88,4 @@ jobs:
             # on `pnpm run` as well as install, so `pnpm test` cannot run on
             # the floor Node. Same command as `pnpm test` minus pretest.
             - run: ./node_modules/.bin/vitest --run
-              working-directory: packages/astro-pagemeta
+              working-directory: packages/ephemeris

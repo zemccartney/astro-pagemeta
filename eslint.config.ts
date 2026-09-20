@@ -28,8 +28,8 @@ export default defineConfig([
         // from within the isolated fixtures directory, which wouldn't correspond
         // to the correct source files from where the fixture files actually are on disk
         files: [
-            "packages/astro-pagemeta/tests/integration/fixtures/**",
-            "packages/astro-pagemeta/tests/integration/middleware/sequence.middleware.ts"
+            "packages/ephemeris/tests/integration/fixtures/**",
+            "packages/ephemeris/tests/integration/middleware/sequence.middleware.ts"
         ],
         rules: {
             "workspaces/no-absolute-imports": "off"

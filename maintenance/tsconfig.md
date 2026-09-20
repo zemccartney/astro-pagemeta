@@ -10,7 +10,7 @@ Rough summary of how all the `tsconfig`s in the project work together. Not entir
 
 - playground: uses astro's typescript config, no relation to workspace root tsconfig
 
-- astro-pagemeta
+- ephemeris
     - root:
         - tailored for node (config files, test writing)
         - uses node types to support node env; astro types to support astro work in fixtures
@@ -23,11 +23,11 @@ Rough summary of how all the `tsconfig`s in the project work together. Not entir
 
 ### no typechecking standalone astro files
 
-- no typechecking on `.astro` files in non-Astro projects e.g. `Head.astro` and test fixtures in `astro-pagemeta`. Astro handles typechecking through its `check` library, which seems to run only within a project? unsure. but haven't gotten it to work with isolated astro files
+- no typechecking on `.astro` files in non-Astro projects e.g. `Head.astro` and test fixtures in `ephemeris`. Astro handles typechecking through its `check` library, which seems to run only within a project? unsure. but haven't gotten it to work with isolated astro files
 
 ### Why typescript doesn't flag node globals in files without node types
 
-Neither root eslint.config.ts nor astro-pagemeta/src/ explicitly register node types — yet `process`, `Buffer`, etc. resolve without errors. This is NOT from pnpm hoisting.
+Neither root eslint.config.ts nor ephemeris/src/ explicitly register node types — yet `process`, `Buffer`, etc. resolve without errors. This is NOT from pnpm hoisting.
 
 The cause: `types`/`typeRoots` in tsconfig only control _automatic discovery_ of `@types/*` packages. They can't prevent types loaded via `/// <reference types="node" />` directives inside imported packages' `.d.ts` files. For example, `vite/dist/node/index.d.ts` contains `/// <reference types="node" />`, so any file that imports from `vite` (directly or transitively) gets all Node globals injected unconditionally.
 

@@ -4,7 +4,7 @@
  * Usage: pnpm deps:pkg <workspace-name> [extra ncu args...]
  * Errors with the list of available workspaces when the name is missing
  * or unknown. Run via node's native TS support (Node 24), same pattern
- * as packages/astro-pagemeta/scripts/check-engines.ts.
+ * as packages/ephemeris/scripts/check-engines.ts.
  */
 import { execFileSync, spawnSync } from "node:child_process";
 

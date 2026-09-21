@@ -88,3 +88,7 @@
 - **Supply-chain understanding before automation** (already noted on the M2 Socket line): a written explainer on provenance, OIDC trusted publishing, Socket, lockfile trust and `minimumReleaseAge`, then the config.
 - **Dependency majors sweep** (TS 7, undici 8, tsdown 0.23): see "Deferred majors" above; own leg after M2.
 - ~~**Rename**~~ done 2026-09-20.
+
+## Benchmarks policy (Zack, 2026-09-20)
+
+- `packages/ephemeris/BENCHMARKS.md` is regenerated only as part of a production release, from a designated CI environment whose details the report header captures for reproducibility. Local `bench:report` runs are for looking, not committing (a local regen on 2026-09-20 was discarded for this reason). Fold into the M4 release runbook: add a release-workflow step that runs `bench` + `bench:report` and commits the result.
